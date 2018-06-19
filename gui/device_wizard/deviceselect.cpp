@@ -6,7 +6,7 @@ DeviceSelect::DeviceSelect(QWidget *parent)
 {
     setTitle("Select Device");
     _discoveryAgent = new QBluetoothServiceDiscoveryAgent(this);
-//    connect(_discoveryAgent,SIGNAL)
+    connect(_discoveryAgent,SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
     _discoveryAgent->start();
 }
 

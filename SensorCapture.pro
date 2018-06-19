@@ -44,4 +44,5 @@ HEADERS += \
     gui/devicehandler.h \
     gui/devicemanager.h \
     gui/device.h \
-    gui/device_wizard/deviceconnect.h
+    gui/device_wizard/deviceconnect.h \
+    common/devices/graillabpackets.h

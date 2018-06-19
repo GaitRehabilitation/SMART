@@ -6,8 +6,9 @@
 
 class DeviceConnect: QWizardPage
 {
+    Q_OBJECT
 public:
-    DeviceConnect();
+    DeviceConnect(QWidget *parent = 0);
 };
 
 #endif // DEVICECONNECT_H
