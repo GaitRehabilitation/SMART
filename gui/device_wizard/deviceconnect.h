@@ -1,8 +1,10 @@
 #ifndef DEVICECONNECT_H
 #define DEVICECONNECT_H
 
+#include <QWizard>
 
-class DeviceConnect
+
+class DeviceConnect: QWizardPage
 {
 public:
     DeviceConnect();

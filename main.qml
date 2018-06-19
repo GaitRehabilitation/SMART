@@ -12,14 +12,10 @@ ApplicationWindow {
 
     menuBar: MenuBar {
            Menu {
-               title: qsTr("File")
+               title: qsTr("Help")
                MenuItem {
-                   text: qsTr("&Open")
+                   text: qsTr("Splash Screen")
                    onTriggered: console.log("Open action triggered");
-               }
-               MenuItem {
-                   text: qsTr("Exit")
-                   onTriggered: Qt.quit();
                }
            }
        }

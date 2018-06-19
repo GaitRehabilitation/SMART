@@ -1,5 +1,6 @@
 QT += quick
 QT += widgets
+QT += bluetooth
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -14,8 +15,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    mainwindow.cpp \
-    devicewizard.cpp
+    gui/mainwindow.cpp \
+    gui/device_wizard/devicewizard.cpp \
+    gui/device_wizard/deviceselect.cpp \
+    gui/devicehandler.cpp \
+    gui/devicemanager.cpp \
+    gui/device.cpp \
+    gui/device_wizard/deviceconnect.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -24,7 +30,7 @@ RESOURCES += qml.qrc \
 QML_IMPORT_PATH =
 
 # Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
+QML_DESIGNER_IMPORT_PATH = gui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -32,5 +38,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    mainwindow.h \
-    devicewizard.h
+    gui/mainwindow.h \
+    gui/device_wizard/devicewizard.h \
+    gui/device_wizard/deviceselect.h \
+    gui/devicehandler.h \
+    gui/devicemanager.h \
+    gui/device.h \
+    gui/device_wizard/deviceconnect.h

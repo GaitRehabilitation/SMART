@@ -4,8 +4,13 @@
 
 class Device
 {
+private:
+
 public:
     Device();
+
+
+
 };
 
 #endif // DEVICE_H
