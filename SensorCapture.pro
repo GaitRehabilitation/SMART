@@ -17,11 +17,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     gui/mainwindow.cpp \
     gui/device_wizard/devicewizard.cpp \
-    gui/device_wizard/deviceselect.cpp \
     gui/devicehandler.cpp \
     gui/devicemanager.cpp \
     gui/device.cpp \
-    gui/device_wizard/deviceconnect.cpp
+    gui/device_wizard/deviceconnectpage.cpp \
+    gui/device_wizard/devicediscoverypage.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -40,9 +40,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     gui/mainwindow.h \
     gui/device_wizard/devicewizard.h \
-    gui/device_wizard/deviceselect.h \
     gui/devicehandler.h \
     gui/devicemanager.h \
     gui/device.h \
-    gui/device_wizard/deviceconnect.h \
-    common/devices/graillabpackets.h
+    common/devices/graillabpackets.h \
+    gui/device_wizard/deviceconnectpage.h \
+    gui/device_wizard/devicediscoverypage.h

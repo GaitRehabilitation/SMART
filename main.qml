@@ -26,6 +26,7 @@ ApplicationWindow {
                ToolButton {
                    iconSource: "icons/plus.svg"
                    onClicked: {
+                       var window = DeviceDiscoveryWizard();
                        var component = Qt.createComponent("device.qml")
                        var window = component.createObject(root)
                        window.show()

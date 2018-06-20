@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QObject *parent ){
-
+MainWindow::MainWindow(QObject *parent )
+    :QObject(parent)
+{
 }
