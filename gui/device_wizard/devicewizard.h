@@ -2,6 +2,7 @@
 #define DEVICEWIZARD_H
 #include <QQmlEngine>
 #include <QWizard>
+#include <QWidget>
 
 class DeviceWizard : public QWizard
 {
@@ -18,4 +19,5 @@ public:
 
     void accept() override;
 };
+
 #endif // DEVICEWIZARD_H

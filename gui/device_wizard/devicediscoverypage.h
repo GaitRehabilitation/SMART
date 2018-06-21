@@ -15,7 +15,7 @@ private:
      QVBoxLayout* _discoveryList;
 
  public slots:
-     void deviceDiscovered(const QBluetoothDeviceInfo &device);
+     void deviceDiscovered(const QBluetoothServiceInfo &device);
      void finishedDiscovery();
 
 };
