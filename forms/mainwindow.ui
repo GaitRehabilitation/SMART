@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>854</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -38,8 +38,8 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAddDevice">
    <property name="icon">
-    <iconset>
-     <normaloff>:/icons/icons/document-open.svg</normaloff>:/icons/icons/document-open.svg</iconset>
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/plus.svg</normaloff>:/icons/plus.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Add</string>
@@ -97,7 +97,9 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionExit</sender>

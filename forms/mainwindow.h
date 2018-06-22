@@ -1,7 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include "ui_mainwindow.h"
 #include <QMainWindow>
+
+namespace Ui {
+    class MainWindow;
+}
+
+QT_FORWARD_DECLARE_CLASS(DeviceWizard)
 
 class MainWindow : public QMainWindow
 {
@@ -10,9 +15,10 @@ public:
     MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 private slots:
-    void on_device_added();
+    void deviceAddWizard();
 private:
-    Ui::MainWindow* _ui;
+    Ui::MainWindow* ui;
+    DeviceWizard* deviceWizard;
 };
 
 #endif // MAINWINDOW_H
