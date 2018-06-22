@@ -1,6 +1,7 @@
 QT += quick
 QT += widgets
 QT += bluetooth
+QT += charts
 CONFIG += c++11
 
 FORMS += forms/mainwindow.ui \
