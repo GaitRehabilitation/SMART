@@ -4,7 +4,7 @@
 #include <qbluetoothserviceinfo.h>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothuuid.h>
-#include <QListWidgetItem>
+#include <QListView>
 
 DeviceDiscoveryWizardPage::DeviceDiscoveryWizardPage(QWidget *parent) :
     QWizardPage(parent),
@@ -17,7 +17,6 @@ DeviceDiscoveryWizardPage::DeviceDiscoveryWizardPage(QWidget *parent) :
      discoveryAgent->setInquiryType(QBluetoothDeviceDiscoveryAgent::GeneralUnlimitedInquiry);
 
     connect(ui->scan,SIGNAL(clicked()),this,SLOT(startScan()));
-
     connect(ui->deviceList,SIGNAL(currentItemChanged(QListWidgetItem *,QListWidgetItem *)),this,SLOT(deviceItemChange(QListWidgetItem*,QListWidgetItem*)));
 
     connect(discoveryAgent,SIGNAL(finished()),this,SLOT(scanFinished()));
@@ -73,4 +72,5 @@ void DeviceDiscoveryWizardPage::addDevice(const QBluetoothDeviceInfo &info)
 void DeviceDiscoveryWizardPage::deviceItemChange(QListWidgetItem* current, QListWidgetItem* previous){
 
 }
+
 

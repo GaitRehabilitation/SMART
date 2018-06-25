@@ -70,22 +70,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>clear</sender>
-   <signal>clicked()</signal>
-   <receiver>deviceList</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>135</x>
-     <y>539</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>351</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

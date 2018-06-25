@@ -6,7 +6,8 @@ CONFIG += c++11
 
 FORMS += forms/mainwindow.ui \
     forms/devicepanel.ui \
-    forms/devicediscoverywizardpage.ui
+    forms/devicediscoverywizardpage.ui \
+    forms/deviceselectwizardpage.ui
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -25,7 +26,9 @@ SOURCES += main.cpp \
     forms/mainwindow.cpp \
     forms/devicewizard.cpp \
     forms/devicediscoverywizardpage.cpp \
-    common/devicehandler.cpp
+    common/devicehandler.cpp \
+    common/metawearhandler.cpp \
+    forms/deviceselectwizardpage.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -46,4 +49,6 @@ HEADERS += \
     common/devices/graillabpackets.h \
     forms/devicewizard.h \
     forms/devicediscoverywizardpage.h \
-    common/devicehandler.h
+    common/devicehandler.h \
+    common/metawearhandler.h \
+    forms/deviceselectwizardpage.h
