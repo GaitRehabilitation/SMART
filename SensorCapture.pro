@@ -14,6 +14,8 @@ FORMS += forms/mainwindow.ui \
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+include(3rdparty/mbientlab.pro)
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -21,13 +23,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
     forms/mainwindow.cpp \
-    gui/devicehandler.cpp \
-    gui/devicemanager.cpp \
-    gui/device.cpp \
-    gui/device_wizard/deviceconnectpage.cpp \
-    gui/device_wizard/devicediscoverypage.cpp \
     forms/devicewizard.cpp \
-    forms/devicediscoverywizardpage.cpp
+    forms/devicediscoverywizardpage.cpp \
+    common/devicehandler.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -45,11 +43,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     forms/mainwindow.h \
-    gui/devicehandler.h \
-    gui/devicemanager.h \
-    gui/device.h \
     common/devices/graillabpackets.h \
-    gui/device_wizard/deviceconnectpage.h \
-    gui/device_wizard/devicediscoverypage.h \
     forms/devicewizard.h \
-    forms/devicediscoverywizardpage.h
+    forms/devicediscoverywizardpage.h \
+    common/devicehandler.h

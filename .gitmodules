@@ -1,0 +1,3 @@
+[submodule "3rdparty/mbientlab"]
+	path = 3rdparty/mbientlab
+	url = https://github.com/mbientlab/MetaWear-SDK-Cpp.git

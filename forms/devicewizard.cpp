@@ -13,6 +13,7 @@ DeviceWizard::DeviceWizard(QWidget *parent) :
 
 DeviceWizard::~DeviceWizard()
 {
+    delete deviceDiscoveryWizardPage;
 }
 
 

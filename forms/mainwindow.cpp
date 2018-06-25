@@ -4,20 +4,23 @@
 #include "forms/mainwindow.h"
 
 #include <QtDebug>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent  )
     :QMainWindow(parent),
      ui(new Ui::MainWindow),
-     deviceWizard(new DeviceWizard(this))
+     saveDialog(new QFileDialog(this))
 {
     ui->setupUi(this);
-    connect(ui->actionAddDevice,SIGNAL(triggered()),this,SLOT(deviceAddWizard()));
+    ui->save->setDisabled(true);
 
+    connect(ui->actionAddDevice,SIGNAL(triggered()),this,SLOT(deviceAddWizard()));
 }
 
 void MainWindow::deviceAddWizard(){
     qDebug() << "Device Wizard";
-   deviceWizard->show();
+   DeviceWizard deviceWizard(this);
+   deviceWizard.exec();
 
 }
 

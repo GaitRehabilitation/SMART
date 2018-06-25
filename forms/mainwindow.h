@@ -7,6 +7,7 @@ namespace Ui {
 }
 
 QT_FORWARD_DECLARE_CLASS(DeviceWizard)
+QT_FORWARD_DECLARE_CLASS(QFileDialog)
 
 class MainWindow : public QMainWindow
 {
@@ -18,7 +19,7 @@ private slots:
     void deviceAddWizard();
 private:
     Ui::MainWindow* ui;
-    DeviceWizard* deviceWizard;
+    QFileDialog* saveDialog;
 };
 
 #endif // MAINWINDOW_H
