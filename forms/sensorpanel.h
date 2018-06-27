@@ -15,18 +15,16 @@ class SensorPanel : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SensorPanel(QBluetoothAddress address,QWidget *parent = 0);
+    explicit SensorPanel(QWidget *parent = 0);
     virtual ~SensorPanel();
 private:
     MetawearWrapper* wrapper;
     Ui::SensorPanel* ui;
+    QBluetoothDeviceInfo m_currentDevice;
 private slots:
-    void handleConnection();
-    void handleError(QLowEnergyController::Error);\
-    void handleDisconnect();
 public slots:
     void setName(QString);
-
+    void setDevice(const QBluetoothDeviceInfo &device);
 signals:
    void onConnected();
    void onBluetoothError(QLowEnergyController::Error e);

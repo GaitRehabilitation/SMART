@@ -5,6 +5,7 @@
 #include <QBluetoothDeviceInfo>
 #include <QWizardPage>
 #include <QBluetoothLocalDevice>
+#include <QMap>
 
 QT_FORWARD_DECLARE_CLASS(QBluetoothDeviceDiscoveryAgent)
 QT_FORWARD_DECLARE_CLASS(QBluetoothLocalDevice)
@@ -19,14 +20,13 @@ class DeviceSelectDialog : public QDialog
     Q_OBJECT
 
 public:
-
     explicit DeviceSelectDialog(QWidget *parent = 0);
     ~DeviceSelectDialog();
-
 private:
     Ui::DeviceSelectDialog *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
     QBluetoothLocalDevice *localDevice;
+    QMap<QString,QBluetoothDeviceInfo> m_deviceInfo;
 
 public slots:
      void addDevice(const QBluetoothDeviceInfo&);
@@ -37,7 +37,7 @@ private slots:
     void scanFinished();
     void onItemSelection();
 signals:
-     void onBluetoothDeviceAccepted(QBluetoothAddress address);
+     void onBluetoothDeviceAccepted(const QBluetoothDeviceInfo &info);
 
 
 };

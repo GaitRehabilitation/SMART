@@ -21,17 +21,18 @@ MainWindow::MainWindow(QWidget *parent  )
 
 void MainWindow::deviceAddWizard(){
   DeviceSelectDialog deviceSelectDialog(this);
-  connect(&deviceSelectDialog,SIGNAL(onBluetoothDeviceAccepted(QBluetoothAddress)),this,SLOT(registerDevice(QBluetoothAddress)));
+  connect(&deviceSelectDialog,SIGNAL(onBluetoothDeviceAccepted(QBluetoothDeviceInfo)),this,SLOT(registerDevice(QBluetoothDeviceInfo)));
   deviceSelectDialog.exec();
 }
 
-void MainWindow::registerDevice(QBluetoothAddress address){
+void MainWindow::registerDevice(const QBluetoothDeviceInfo& info){
     //created a new list widget
     QListWidgetItem *listWidgetItem = new QListWidgetItem(ui->sensorList);
 
     ui->sensorList->addItem(listWidgetItem);
 
-    SensorPanel* sensorPanel = new SensorPanel(address,this);
+    SensorPanel* sensorPanel = new SensorPanel(this);
+    sensorPanel->setDevice(info);
 
     //make the widget the same size as the panel
     listWidgetItem->setSizeHint(sensorPanel->sizeHint());

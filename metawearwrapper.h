@@ -8,45 +8,52 @@
 
 QT_FORWARD_DECLARE_CLASS(MblMwMetaWearBoard)
 
-
 class MetawearWrapper : public QObject
 {
     Q_OBJECT
-public:
-
-    explicit MetawearWrapper(QBluetoothAddress address,QObject *parent = 0);
-    virtual ~MetawearWrapper();
-    QLowEnergyService* getSerivce(const QBluetoothUuid &uuid);
-    QLowEnergyController* getLowEnergyController();
 private:
+       MblMwFnIntVoidPtrArray m_readGattHandler;
+       MblMwFnVoidVoidPtrInt m_disconnectedHandler;
+       MblMwFnIntVoidPtrArray m_notificationHandler;
+
+       QLowEnergyController* m_controller;
+       MblMwMetaWearBoard* m_metaWearBoard;
+
+       QMap<QString,QLowEnergyService*> m_services;
+       QBluetoothDeviceInfo m_currentDevice;
+
        static void read_gatt_char_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler);
        static void write_gatt_char_qt(void *context, const void* caller, MblMwGattCharWriteType writeType, const MblMwGattChar* characteristic,const uint8_t* value, uint8_t length);
        static void enable_char_notify_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler, MblMwFnVoidVoidPtrInt ready);
        static void on_disconnect_qt(void *context, const void* caller, MblMwFnVoidVoidPtrInt handler);
+public:
 
-       MblMwFnIntVoidPtrArray  readGattHandler;
-       MblMwFnVoidVoidPtrInt disconnectedHandler;
-       MblMwFnIntVoidPtrArray notificationHandler;
-       MblMwBtleConnection connectImpl;
-       QLowEnergyController* controller;
-       MblMwMetaWearBoard* board;
-       QMap<QString,QLowEnergyService*> services;
+    explicit MetawearWrapper(QObject *parent = 0);
+    virtual ~MetawearWrapper();
+    QLowEnergyController* getController();
+
+    void setDevice(const QBluetoothDeviceInfo &device);
 public slots:
 
-       void onDeviceConnected();
 private slots:
-       void handleConnection();
-       void handleDisconnect();
+    //QLowEnergyController
+    void onServiceDiscovered(const QBluetoothUuid &newService);
+    void onServiceDiscoveryFinished();
 
-       void onServiceDiscovered(const QBluetoothUuid &newService);
-       void onServiceScanFinished();
+   void onConnected();
+   void onDisconnect();
 
+   void onCharacteristicRead(QLowEnergyCharacteristic,QByteArray);
+   void onControllerError(QLowEnergyController::Error);
+   void onStateChange(QLowEnergyController::ControllerState state);
+
+   void onCharacteristicError(QLowEnergyService::ServiceError);
 signals:
     void connected();
     void disconnected();
 
-    void bluetoothError(QLowEnergyController::Error);
-    void bluetoothCharacteristicError(QLowEnergyService::ServiceError);
+    void controllerError(QLowEnergyController::Error);
+    void characteristicError(QLowEnergyService::ServiceError);
 
 };
 
