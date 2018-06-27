@@ -31,10 +31,14 @@ void MetawearWrapper::read_gatt_char_qt(void* context, const void* caller, const
 
     QLowEnergyService* service =  wrapper->m_services.value(service_uuid.toString());
     if(service == nullptr){
-        qWarning() << "Failed to parse service uuid" << service_uuid.toString();
+        qWarning() << "Invliad service Uuid(read gatt)" << service_uuid.toString();
         return;
     }
     QLowEnergyCharacteristic c =  service->characteristic(characteristic_uuid);
+    if(!c.isValid()){
+        qWarning() << "Invalid characteristic Uuid(read gatt)" << characteristic_uuid.toString();
+        return;
+    }
     service->readCharacteristic(c);
 }
 
@@ -43,12 +47,17 @@ void MetawearWrapper::write_gatt_char_qt(void *context, const void* caller, MblM
     QBluetoothUuid service_uuid = QBluetoothUuid(convertToQuint128((uint8_t*)&characteristic->service_uuid_low,(uint8_t*)&characteristic->service_uuid_high));
     QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertToQuint128((uint8_t*)&characteristic->uuid_low,(uint8_t*)&characteristic->uuid_high));
 
+
     QLowEnergyService* service =  wrapper->m_services.value(service_uuid.toString());
     if(service == nullptr){
-        qWarning() << "failed to parse service uuid" << service_uuid.toString();
+        qWarning() << "failed to parse service uuid(write gatt)" << service_uuid.toString();
         return;
     }
     QLowEnergyCharacteristic c =  service->characteristic(characteristic_uuid);
+    if(!c.isValid()){
+        qWarning() << "Invalid characteristic Uuid(write gatt)" << characteristic_uuid.toString();
+        return;
+    }
     QByteArray payload;
     for(int x = 0; x< length; ++x){
         payload.append(value[x]);
@@ -60,14 +69,17 @@ void MetawearWrapper::enable_char_notify_qt(void* context, const void* caller, c
     MetawearWrapper* wrapper = (MetawearWrapper *)context;
     wrapper->m_notificationHandler = handler;
     QBluetoothUuid service_uuid = QBluetoothUuid(convertToQuint128((uint8_t*)&characteristic->service_uuid_low,(uint8_t*)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertToQuint128((uint8_t*)&characteristic->service_uuid_low,(uint8_t*)&characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertToQuint128((uint8_t*)&characteristic->uuid_low,(uint8_t*)&characteristic->uuid_high));
 
     QLowEnergyService* service =  wrapper->m_services.value(service_uuid.toString());
     if(service == nullptr){
-        qWarning() << "failed to parse service uuid" << service_uuid.toString();
+        qWarning() << "failed to parse service uuid(char notify):" << service_uuid.toString();
         return;
     }
     QLowEnergyCharacteristic c =  service->characteristic(characteristic_uuid);
+    if(!c.isValid()){
+        qWarning() << "Invalid characteristic Uuid(char notify)" << characteristic_uuid.toString();
+    }
 
     QLowEnergyDescriptor notification = c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
     if (!notification.isValid())
@@ -150,16 +162,25 @@ void MetawearWrapper::onServiceDiscovered(const QBluetoothUuid &newService){
 
     lowEnergyService->connect(lowEnergyService,SIGNAL(characteristicRead(QLowEnergyCharacteristic,QByteArray)),this,SLOT(onCharacteristicRead(QLowEnergyCharacteristic,QByteArray)));
     lowEnergyService->connect(lowEnergyService, SIGNAL(error(QLowEnergyService::ServiceError)),this,SLOT(onCharacteristicError(QLowEnergyService::ServiceError)));
+    lowEnergyService->connect(lowEnergyService,lowEnergyService::stateChanged&,[this,lowEnergyService](QLowEnergyService::ServiceState state){
 
+    });
     qDebug() << "Service Name: " << lowEnergyService->serviceName();
     qDebug() << "Service UUID: " << lowEnergyService->serviceUuid().toString();
 }
 
 void MetawearWrapper::onCharacteristicRead(QLowEnergyCharacteristic characteristic, QByteArray payload){
+    qDebug() << payload;
     this->m_readGattHandler(this->m_metaWearBoard,(uint8_t*)payload.data(),payload.length());
 }
 
 void MetawearWrapper::onServiceDiscoveryFinished(){
+    for(QString uuid : m_services.keys()){
+       QLowEnergyService* lowEnergyService =   m_services.value(uuid);
+
+        lowEnergyService->discoverDetails();
+
+    }
     mbl_mw_metawearboard_initialize(this->m_metaWearBoard, nullptr, [](void* context, MblMwMetaWearBoard* board, int32_t status) -> void {
         if (!status) {
             qWarning() << QString("Error initializing board: %d").arg(status);
