@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <QBluetoothAddress>
 #include <QMainWindow>
 
 namespace Ui {
@@ -15,11 +16,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
+public slots:
+    void registerDevice(QBluetoothAddress address);
 private slots:
-    void deviceAddWizard();
+    void deviceAddWizard();    
+
 private:
     Ui::MainWindow* ui;
-    QFileDialog* saveDialog;
 };
 
 #endif // MAINWINDOW_H

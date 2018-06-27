@@ -5,9 +5,8 @@ QT += charts
 CONFIG += c++11
 
 FORMS += forms/mainwindow.ui \
-    forms/devicepanel.ui \
-    forms/devicediscoverywizardpage.ui \
-    forms/deviceselectwizardpage.ui
+    forms/deviceselectdialog.ui \
+    forms/sensorpanel.ui
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -24,11 +23,10 @@ include(3rdparty/mbientlab.pro)
 
 SOURCES += main.cpp \
     forms/mainwindow.cpp \
-    forms/devicewizard.cpp \
-    forms/devicediscoverywizardpage.cpp \
-    common/devicehandler.cpp \
-    common/metawearhandler.cpp \
-    forms/deviceselectwizardpage.cpp
+    forms/deviceselectdialog.cpp \
+    forms/sensorpanel.cpp \
+    metawearwrapper.cpp \
+    deviceservice.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -46,9 +44,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     forms/mainwindow.h \
-    common/devices/graillabpackets.h \
-    forms/devicewizard.h \
-    forms/devicediscoverywizardpage.h \
-    common/devicehandler.h \
-    common/metawearhandler.h \
-    forms/deviceselectwizardpage.h
+    forms/deviceselectdialog.h \
+    forms/sensorpanel.h \
+    metawearwrapper.h \
+    deviceservice.h

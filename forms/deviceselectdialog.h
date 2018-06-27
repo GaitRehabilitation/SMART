@@ -1,6 +1,7 @@
-#ifndef DEVICEDISCOVERYWIZARDPAGE_H
-#define DEVICEDISCOVERYWIZARDPAGE_H
+#ifndef DEVICESELECTDIALOG_H
+#define DEVICESELECTDIALOG_H
 
+#include <QDialog>
 #include <QBluetoothDeviceInfo>
 #include <QWizardPage>
 #include <QBluetoothLocalDevice>
@@ -10,33 +11,35 @@ QT_FORWARD_DECLARE_CLASS(QBluetoothLocalDevice)
 QT_FORWARD_DECLARE_CLASS(QListWidgetItem)
 
 namespace Ui {
-    class DeviceDiscoveryWizardPage;
+    class DeviceSelectDialog;
 }
 
-class DeviceDiscoveryWizardPage : public QWizardPage
+class DeviceSelectDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit DeviceDiscoveryWizardPage(QWidget *parent = 0);
-    ~DeviceDiscoveryWizardPage();
-    bool isComplete() const Q_DECL_OVERRIDE;
+    explicit DeviceSelectDialog(QWidget *parent = 0);
+    ~DeviceSelectDialog();
+
 private:
-    Ui::DeviceDiscoveryWizardPage *ui;
+    Ui::DeviceSelectDialog *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
     QBluetoothLocalDevice *localDevice;
 
 public slots:
      void addDevice(const QBluetoothDeviceInfo&);
-
+     void accept();
 private slots:
     void startScan();
     void hostModeStateChanged(QBluetoothLocalDevice::HostMode);
     void scanFinished();
-    void deviceItemChange(QListWidgetItem*, QListWidgetItem*);
+    void onItemSelection();
+signals:
+     void onBluetoothDeviceAccepted(QBluetoothAddress address);
 
 
 };
 
-#endif // DEVICEDISCOVERYWIZARDPAGE_H
+#endif // DEVICESELECTDIALOG_H
