@@ -85,10 +85,6 @@ void MetawearWrapper::enable_char_notify_qt(void* context, const void* caller, c
     if (!notification.isValid())
         return;
 
-    service->connect(service, &QLowEnergyService::characteristicChanged,[caller,handler](const QLowEnergyCharacteristic &characteristic, const QByteArray &newValue){
-        handler(caller,(uint8_t*)newValue.data(),newValue.length());
-    });
-
     service->writeDescriptor(notification, QByteArray::fromHex("0100"));
     QObject* temp = new QObject();
     service->connect(service,&QLowEnergyService::descriptorWritten,temp,[caller,ready,temp](const QLowEnergyDescriptor &descriptor, const QByteArray &newValue){
@@ -112,7 +108,10 @@ MetawearWrapper::MetawearWrapper(QObject *parent )
       m_controller(0),
       m_serviceReady(0),
       m_isMetawareReady(0),
-      m_readyCharacteristicCount(0)
+      m_readyCharacteristicCount(0),
+      m_notificationHandler(0),
+      m_disconnectedHandler(0),
+      m_readGattHandler(0)
 {
 }
 
@@ -167,19 +166,28 @@ void MetawearWrapper::onServiceDiscovered(const QBluetoothUuid &newService){
     m_services.insert(uuid,lowEnergyService);
 
     lowEnergyService->connect(lowEnergyService,SIGNAL(characteristicRead(QLowEnergyCharacteristic,QByteArray)),this,SLOT(onCharacteristicRead(QLowEnergyCharacteristic,QByteArray)));
-    lowEnergyService->connect(lowEnergyService, SIGNAL(error(QLowEnergyService::ServiceError)),this,SLOT(onCharacteristicError(QLowEnergyService::ServiceError)));
+    lowEnergyService->connect(lowEnergyService, SIGNAL(characteristicChanged(QLowEnergyCharacteristic,QByteArray)),this,SLOT(onCharacteristicNotifications(QLowEnergyCharacteristic,QByteArray)));
 
+    lowEnergyService->connect(lowEnergyService, SIGNAL(error(QLowEnergyService::ServiceError)),this,SLOT(onCharacteristicError(QLowEnergyService::ServiceError)));
 
     qDebug() << "Service Name: " << lowEnergyService->serviceName();
     qDebug() << "Service UUID: " << lowEnergyService->serviceUuid().toString();
 }
 
 void MetawearWrapper::onCharacteristicRead(QLowEnergyCharacteristic characteristic, QByteArray payload){
-    this->m_readGattHandler(this->m_metaWearBoard,(uint8_t*)payload.data(),payload.length());
+
+    qDebug() <<payload;
+    if(this->m_readGattHandler != nullptr){
+        this->m_readGattHandler(this->m_metaWearBoard,(uint8_t*)payload.data(),payload.length());
+    }
 }
 
-
-
+void MetawearWrapper::onCharacteristicNotifications(QLowEnergyCharacteristic characteristic, QByteArray payload){
+    qDebug() <<payload;
+    if(this->m_notificationHandler != nullptr){
+        this->m_notificationHandler(this->m_metaWearBoard,(uint8_t*)payload.data(),payload.length());
+    }
+}
 
 void MetawearWrapper::onServiceDiscoveryFinished(){
     foreach(QString key, this->m_services.keys()){

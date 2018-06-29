@@ -50,10 +50,13 @@ private slots:
    void onDisconnect();
 
    void onCharacteristicRead(QLowEnergyCharacteristic,QByteArray);
+   void onCharacteristicNotifications(QLowEnergyCharacteristic,QByteArray);
+
    void onControllerError(QLowEnergyController::Error);
    void onStateChange(QLowEnergyController::ControllerState state);
 
    void onCharacteristicError(QLowEnergyService::ServiceError);
+
 
    void metwareIntialize();
 
