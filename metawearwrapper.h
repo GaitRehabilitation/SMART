@@ -6,6 +6,9 @@
 #include <QObject>
 #include "metawear/platform/btle_connection.h"
 
+#include "metawear/sensor/accelerometer.h"
+
+
 QT_FORWARD_DECLARE_CLASS(MblMwMetaWearBoard)
 
 class MetawearWrapper : public QObject
@@ -18,6 +21,7 @@ private:
 
        QLowEnergyController* m_controller;
        MblMwMetaWearBoard* m_metaWearBoard;
+       int m_serviceReady;
 
        QMap<QString,QLowEnergyService*> m_services;
        QBluetoothDeviceInfo m_currentDevice;
@@ -27,18 +31,20 @@ private:
        static void enable_char_notify_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler, MblMwFnVoidVoidPtrInt ready);
        static void on_disconnect_qt(void *context, const void* caller, MblMwFnVoidVoidPtrInt handler);
 public:
-
     explicit MetawearWrapper(QObject *parent = 0);
     virtual ~MetawearWrapper();
     QLowEnergyController* getController();
+    MblMwMetaWearBoard* getBoard();
 
+    int m_readyCharacteristicCount;
+    bool m_isMetawareReady;
     void setDevice(const QBluetoothDeviceInfo &device);
 public slots:
 
 private slots:
     //QLowEnergyController
-    void onServiceDiscovered(const QBluetoothUuid &newService);
-    void onServiceDiscoveryFinished();
+   void onServiceDiscovered(const QBluetoothUuid &newService);
+   void onServiceDiscoveryFinished();
 
    void onConnected();
    void onDisconnect();
@@ -48,12 +54,20 @@ private slots:
    void onStateChange(QLowEnergyController::ControllerState state);
 
    void onCharacteristicError(QLowEnergyService::ServiceError);
+
+   void metwareIntialize();
+
 signals:
     void connected();
     void disconnected();
 
+    void metawareInitialized();
+    void metawareFailedToInitialized(int32_t status);
+
     void controllerError(QLowEnergyController::Error);
     void characteristicError(QLowEnergyService::ServiceError);
+
+
 
 };
 

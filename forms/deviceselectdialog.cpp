@@ -5,6 +5,7 @@
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothuuid.h>
 #include <QListView>
+#include <QtCharts>
 
 DeviceSelectDialog::DeviceSelectDialog(QWidget *parent) :
     QDialog(parent),

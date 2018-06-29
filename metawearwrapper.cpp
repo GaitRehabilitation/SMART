@@ -1,6 +1,7 @@
 #include "metawearwrapper.h"
 #include "metawear/core/metawearboard.h"
 #include "metawear/core/status.h"
+#include "metawear/platform/memory.h"
 
 #include <QBluetoothAddress>
 #include <QLowEnergyController>
@@ -8,7 +9,7 @@
 #include <QBluetoothUuid>
 #include <QObject>
 #include <QByteArray>
-
+#include <QThread>
 
 static quint128 convertToQuint128(uint8_t * low,uint8_t * high){
     quint128 result;
@@ -20,7 +21,6 @@ static quint128 convertToQuint128(uint8_t * low,uint8_t * high){
     }
     return result;
 }
-
 
 void MetawearWrapper::read_gatt_char_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler) {
     MetawearWrapper* wrapper = (MetawearWrapper *)context;
@@ -85,6 +85,10 @@ void MetawearWrapper::enable_char_notify_qt(void* context, const void* caller, c
     if (!notification.isValid())
         return;
 
+    service->connect(service, &QLowEnergyService::characteristicChanged,[caller,handler](const QLowEnergyCharacteristic &characteristic, const QByteArray &newValue){
+        handler(caller,(uint8_t*)newValue.data(),newValue.length());
+    });
+
     service->writeDescriptor(notification, QByteArray::fromHex("0100"));
     QObject* temp = new QObject();
     service->connect(service,&QLowEnergyService::descriptorWritten,temp,[caller,ready,temp](const QLowEnergyDescriptor &descriptor, const QByteArray &newValue){
@@ -105,7 +109,10 @@ void MetawearWrapper::on_disconnect_qt(void *context, const void* caller, MblMwF
 MetawearWrapper::MetawearWrapper(QObject *parent )
     : QObject(parent),
       m_services(QMap<QString,QLowEnergyService*>()),
-      m_controller(0)
+      m_controller(0),
+      m_serviceReady(0),
+      m_isMetawareReady(0),
+      m_readyCharacteristicCount(0)
 {
 }
 
@@ -142,9 +149,8 @@ void MetawearWrapper::setDevice(const QBluetoothDeviceInfo &device){
     btleConnection.on_disconnect = on_disconnect_qt;
     this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
 
-    qDebug() << "QlowEnergy Status:" << m_controller->state();
     if(m_controller->state() == QLowEnergyController::UnconnectedState){
-          qDebug() << "Starting connection";
+        qDebug() << "Starting connection";
         m_controller->connectToDevice();
     }
     else{
@@ -162,32 +168,56 @@ void MetawearWrapper::onServiceDiscovered(const QBluetoothUuid &newService){
 
     lowEnergyService->connect(lowEnergyService,SIGNAL(characteristicRead(QLowEnergyCharacteristic,QByteArray)),this,SLOT(onCharacteristicRead(QLowEnergyCharacteristic,QByteArray)));
     lowEnergyService->connect(lowEnergyService, SIGNAL(error(QLowEnergyService::ServiceError)),this,SLOT(onCharacteristicError(QLowEnergyService::ServiceError)));
-    lowEnergyService->connect(lowEnergyService,lowEnergyService::stateChanged&,[this,lowEnergyService](QLowEnergyService::ServiceState state){
 
-    });
+
     qDebug() << "Service Name: " << lowEnergyService->serviceName();
     qDebug() << "Service UUID: " << lowEnergyService->serviceUuid().toString();
 }
 
 void MetawearWrapper::onCharacteristicRead(QLowEnergyCharacteristic characteristic, QByteArray payload){
-    qDebug() << payload;
     this->m_readGattHandler(this->m_metaWearBoard,(uint8_t*)payload.data(),payload.length());
 }
 
+
+
+
 void MetawearWrapper::onServiceDiscoveryFinished(){
-    for(QString uuid : m_services.keys()){
-       QLowEnergyService* lowEnergyService =   m_services.value(uuid);
-
+    foreach(QString key, this->m_services.keys()){
+        QLowEnergyService* lowEnergyService = this->m_services.value(key);
+        lowEnergyService->connect(lowEnergyService,&QLowEnergyService::stateChanged,[this,lowEnergyService](QLowEnergyService::ServiceState state){
+            if(state == QLowEnergyService::ServiceDiscovered){
+                this->m_readyCharacteristicCount++;
+                if(this->m_readyCharacteristicCount == this->m_services.count())
+                {
+                    this->metwareIntialize();
+                }
+            }
+        });
         lowEnergyService->discoverDetails();
-
     }
-    mbl_mw_metawearboard_initialize(this->m_metaWearBoard, nullptr, [](void* context, MblMwMetaWearBoard* board, int32_t status) -> void {
-        if (!status) {
-            qWarning() << QString("Error initializing board: %d").arg(status);
-        } else {
-            qDebug() << "Board initialized";
-        }
-    });
+}
+
+void MetawearWrapper::metwareIntialize(){
+    if(this->m_isMetawareReady == false){
+        mbl_mw_metawearboard_initialize(this->m_metaWearBoard, this, [](void* context, MblMwMetaWearBoard* board, int32_t status) -> void {
+            MetawearWrapper* wrapper = (MetawearWrapper *)context;
+            if (!status) {
+                qWarning() << "Error initializing board:" << status;
+                emit wrapper->metawareFailedToInitialized(status);
+            } else {
+                qDebug() << "Board initialized";
+
+                auto dev_info = mbl_mw_metawearboard_get_device_information(board);
+                qDebug() << "firmware = " << dev_info->firmware_revision << endl;
+                mbl_mw_memory_free((void*) dev_info);
+
+                qDebug() << "model = " << mbl_mw_metawearboard_get_model(board) << endl;
+
+                emit wrapper->metawareInitialized();
+            }
+        });
+        this->m_isMetawareReady = true;
+    }
 }
 
 void MetawearWrapper::onConnected(){
@@ -228,27 +258,27 @@ void MetawearWrapper::onControllerError(QLowEnergyController::Error e){
 void MetawearWrapper::onStateChange(QLowEnergyController::ControllerState state)
 {
     switch(state){
-        case QLowEnergyController::UnconnectedState:
-            qDebug() << "UnconnectedState";
-            break;
-        case QLowEnergyController::ConnectingState:
-            qDebug() << "ConnectingState";
-            break;
-        case QLowEnergyController::ConnectedState:
-            qDebug() << "ConnectedState";
-            break;
-        case QLowEnergyController::DiscoveringState:
-            qDebug() << "DiscoveringState";
-            break;
-        case QLowEnergyController::DiscoveredState:
-            qDebug() << "DiscoveredState";
-            break;
-        case QLowEnergyController::ClosingState:
-            qDebug() << "ClosingState";
-            break;
-        case QLowEnergyController::AdvertisingState:
-            qDebug() << "AdvertisingState";
-            break;
+    case QLowEnergyController::UnconnectedState:
+        qDebug() << "UnconnectedState";
+        break;
+    case QLowEnergyController::ConnectingState:
+        qDebug() << "ConnectingState";
+        break;
+    case QLowEnergyController::ConnectedState:
+        qDebug() << "ConnectedState";
+        break;
+    case QLowEnergyController::DiscoveringState:
+        qDebug() << "DiscoveringState";
+        break;
+    case QLowEnergyController::DiscoveredState:
+        qDebug() << "DiscoveredState";
+        break;
+    case QLowEnergyController::ClosingState:
+        qDebug() << "ClosingState";
+        break;
+    case QLowEnergyController::AdvertisingState:
+        qDebug() << "AdvertisingState";
+        break;
     }
 }
 
@@ -275,10 +305,11 @@ void MetawearWrapper::onCharacteristicError(QLowEnergyService::ServiceError e){
     }
 }
 
-
+MblMwMetaWearBoard* MetawearWrapper::getBoard(){
+    return m_metaWearBoard;
+}
 
 MetawearWrapper::~MetawearWrapper(){
-    onDisconnect();
 }
 
 QLowEnergyController* MetawearWrapper::getController() {
