@@ -1,6 +1,3 @@
 #include "deviceservice.h"
 
-DeviceService::DeviceService(QObject *parent) : QObject(parent)
-{
-
-}
+DeviceService::DeviceService(QObject *parent) : QObject(parent) {}

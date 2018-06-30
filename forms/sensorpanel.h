@@ -8,6 +8,14 @@
 
 QT_FORWARD_DECLARE_CLASS(MetawearWrapper)
 QT_FORWARD_DECLARE_CLASS(MblMwMetaWearBoard)
+QT_FORWARD_DECLARE_CLASS(QTime)
+
+QT_CHARTS_BEGIN_NAMESPACE
+class QSplineSeries;
+class QValueAxis;
+class QXYSeries;
+QT_CHARTS_END_NAMESPACE
+
 
 
 namespace Ui {
@@ -28,12 +36,15 @@ private:
     MetawearWrapper* m_wrapper;
     Ui::SensorPanel* ui;
     QBluetoothDeviceInfo m_currentDevice;
+
+    QValueAxis* m_xAxis;
+    QValueAxis* m_yAxis;
+
 private slots:
     void onMetawareInitialized();
 public slots:
     void setName(QString);
     void setDevice(const QBluetoothDeviceInfo &device);
-
 signals:
    void onConnected();
    void onBluetoothError(QLowEnergyController::Error e);

@@ -6,7 +6,8 @@ CONFIG += c++11
 
 FORMS += forms/mainwindow.ui \
     forms/deviceselectdialog.ui \
-    forms/sensorpanel.ui
+    forms/sensorpanel.ui \
+    forms/metawearconfig.ui
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -26,7 +27,8 @@ SOURCES += main.cpp \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
     metawearwrapper.cpp \
-    deviceservice.cpp
+    deviceservice.cpp \
+    xyseriesstream.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -47,4 +49,5 @@ HEADERS += \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
     metawearwrapper.h \
-    deviceservice.h
+    deviceservice.h \
+    xyseriesstream.h
