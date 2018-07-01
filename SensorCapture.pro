@@ -30,7 +30,9 @@ SOURCES += \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
     metawearwrapper.cpp \
-    deviceservice.cpp
+    deviceservice.cpp \
+    forms/metawearconfig.cpp \
+    util.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -52,5 +54,7 @@ HEADERS += \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
     metawearwrapper.h \
-    deviceservice.h
+    deviceservice.h \
+    forms/metawearconfig.h \
+    util.h
 
