@@ -16,17 +16,15 @@ class QValueAxis;
 class QXYSeries;
 QT_CHARTS_END_NAMESPACE
 
-
-
 namespace Ui {
     class SensorPanel;
 }
-
 
 QT_CHARTS_USE_NAMESPACE
 
 class SensorPanel : public QWidget
 {
+
     Q_OBJECT
 public:
     explicit SensorPanel(QWidget *parent = 0);

@@ -2,6 +2,7 @@ QT += quick
 QT += widgets
 QT += bluetooth
 QT += charts
+QT += printsupport
 CONFIG += c++11
 
 FORMS += forms/mainwindow.ui \
@@ -22,13 +23,14 @@ include(3rdparty/mbientlab.pro)
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += main.cpp \
+SOURCES += \
+    qcustomplot.cpp \
+    main.cpp \
     forms/mainwindow.cpp \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
     metawearwrapper.cpp \
-    deviceservice.cpp \
-    xyseriesstream.cpp
+    deviceservice.cpp
 
 RESOURCES += qml.qrc \
     icons.qrc
@@ -45,9 +47,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    qcustomplot.h \
     forms/mainwindow.h \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
     metawearwrapper.h \
-    deviceservice.h \
-    xyseriesstream.h
+    deviceservice.h
+

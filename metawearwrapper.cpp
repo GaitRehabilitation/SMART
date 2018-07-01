@@ -2,6 +2,9 @@
 #include "metawear/core/metawearboard.h"
 #include "metawear/core/status.h"
 #include "metawear/platform/memory.h"
+#include "metawear/core/types.h"
+#include "metawear/core/data.h"
+#include "metawear/core/datasignal.h"
 
 #include <QBluetoothAddress>
 #include <QBluetoothUuid>
@@ -9,6 +12,7 @@
 #include <QLowEnergyController>
 #include <QObject>
 #include <QThread>
+
 
 static quint128 convertToQuint128(uint8_t *low, uint8_t *high) {
   quint128 result;
@@ -58,7 +62,7 @@ void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller,
       convertToQuint128((uint8_t *)&characteristic->service_uuid_low,
                         (uint8_t *)&characteristic->service_uuid_high));
   QBluetoothUuid characteristic_uuid =
-      QBluetoothUuid(convertToQuint128((uint8_t *)&characteristic->uuid_low,
+    QBluetoothUuid(convertToQuint128((uint8_t *)&characteristic->uuid_low,
                                        (uint8_t *)&characteristic->uuid_high));
 
   QLowEnergyService *service =
@@ -183,6 +187,20 @@ void MetawearWrapper::setDevice(const QBluetoothDeviceInfo &device) {
     this->m_controller->discoverServices();
   }
 }
+
+void MetawearWrapper::enableAcceleration()
+{
+    auto acc_signal = mbl_mw_acc_get_acceleration_data_signal(this->getBoard());
+    mbl_mw_datasignal_subscribe(acc_signal, this , [](void *context, const MblMwData *data) -> void {
+        MetawearWrapper* wrapper = (MetawearWrapper*)context;
+        auto acceleration = (MblMwCartesianFloat *)data->value;
+        emit wrapper->onAcceleration(data->epoch,acceleration->x,acceleration->y,acceleration->z);
+        emit wrapper->onEpoch(data->epoch);
+    });
+    mbl_mw_acc_enable_acceleration_sampling(this->getBoard());
+    mbl_mw_acc_start(this->getBoard());
+}
+
 
 void MetawearWrapper::onServiceDiscovered(const QBluetoothUuid &newService) {
   QString uuid = newService.toString();
@@ -359,3 +377,4 @@ MetawearWrapper::~MetawearWrapper() {}
 QLowEnergyController *MetawearWrapper::getController() {
   return this->m_controller;
 }
+
