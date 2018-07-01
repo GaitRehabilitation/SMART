@@ -28,12 +28,15 @@ public:
 
 
 public slots:
-
+    void setMagnetometereSampleRate(double);
+    void setGyroscopeSampleRate(double);
+    void setAcceleromterSampleRate(double);
+    void setAmbientLightSampleRate(double);
+    void setPressureSampleRate(double);
 signals:
 
 private:
     Ui::MetawearConfig *ui;
-    double getPosition(double minimum, double maximum, int slidePosition,int max);
 };
 
 #endif // METAWEARCONFIG_H

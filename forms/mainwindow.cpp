@@ -30,8 +30,7 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
 
   ui->sensorList->addItem(listWidgetItem);
 
-  SensorPanel *sensorPanel = new SensorPanel(this);
-  sensorPanel->setDevice(info);
+  SensorPanel *sensorPanel = new SensorPanel(info,this);
 
   // make the widget the same size as the panel
   listWidgetItem->setSizeHint(sensorPanel->sizeHint());

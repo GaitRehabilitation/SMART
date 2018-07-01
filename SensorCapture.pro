@@ -30,7 +30,6 @@ SOURCES += \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
     metawearwrapper.cpp \
-    deviceservice.cpp \
     forms/metawearconfig.cpp \
     util.cpp
 
@@ -54,7 +53,6 @@ HEADERS += \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
     metawearwrapper.h \
-    deviceservice.h \
     forms/metawearconfig.h \
     util.h
 

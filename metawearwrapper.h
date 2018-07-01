@@ -24,22 +24,24 @@ private:
 
        QMap<QString,QLowEnergyService*> m_services;
        QBluetoothDeviceInfo m_currentDevice;
+       bool m_isSensorEnabled;
 
+       static quint128 convertQuint128(uint8_t *low, uint8_t *high);
        static void read_gatt_char_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler);
        static void write_gatt_char_qt(void *context, const void* caller, MblMwGattCharWriteType writeType, const MblMwGattChar* characteristic,const uint8_t* value, uint8_t length);
        static void enable_char_notify_qt(void* context, const void* caller, const MblMwGattChar* characteristic,MblMwFnIntVoidPtrArray handler, MblMwFnVoidVoidPtrInt ready);
        static void on_disconnect_qt(void *context, const void* caller, MblMwFnVoidVoidPtrInt handler);
 public:
-    explicit MetawearWrapper(QObject *parent = 0);
+    explicit MetawearWrapper(const QBluetoothDeviceInfo &device,QObject *parent = 0);
     virtual ~MetawearWrapper();
     QLowEnergyController* getController();
     MblMwMetaWearBoard* getBoard();
 
     int m_readyCharacteristicCount;
     bool m_isMetawareReady;
-    void setDevice(const QBluetoothDeviceInfo &device);
 
     void enableAcceleration();
+    void readBatteryStatus();
 public slots:
 
 private slots:
@@ -61,10 +63,13 @@ private slots:
    void metwareIntialize();
 
 signals:
+    double onBatteryPercentage(qint8);
+    double onVoltage(quint16);
+
     void connected();
     void disconnected();
     void onAcceleration(int64_t,float,float,float);
-    void onEpoch(int64_t);
+    void onEpoch(qint64);
 
     void metawareInitialized();
     void metawareFailedToInitialized(int32_t status);

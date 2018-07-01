@@ -9,40 +9,44 @@ MetawearConfig::MetawearConfig(QWidget *parent)
     this->ui->setupUi(this);
 
     connect(this->ui->acceleromterSlider,&QSlider::sliderMoved,[this](int value){
-       this->ui->sampleRateAccelerometer->setValue( this->getPosition(
-                    this->ui->sampleRateAccelerometer->minimum(),
-                    this->ui->sampleRateAccelerometer->maximum(),
-                    value,
-                    this->ui->acceleromterSlider->maximum()));
+        QDoubleSpinBox* spinBox =  this->ui->sampleRateAccelerometer;
+        QSlider* slider = this->ui->acceleromterSlider;
+
+        double percent = ((double)value)/((double)slider->maximum());
+        double result =  ((spinBox->maximum() - spinBox->minimum()) * percent) + spinBox->minimum();
+        spinBox->setValue(result);
     });
     connect(this->ui->gyroscopeSlider,&QSlider::sliderMoved,[this](int value){
-        this->ui->sampleRateGyroscope->setValue( this->getPosition(
-                     this->ui->sampleRateGyroscope->minimum(),
-                     this->ui->sampleRateGyroscope->maximum(),
-                     value,
-                     this->ui->gyroscopeSlider->maximum()));
+        QDoubleSpinBox* spinBox =  this->ui->sampleRateGyroscope;
+        QSlider* slider = this->ui->gyroscopeSlider;
 
+        double percent = ((double)value)/((double)slider->maximum());
+        double result =  ((spinBox->maximum() - spinBox->minimum()) * percent) + spinBox->minimum();
+        spinBox->setValue(result);
     });
     connect(this->ui->ambientLightSlider,&QSlider::sliderMoved,[this](int value){
-        this->ui->sampleeRateAmbientLight->setValue( this->getPosition(
-                     this->ui->sampleeRateAmbientLight->minimum(),
-                     this->ui->sampleeRateAmbientLight->maximum(),
-                     value,
-                     this->ui->ambientLightSlider->maximum()));
+        QDoubleSpinBox* spinBox =  this->ui->sampleeRateAmbientLight;
+        QSlider* slider = this->ui->ambientLightSlider;
+
+        double percent = ((double)value)/((double)slider->maximum());
+        double result =  ((spinBox->maximum() - spinBox->minimum()) * percent) + spinBox->minimum();
+        spinBox->setValue(result);
     });
     connect(this->ui->magnetometerSlider,&QSlider::sliderMoved,[this](int value){
-        this->ui->sampleRateMagnetometer->setValue( this->getPosition(
-                     this->ui->sampleRateMagnetometer->minimum(),
-                     this->ui->sampleRateMagnetometer->maximum(),
-                     value,
-                     this->ui->magnetometerSlider->maximum()));
+        QDoubleSpinBox* spinBox =  this->ui->sampleRateMagnetometer;
+        QSlider* slider = this->ui->magnetometerSlider;
+
+        double percent = ((double)value)/((double)slider->maximum());
+        double result =  ((spinBox->maximum() - spinBox->minimum()) * percent) + spinBox->minimum();
+        spinBox->setValue(result);
     });
     connect(this->ui->pressureSlider,&QSlider::sliderMoved,[this](int value){
-        this->ui->sampleRatePressure->setValue( this->getPosition(
-                     this->ui->sampleRatePressure->minimum(),
-                     this->ui->sampleRatePressure->maximum(),
-                     value,
-                     this->ui->pressureSlider->maximum()));
+        QDoubleSpinBox* spinBox =  this->ui->sampleRatePressure;
+        QSlider* slider = this->ui->pressureSlider;
+
+        double percent = ((double)value)/((double)slider->maximum());
+        double result =  ((spinBox->maximum() - spinBox->minimum()) * percent) + spinBox->minimum();
+        spinBox->setValue(result);
     });
 
     connect(this->ui->enableAccelerometer,&QCheckBox::stateChanged,[this](int state){
@@ -69,8 +73,6 @@ MetawearConfig::MetawearConfig(QWidget *parent)
             this->ui->pressureSlider->setEnabled((state == Qt::Checked));
             this->ui->sampleRateAccelerometer->setEnabled((state == Qt::Checked));
     });
-
-
 }
 
 MetawearConfig::~MetawearConfig()
@@ -128,9 +130,60 @@ bool MetawearConfig::isPressureActive()
     return this->ui->enablePressure;
 }
 
-double MetawearConfig::getPosition(double minimum, double maximum, int slidePosition, int max)
+void MetawearConfig::setMagnetometereSampleRate(double value)
 {
-    double percent = ((double)slidePosition)/((double)max);
-    return ((maximum - minimum) * percent) + minimum;
+    QDoubleSpinBox* spintBox = this->ui->sampleRateMagnetometer;
+    QSlider* slider = this->ui->magnetometerSlider;
+
+    double factor = (spintBox->value() -  spintBox->minimum())/(spintBox->maximum() - spintBox->minimum());
+    int pos = (int)(((double)slider->maximum()) * factor);
+    spintBox->setValue(value);
+    slider->setValue(pos);
+}
+
+void MetawearConfig::setGyroscopeSampleRate(double value)
+{
+    QDoubleSpinBox* spintBox = this->ui->sampleRateGyroscope;
+    QSlider* slider =  this->ui->gyroscopeSlider;
+
+    double factor = (spintBox->value() -  spintBox->minimum())/(spintBox->maximum() - spintBox->minimum());
+    int pos = (int)(((double)slider->maximum()) * factor);
+    spintBox->setValue(value);
+    slider->setValue(pos);
+}
+
+void MetawearConfig::setAcceleromterSampleRate(double value)
+{
+    QDoubleSpinBox* spintBox = this->ui->sampleRateAccelerometer;
+    QSlider* slider =  this->ui->acceleromterSlider;
+
+    double factor = (spintBox->value() -  spintBox->minimum())/(spintBox->maximum() - spintBox->minimum());
+    int pos = (int)(((double)slider->maximum()) * factor);
+
+    spintBox->setValue(value);
+    slider->setValue(pos);
+
+}
+
+void MetawearConfig::setAmbientLightSampleRate(double value)
+{
+    QDoubleSpinBox* spintBox = this->ui->sampleeRateAmbientLight;
+    QSlider* slider =  this->ui->ambientLightSlider;
+
+    double factor = (spintBox->value() -  spintBox->minimum())/(spintBox->maximum() - spintBox->minimum());
+    int pos = (int)(((double)slider->maximum()) * factor);
+    spintBox->setValue(value);
+    slider->setValue(pos);
+}
+
+void MetawearConfig::setPressureSampleRate(double value)
+{
+    QDoubleSpinBox* spintBox = this->ui->sampleRateMagnetometer;
+    QSlider* slider =  this->ui->magnetometerSlider;
+
+    double factor = (spintBox->value() -  spintBox->minimum())/(spintBox->maximum() - spintBox->minimum());
+    int pos = (int)(((double)slider->maximum()) * factor);
+    spintBox->setValue(value);
+    slider->setValue(pos);
 }
 
