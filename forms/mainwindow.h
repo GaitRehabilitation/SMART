@@ -4,25 +4,24 @@
 #include <QMainWindow>
 
 namespace Ui {
-    class MainWindow;
+class MainWindow;
 }
 
 QT_FORWARD_DECLARE_CLASS(DeviceWizard)
 QT_FORWARD_DECLARE_CLASS(QFileDialog)
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 public:
-    MainWindow(QWidget *parent = 0);
-    virtual ~MainWindow();
+  MainWindow(QWidget *parent = 0);
+  virtual ~MainWindow();
 public slots:
-    void registerDevice(const QBluetoothDeviceInfo& info);
+  void registerDevice(const QBluetoothDeviceInfo &info);
 private slots:
-    void deviceAddWizard();    
+  void deviceAddWizard();
 
 private:
-    Ui::MainWindow* ui;
+  Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

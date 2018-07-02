@@ -4,31 +4,29 @@
 #include <QDialog>
 
 namespace Ui {
-    class MetawearConfig;
+class MetawearConfig;
 }
 
-class MetawearConfig : public QDialog
-{
-    Q_OBJECT
+class MetawearConfig : public QDialog {
+  Q_OBJECT
 public:
-    explicit MetawearConfig(QWidget *parent = 0);
-    ~MetawearConfig();
+  explicit MetawearConfig(QWidget *parent = 0);
+  ~MetawearConfig();
 
-    double getAcceleromterSampleRate();
+  double getAcceleromterSampleRate();
 
-    bool isMagnetometerActive();
-    bool isGyroscopeActive();
-    bool isAcceleromterActive();
-    bool isAmbientLightActive();
-    bool isPressureActive();
-
+  bool isMagnetometerActive();
+  bool isGyroscopeActive();
+  bool isAcceleromterActive();
+  bool isAmbientLightActive();
+  bool isPressureActive();
 
 public slots:
-    void setAcceleromterSampleRate(double);
+  void setAcceleromterSampleRate(double);
 signals:
 
 private:
-    Ui::MetawearConfig *ui;
+  Ui::MetawearConfig *ui;
 };
 
 #endif // METAWEARCONFIG_H

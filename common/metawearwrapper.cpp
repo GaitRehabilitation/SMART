@@ -1,16 +1,16 @@
 #include "metawearwrapper.h"
-#include "metawear/core/metawearboard.h"
-#include "metawear/core/status.h"
-#include "metawear/platform/memory.h"
-#include "metawear/core/types.h"
 #include "metawear/core/data.h"
 #include "metawear/core/datasignal.h"
+#include "metawear/core/metawearboard.h"
 #include "metawear/core/settings.h"
+#include "metawear/core/status.h"
+#include "metawear/core/types.h"
+#include "metawear/platform/memory.h"
 #include "metawear/sensor/ambientlight_ltr329.h"
+#include "metawear/sensor/barometer_bosch.h"
+#include "metawear/sensor/cpp/utils.h"
 #include "metawear/sensor/gyro_bmi160.h"
 #include "metawear/sensor/magnetometer_bmm150.h"
-#include "metawear/sensor/cpp/utils.h"
-#include "metawear/sensor/barometer_bosch.h"
 
 #include <QBluetoothAddress>
 #include <QBluetoothUuid>
@@ -21,16 +21,15 @@
 
 #include <bits/stl_vector.h>
 
-quint128 MetawearWrapper::convertQuint128(uint8_t *low, uint8_t *high)
-{
-    quint128 result;
-    for (int i = 0; i < 8; i++) {
-      result.data[i] = high[7 - i];
-    }
-    for (int i = 0; i < 8; i++) {
-      result.data[i + 8] = low[7 - i];
-    }
-    return result;
+quint128 MetawearWrapper::convertQuint128(uint8_t *low, uint8_t *high) {
+  quint128 result;
+  for (int i = 0; i < 8; i++) {
+    result.data[i] = high[7 - i];
+  }
+  for (int i = 0; i < 8; i++) {
+    result.data[i + 8] = low[7 - i];
+  }
+  return result;
 }
 
 void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
@@ -39,8 +38,12 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
   MetawearWrapper *wrapper = (MetawearWrapper *)context;
   wrapper->m_readGattHandler = handler;
 
-  QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low,(uint8_t *)&characteristic->service_uuid_high));
-  QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,(uint8_t *)&characteristic->uuid_high));
+  QBluetoothUuid service_uuid = QBluetoothUuid(
+      convertQuint128((uint8_t *)&characteristic->service_uuid_low,
+                      (uint8_t *)&characteristic->service_uuid_high));
+  QBluetoothUuid characteristic_uuid =
+      QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
+                                     (uint8_t *)&characteristic->uuid_high));
 
   QLowEnergyService *service =
       wrapper->m_services.value(service_uuid.toString());
@@ -62,9 +65,12 @@ void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller,
                                          const MblMwGattChar *characteristic,
                                          const uint8_t *value, uint8_t length) {
   MetawearWrapper *wrapper = (MetawearWrapper *)context;
-  QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low,(uint8_t *)&characteristic->service_uuid_high));
-  QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,(uint8_t *)&characteristic->uuid_high));
-
+  QBluetoothUuid service_uuid = QBluetoothUuid(
+      convertQuint128((uint8_t *)&characteristic->service_uuid_low,
+                      (uint8_t *)&characteristic->service_uuid_high));
+  QBluetoothUuid characteristic_uuid =
+      QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
+                                     (uint8_t *)&characteristic->uuid_high));
 
   QLowEnergyService *service =
       wrapper->m_services.value(service_uuid.toString());
@@ -93,9 +99,12 @@ void MetawearWrapper::enable_char_notify_qt(void *context, const void *caller,
   MetawearWrapper *wrapper = (MetawearWrapper *)context;
   wrapper->m_notificationHandler = handler;
 
-  QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low,(uint8_t *)&characteristic->service_uuid_high));
-  QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,(uint8_t *)&characteristic->uuid_high));
-
+  QBluetoothUuid service_uuid = QBluetoothUuid(
+      convertQuint128((uint8_t *)&characteristic->service_uuid_low,
+                      (uint8_t *)&characteristic->service_uuid_high));
+  QBluetoothUuid characteristic_uuid =
+      QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
+                                     (uint8_t *)&characteristic->uuid_high));
 
   QLowEnergyService *service =
       wrapper->m_services.value(service_uuid.toString());
@@ -135,152 +144,136 @@ void MetawearWrapper::on_disconnect_qt(void *context, const void *caller,
 // Class
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,QObject *parent)
+MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
+                                 QObject *parent)
     : QObject(parent), m_services(QMap<QString, QLowEnergyService *>()),
       m_controller(0), m_serviceReady(0), m_isMetawareReady(0),
       m_readyCharacteristicCount(0), m_notificationHandler(0),
-      m_disconnectedHandler(0), m_readGattHandler(0), m_isSensorEnabled(0){
+      m_disconnectedHandler(0), m_readGattHandler(0), m_isSensorEnabled(0) {
 
-    this->m_currentDevice = device;
+  this->m_currentDevice = device;
 
-    // Disconnect and delete old connection
-    if (m_controller) {
-      m_controller->disconnectFromDevice();
-      delete m_controller;
-      m_controller = 0;
-    }
+  // Disconnect and delete old connection
+  if (m_controller) {
+    m_controller->disconnectFromDevice();
+    delete m_controller;
+    m_controller = 0;
+  }
 
-    m_controller = new QLowEnergyController(m_currentDevice, this);
+  m_controller = new QLowEnergyController(m_currentDevice, this);
 
-    // Make connections
+  // Make connections
 
-    // Service Discovery
-    connect(this->m_controller, SIGNAL(serviceDiscovered(QBluetoothUuid)), this,SLOT(onServiceDiscovered(QBluetoothUuid)));
-    connect(this->m_controller, SIGNAL(discoveryFinished()), this, SLOT(onServiceDiscoveryFinished()));
+  // Service Discovery
+  connect(this->m_controller, SIGNAL(serviceDiscovered(QBluetoothUuid)), this,
+          SLOT(onServiceDiscovered(QBluetoothUuid)));
+  connect(this->m_controller, SIGNAL(discoveryFinished()), this,
+          SLOT(onServiceDiscoveryFinished()));
 
-    // controller connection/disconnect
-    connect(this->m_controller, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
-    connect(this->m_controller, SIGNAL(connected()), this, SLOT(onConnected()));
+  // controller connection/disconnect
+  connect(this->m_controller, SIGNAL(disconnected()), this,
+          SLOT(onDisconnect()));
+  connect(this->m_controller, SIGNAL(connected()), this, SLOT(onConnected()));
 
-    // controller error
-    connect(this->m_controller, SIGNAL(error(QLowEnergyController::Error)), this,SLOT(onControllerError(QLowEnergyController::Error)));
+  // controller error
+  connect(this->m_controller, SIGNAL(error(QLowEnergyController::Error)), this,
+          SLOT(onControllerError(QLowEnergyController::Error)));
 
-    MblMwBtleConnection btleConnection;
-    btleConnection.context = this;
-    btleConnection.write_gatt_char = write_gatt_char_qt;
-    btleConnection.read_gatt_char = read_gatt_char_qt;
-    btleConnection.enable_notifications = enable_char_notify_qt;
-    btleConnection.on_disconnect = on_disconnect_qt;
-    this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
+  MblMwBtleConnection btleConnection;
+  btleConnection.context = this;
+  btleConnection.write_gatt_char = write_gatt_char_qt;
+  btleConnection.read_gatt_char = read_gatt_char_qt;
+  btleConnection.enable_notifications = enable_char_notify_qt;
+  btleConnection.on_disconnect = on_disconnect_qt;
+  this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
 
-    if (m_controller->state() == QLowEnergyController::UnconnectedState) {
-      qDebug() << "Starting connection";
-      m_controller->connectToDevice();
-    } else {
-      qDebug() << "Controller already connected. Search services..";
-      this->m_controller->discoverServices();
-    }
+  if (m_controller->state() == QLowEnergyController::UnconnectedState) {
+    qDebug() << "Starting connection";
+    m_controller->connectToDevice();
+  } else {
+    qDebug() << "Controller already connected. Search services..";
+    this->m_controller->discoverServices();
+  }
 }
 
-
-
-
-
-void MetawearWrapper::readBatteryStatus()
-{
-    auto battery_signal = mbl_mw_settings_get_battery_state_data_signal(this->getBoard());
-    mbl_mw_datasignal_read(battery_signal);
+void MetawearWrapper::readBatteryStatus() {
+  auto battery_signal =
+      mbl_mw_settings_get_battery_state_data_signal(this->getBoard());
+  mbl_mw_datasignal_read(battery_signal);
 }
 
-void MetawearWrapper::setAccelerationSamplerate(float sample)
-{
-    mbl_mw_acc_set_odr(this->getBoard(),sample);
-    mbl_mw_acc_write_acceleration_config(this->getBoard());
+void MetawearWrapper::setAccelerationSamplerate(float sample) {
+  mbl_mw_acc_set_odr(this->getBoard(), sample);
+  mbl_mw_acc_write_acceleration_config(this->getBoard());
 }
 
-void MetawearWrapper::setAmbientLightSamplerate(float sample)
-{
-    static const std::vector<float> MBL_MW_ALS_LTR329_RATE_VALUES= {50.0f,100.0f,200,500,1000,2000};
-    int index =  closest_index(MBL_MW_ALS_LTR329_RATE_VALUES, sample);
-    mbl_mw_als_ltr329_set_measurement_rate(this->getBoard(),(MblMwAlsLtr329MeasurementRate)index);
-    mbl_mw_als_ltr329_write_config(this->getBoard());
+void MetawearWrapper::setAmbientLightSamplerate(float sample) {
+  static const std::vector<float> MBL_MW_ALS_LTR329_RATE_VALUES = {
+      50.0f, 100.0f, 200, 500, 1000, 2000};
+  int index = closest_index(MBL_MW_ALS_LTR329_RATE_VALUES, sample);
+  mbl_mw_als_ltr329_set_measurement_rate(this->getBoard(),
+                                         (MblMwAlsLtr329MeasurementRate)index);
+  mbl_mw_als_ltr329_write_config(this->getBoard());
 }
 
-void MetawearWrapper::setGyroSamplerate(float value)
-{
-    static const std::vector<float> MBL_MW_GYRO_BMI160_RATE_VALUES = {25.0f,50.0f,100.0f,200.0f,400.0f,800.0f,1600.0f,3200.0f};
-    int index= closest_index(MBL_MW_GYRO_BMI160_RATE_VALUES, value);
-     mbl_mw_gyro_bmi160_set_odr(this->getBoard(), (MblMwGyroBmi160Odr)(6 + index) );
-     mbl_mw_gyro_bmi160_write_config(this->getBoard());
+void MetawearWrapper::setGyroSamplerate(float value) {
+  static const std::vector<float> MBL_MW_GYRO_BMI160_RATE_VALUES = {
+      25.0f, 50.0f, 100.0f, 200.0f, 400.0f, 800.0f, 1600.0f, 3200.0f};
+  int index = closest_index(MBL_MW_GYRO_BMI160_RATE_VALUES, value);
+  mbl_mw_gyro_bmi160_set_odr(this->getBoard(), (MblMwGyroBmi160Odr)(6 + index));
+  mbl_mw_gyro_bmi160_write_config(this->getBoard());
 }
 
-void MetawearWrapper::setMagnetometerRate(float value)
-{
+void MetawearWrapper::setMagnetometerRate(float value) {
+  mbl_mw_mag_bmm150_enable_b_field_sampling(this->getBoard());
+  mbl_mw_mag_bmm150_start(this->getBoard());
+}
+
+void MetawearWrapper::setAccelerationCapture(bool enable) {
+  if (enable) {
+    mbl_mw_acc_enable_acceleration_sampling(this->getBoard());
+    mbl_mw_acc_start(this->getBoard());
+  } else {
+    mbl_mw_acc_disable_acceleration_sampling(this->getBoard());
+    mbl_mw_acc_stop(this->getBoard());
+  }
+}
+
+void MetawearWrapper::setAmbientLightCapture(bool enable) {
+  if (enable) {
+    mbl_mw_als_ltr329_start(this->getBoard());
+  } else {
+    mbl_mw_als_ltr329_stop(this->getBoard());
+  }
+}
+
+void MetawearWrapper::setGyroCapture(bool enable) {
+  if (enable) {
+    mbl_mw_gyro_bmi160_enable_rotation_sampling(this->getBoard());
+    mbl_mw_gyro_bmi160_start(this->getBoard());
+  } else {
+    mbl_mw_gyro_bmi160_disable_rotation_sampling(this->getBoard());
+    mbl_mw_gyro_bmi160_stop(this->getBoard());
+  }
+}
+
+void MetawearWrapper::setMagnetometerCapture(bool enable) {
+  if (enable) {
     mbl_mw_mag_bmm150_enable_b_field_sampling(this->getBoard());
     mbl_mw_mag_bmm150_start(this->getBoard());
+  } else {
+    mbl_mw_mag_bmm150_disable_b_field_sampling(this->getBoard());
+    mbl_mw_mag_bmm150_stop(this->getBoard());
+  }
 }
 
-void MetawearWrapper::setAccelerationCapture(bool enable)
-{
-    if(enable){
-        mbl_mw_acc_enable_acceleration_sampling(this->getBoard());
-        mbl_mw_acc_start(this->getBoard());
-    }
-    else{
-        mbl_mw_acc_disable_acceleration_sampling(this->getBoard());
-        mbl_mw_acc_stop(this->getBoard());
-    }
+void MetawearWrapper::setBarometerCapture(bool enable) {
+  if (enable) {
+    mbl_mw_baro_bosch_start(this->getBoard());
+  } else {
+    mbl_mw_als_ltr329_stop(this->getBoard());
+  }
 }
-
-void MetawearWrapper::setAmbientLightCapture(bool enable)
-{
-    if(enable){
-        mbl_mw_als_ltr329_start(this->getBoard());
-    } else{
-        mbl_mw_als_ltr329_stop(this->getBoard());
-    }
-
-}
-
-void MetawearWrapper::setGyroCapture(bool enable)
-{
-    if(enable){
-        mbl_mw_gyro_bmi160_enable_rotation_sampling(this->getBoard());
-        mbl_mw_gyro_bmi160_start(this->getBoard());
-    }
-    else {
-            mbl_mw_gyro_bmi160_disable_rotation_sampling(this->getBoard());
-            mbl_mw_gyro_bmi160_stop(this->getBoard());
-
-    }
-}
-
-void MetawearWrapper::setMagnetometerCapture(bool enable)
-{
-    if(enable){
-        mbl_mw_mag_bmm150_enable_b_field_sampling(this->getBoard());
-        mbl_mw_mag_bmm150_start(this->getBoard());
-    }
-    else
-    {
-        mbl_mw_mag_bmm150_disable_b_field_sampling(this->getBoard());
-        mbl_mw_mag_bmm150_stop(this->getBoard());
-    }
-}
-
-
-void MetawearWrapper::setBarometerCapture(bool enable)
-{
-    if(enable){
-         mbl_mw_baro_bosch_start(this->getBoard());
-    }else{
-         mbl_mw_als_ltr329_stop(this->getBoard());
-    }
-}
-
-
-
-
 
 void MetawearWrapper::onServiceDiscovered(const QBluetoothUuid &newService) {
   QString uuid = newService.toString();
@@ -354,49 +347,70 @@ void MetawearWrapper::metwareIntialize() {
             mbl_mw_memory_free((void *)dev_info);
             qDebug() << "model = " << mbl_mw_metawearboard_get_model(board);
 
-            //subscribe batter handler
-            auto battery_signal = mbl_mw_settings_get_battery_state_data_signal(wrapper->getBoard());
-            mbl_mw_datasignal_subscribe(battery_signal, wrapper, [](void* context, const MblMwData* data) -> void {
-                MetawearWrapper* wrapper = (MetawearWrapper*)context;
-                auto state = (MblMwBatteryState*) data->value;
-                emit wrapper->onBatteryPercentage(state->charge);
-                emit wrapper->onVoltage(state->voltage);
-            });
+            // subscribe batter handler
+            auto battery_signal = mbl_mw_settings_get_battery_state_data_signal(
+                wrapper->getBoard());
+            mbl_mw_datasignal_subscribe(
+                battery_signal, wrapper,
+                [](void *context, const MblMwData *data) -> void {
+                  MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                  auto state = (MblMwBatteryState *)data->value;
+                  emit wrapper->onBatteryPercentage(state->charge);
+                  emit wrapper->onVoltage(state->voltage);
+                });
 
-            //subscribe to acceleration handler
-            auto acc_signal = mbl_mw_acc_get_acceleration_data_signal(wrapper->getBoard());
-            mbl_mw_datasignal_subscribe(acc_signal, wrapper , [](void *context, const MblMwData *data) -> void {
-                MetawearWrapper* wrapper = (MetawearWrapper*)context;
-                auto acceleration = (MblMwCartesianFloat *)data->value;
-                emit wrapper->onAcceleration(data->epoch,acceleration->x,acceleration->y,acceleration->z);
-                emit wrapper->onEpoch(data->epoch);
-            });
+            // subscribe to acceleration handler
+            auto acc_signal =
+                mbl_mw_acc_get_acceleration_data_signal(wrapper->getBoard());
+            mbl_mw_datasignal_subscribe(
+                acc_signal, wrapper,
+                [](void *context, const MblMwData *data) -> void {
+                  MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                  auto acceleration = (MblMwCartesianFloat *)data->value;
+                  emit wrapper->onAcceleration(data->epoch, acceleration->x,
+                                               acceleration->y,
+                                               acceleration->z);
+                  emit wrapper->onEpoch(data->epoch);
+                });
 
-            //subscribe to ambient handler
-            auto ambientLightSignal = mbl_mw_als_ltr329_get_illuminance_data_signal(wrapper->getBoard());
-            mbl_mw_datasignal_subscribe(ambientLightSignal,wrapper,[](void *context,const MblMwData*data)-> void{
-                MetawearWrapper* wrapper = (MetawearWrapper*)context;
-                emit wrapper->onAmbientLight(data->epoch,*((uint32_t*) data->value));
-                emit wrapper->onEpoch(data->epoch);
-            });
+            // subscribe to ambient handler
+            auto ambientLightSignal =
+                mbl_mw_als_ltr329_get_illuminance_data_signal(
+                    wrapper->getBoard());
+            mbl_mw_datasignal_subscribe(
+                ambientLightSignal, wrapper,
+                [](void *context, const MblMwData *data) -> void {
+                  MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                  emit wrapper->onAmbientLight(data->epoch,
+                                               *((uint32_t *)data->value));
+                  emit wrapper->onEpoch(data->epoch);
+                });
 
-            //subscribe to gyro handler
-            auto gyroSignal = mbl_mw_gyro_bmi160_get_packed_rotation_data_signal(wrapper->getBoard());
-            mbl_mw_datasignal_subscribe(gyroSignal,wrapper, [](void *context,const MblMwData*data)-> void{
-                MetawearWrapper* wrapper = (MetawearWrapper*)context;
-                auto rotRate = (MblMwCartesianFloat*)data->value;
-                emit wrapper->onGyro(data->epoch,rotRate ->x,rotRate ->y,rotRate->z);
-                emit wrapper->onEpoch(data->epoch);
-            });
+            // subscribe to gyro handler
+            auto gyroSignal =
+                mbl_mw_gyro_bmi160_get_packed_rotation_data_signal(
+                    wrapper->getBoard());
+            mbl_mw_datasignal_subscribe(
+                gyroSignal, wrapper,
+                [](void *context, const MblMwData *data) -> void {
+                  MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                  auto rotRate = (MblMwCartesianFloat *)data->value;
+                  emit wrapper->onGyro(data->epoch, rotRate->x, rotRate->y,
+                                       rotRate->z);
+                  emit wrapper->onEpoch(data->epoch);
+                });
 
-            auto magnetometerSignal = mbl_mw_mag_bmm150_get_b_field_data_signal(wrapper->getBoard());
-            mbl_mw_datasignal_subscribe(magnetometerSignal,wrapper,[](void *context,const MblMwData*data)-> void{
-                MetawearWrapper* wrapper = (MetawearWrapper*)context;
-                 auto bfield = (MblMwCartesianFloat*) data->value;
-                 emit wrapper->onMagnetometer(data->epoch,bfield->x,bfield->y,bfield->z);
-                 emit wrapper->onEpoch(data->epoch);
-            });
-
+            auto magnetometerSignal =
+                mbl_mw_mag_bmm150_get_b_field_data_signal(wrapper->getBoard());
+            mbl_mw_datasignal_subscribe(
+                magnetometerSignal, wrapper,
+                [](void *context, const MblMwData *data) -> void {
+                  MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                  auto bfield = (MblMwCartesianFloat *)data->value;
+                  emit wrapper->onMagnetometer(data->epoch, bfield->x,
+                                               bfield->y, bfield->z);
+                  emit wrapper->onEpoch(data->epoch);
+                });
 
             emit wrapper->metawareInitialized();
           } else {
@@ -407,8 +421,6 @@ void MetawearWrapper::metwareIntialize() {
     this->m_isMetawareReady = true;
   }
 }
-
-
 
 void MetawearWrapper::onConnected() {
   qDebug() << "Controller conected. Search services..";
@@ -492,7 +504,7 @@ void MetawearWrapper::onCharacteristicError(QLowEnergyService::ServiceError e) {
     qWarning() << "DescriptorWriteError";
     break;
   case QLowEnergyService::ServiceError::NoError:
-      break;
+    break;
   }
 }
 
@@ -503,4 +515,3 @@ MetawearWrapper::~MetawearWrapper() {}
 QLowEnergyController *MetawearWrapper::getController() {
   return this->m_controller;
 }
-
