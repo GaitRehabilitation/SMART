@@ -7,7 +7,6 @@ namespace Ui {
 class MainWindow;
 }
 
-QT_FORWARD_DECLARE_CLASS(DeviceWizard)
 QT_FORWARD_DECLARE_CLASS(QFileDialog)
 
 class MainWindow : public QMainWindow {

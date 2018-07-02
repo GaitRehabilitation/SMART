@@ -1,5 +1,4 @@
 #include "forms/mainwindow.h"
-#include "gui/device_wizard/devicewizard.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
