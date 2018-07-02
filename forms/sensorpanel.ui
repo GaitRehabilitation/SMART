@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>916</width>
-    <height>226</height>
+    <height>273</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -90,6 +90,19 @@
       </property>
       <item>
        <widget class="QCustomPlot" name="plot" native="true"/>
+      </item>
+      <item>
+       <widget class="QSlider" name="xScaleSlider">
+        <property name="minimum">
+         <number>1000</number>
+        </property>
+        <property name="maximum">
+         <number>5000</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -18,6 +18,7 @@ FORMS += forms/mainwindow.ui \
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include(3rdparty/mbientlab.pro)
+include(3rdparty/qmsgpack/qmsgpack.pri)
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -25,14 +26,14 @@ include(3rdparty/mbientlab.pro)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    qcustomplot.cpp \
-    main.cpp \
+    common/qcustomplot.cpp \
+    common/main.cpp \
     forms/mainwindow.cpp \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
-    metawearwrapper.cpp \
+    common/metawearwrapper.cpp \
     forms/metawearconfig.cpp \
-    util.cpp \
+    common/util.cpp \
     forms/sessionentry.cpp
 
 RESOURCES += qml.qrc
@@ -49,12 +50,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    qcustomplot.h \
+    common/qcustomplot.h \
     forms/mainwindow.h \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
-    metawearwrapper.h \
+    common/metawearwrapper.h \
     forms/metawearconfig.h \
-    util.h \
+    common/util.h \
     forms/sessionentry.h
 
