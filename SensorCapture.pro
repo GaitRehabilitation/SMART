@@ -26,7 +26,7 @@ include(3rdparty/qmsgpack/qmsgpack.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    common/qcustomplot.cpp \
+    qcustomplot.cpp \
     common/main.cpp \
     forms/mainwindow.cpp \
     forms/deviceselectdialog.cpp \
@@ -50,7 +50,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    common/qcustomplot.h \
+    qcustomplot.h \
     forms/mainwindow.h \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \

@@ -5,7 +5,7 @@
 #include "metawear/core/metawearboard.h"
 #include "metawear/core/types.h"
 #include "metawear/sensor/accelerometer.h"
-#include "metawearwrapper.h"
+#include "common/metawearwrapper.h"
 
 #include <QSplineSeries>
 #include <QTimer>
@@ -13,13 +13,9 @@
 #include <QtCharts/QValueAxis>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
-
-#include <QtCharts/QChart>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-
-#include "xyseriesstream.h"
 #include <QGraphicsLayout>
+#include <QSplineSeries>
+#include "qcustomplot.h"
 
 
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device,QWidget *parent)
@@ -111,7 +107,6 @@ void SensorPanel::setOffset(qint64 offset)
 }
 
 void SensorPanel::onMetawareInitialized() {
-  QSplineSeries* series = new QSplineSeries(this);
 
   this->ui->configButton->setEnabled(true);
   settingUpdateTimer->start(60000);
