@@ -14,11 +14,7 @@ public:
     explicit MetawearConfig(QWidget *parent = 0);
     ~MetawearConfig();
 
-    double getMagnetometereSampleRate();
-    double getGyroscopeSampleRate();
     double getAcceleromterSampleRate();
-    double getAmbientLightSampleRate();
-    double getPressureSampleRate();
 
     bool isMagnetometerActive();
     bool isGyroscopeActive();
@@ -28,11 +24,7 @@ public:
 
 
 public slots:
-    void setMagnetometereSampleRate(double);
-    void setGyroscopeSampleRate(double);
     void setAcceleromterSampleRate(double);
-    void setAmbientLightSampleRate(double);
-    void setPressureSampleRate(double);
 signals:
 
 private:

@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>device.qml</file>
+        <file>icons/history-solid.svg</file>
+        <file>icons/plus-solid.svg</file>
+        <file>icons/download-solid.svg</file>
     </qresource>
 </RCC>

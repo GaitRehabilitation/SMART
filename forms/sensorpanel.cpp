@@ -25,12 +25,22 @@
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device,QWidget *parent)
     : QWidget(parent),
       ui(new Ui::SensorPanel),
-      metwareConfig(new MetawearConfig(this)),
+      m_metawearConfig(new MetawearConfig(this)),
       settingUpdateTimer(new QTimer(this)),
       m_currentDevice(device),
-      m_wrapper(new MetawearWrapper(device,this)){
-
+      m_wrapper(new MetawearWrapper(device,this))
+{
     ui->setupUi(this);
+
+    connect(this->m_wrapper,SIGNAL(onMagnetometer(qint64,float,float,float)),this,SIGNAL(onMagnetometer(qint64,float,float,float)));
+    connect(this->m_wrapper,SIGNAL(onGyro(qint64,float,float,float)),this,SIGNAL(onGyro(qint64,float,float,float)));
+    connect(this->m_wrapper,SIGNAL(onAcceleration(qint64,float,float,float)),this,SIGNAL(onAcceleration(qint64,float,float,float)));
+    connect(this->m_wrapper,SIGNAL(onAmbientLight(qint64,qint32)),this,SIGNAL(onAmbientLight(qint64,qint32)));
+
+    connect(this->m_wrapper,SIGNAL(onEpoch(qint64)),this,SIGNAL(onEpoch(qint64)));
+
+    connect(this->m_wrapper,SIGNAL(onVoltage(quint16)),this,SIGNAL(onVoltage(quint16)));
+    connect(this->m_wrapper,SIGNAL(onBatteryPercentage(qint8)),this,SIGNAL(onBatteryPercentage(qint8)));
 
     QCPGraph* xgraph = ui->plot->addGraph();
     QCPGraph* ygraph = ui->plot->addGraph();
@@ -67,24 +77,47 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device,QWidget *parent)
         this->m_wrapper->readBatteryStatus();
     });
 
-
     connect(this->m_wrapper,&MetawearWrapper::onEpoch,this,[this](qint64 epoch){
         this->ui->plot->xAxis->setRange(epoch,10000,Qt::AlignRight);
+        for(int x = 0; x< this->ui->plot->graphCount(); ++x){
+            QCPGraph* graph =  this->ui->plot->graph(x);
+            graph->data()->removeBefore(epoch - 50000);
+        }
         this->ui->plot->replot();
     });
 
-}
+    this->ui->configButton->setEnabled(false);
+    connect(this->ui->configButton,&QPushButton::clicked,[=](){
+        m_metawearConfig->show();
+    });
 
+    connect(this->m_metawearConfig,&MetawearConfig::accepted,[=](){
+        if(this->m_metawearConfig->isAcceleromterActive())
+            this->m_wrapper->setAccelerationSamplerate(this->m_metawearConfig->getAcceleromterSampleRate());
+        this->m_wrapper->setAccelerationCapture(this->m_metawearConfig->isAcceleromterActive());
+        this->m_wrapper->setAmbientLightCapture(this->m_metawearConfig->isAmbientLightActive());
+        this->m_wrapper->setGyroCapture(this->m_metawearConfig->isGyroscopeActive());
+        this->m_wrapper->setMagnetometerCapture(this->m_metawearConfig->isMagnetometerActive());
+        this->m_wrapper->setBarometerCapture(this->m_metawearConfig->isPressureActive());
+    });
+}
 
 
 void SensorPanel::setName(QString name) { ui->sensorName->setText(name); }
 
+void SensorPanel::setOffset(qint64 offset)
+{
+
+}
+
 void SensorPanel::onMetawareInitialized() {
   QSplineSeries* series = new QSplineSeries(this);
-  this->m_wrapper->enableAcceleration();
 
+  this->ui->configButton->setEnabled(true);
   settingUpdateTimer->start(60000);
   this->m_wrapper->readBatteryStatus();
 }
+
+
 
 SensorPanel::~SensorPanel() { delete ui; }

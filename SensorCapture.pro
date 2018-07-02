@@ -8,7 +8,8 @@ CONFIG += c++11
 FORMS += forms/mainwindow.ui \
     forms/deviceselectdialog.ui \
     forms/sensorpanel.ui \
-    forms/metawearconfig.ui
+    forms/metawearconfig.ui \
+    forms/sessionentry.ui
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -31,10 +32,10 @@ SOURCES += \
     forms/sensorpanel.cpp \
     metawearwrapper.cpp \
     forms/metawearconfig.cpp \
-    util.cpp
+    util.cpp \
+    forms/sessionentry.cpp
 
-RESOURCES += qml.qrc \
-    icons.qrc
+RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -54,5 +55,6 @@ HEADERS += \
     forms/sensorpanel.h \
     metawearwrapper.h \
     forms/metawearconfig.h \
-    util.h
+    util.h \
+    forms/sessionentry.h
 

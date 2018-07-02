@@ -12,8 +12,15 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   ui->save->setDisabled(true);
 
-  connect(ui->actionAddDevice, SIGNAL(triggered()), this,
-          SLOT(deviceAddWizard()));
+  connect(ui->actionAddDevice, SIGNAL(triggered()), this, SLOT(deviceAddWizard()));
+  connect(ui->actionCapture,&QAction::triggered,[=](){
+      this->ui->pages->setCurrentWidget(this->ui->Capture);
+  });
+
+  connect(ui->actionSessions,&QAction::triggered,[=](){
+      this->ui->pages->setCurrentWidget(this->ui->Sessions);
+  });
+
 }
 
 void MainWindow::deviceAddWizard() {
@@ -29,12 +36,10 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
   QListWidgetItem *listWidgetItem = new QListWidgetItem(ui->sensorList);
 
   ui->sensorList->addItem(listWidgetItem);
-
   SensorPanel *sensorPanel = new SensorPanel(info,this);
 
   // make the widget the same size as the panel
   listWidgetItem->setSizeHint(sensorPanel->sizeHint());
-
   ui->sensorList->setItemWidget(listWidgetItem, sensorPanel);
 }
 

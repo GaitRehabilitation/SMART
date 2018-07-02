@@ -40,9 +40,20 @@ public:
     int m_readyCharacteristicCount;
     bool m_isMetawareReady;
 
-    void enableAcceleration();
-    void readBatteryStatus();
 public slots:
+
+    void setAccelerationSamplerate(float);
+    void setAmbientLightSamplerate(float);
+    void setGyroSamplerate(float);
+    void setMagnetometerRate(float);
+
+    void setAccelerationCapture(bool);
+    void setAmbientLightCapture(bool);
+    void setGyroCapture(bool);
+    void setMagnetometerCapture(bool);
+    void setBarometerCapture(bool);
+
+    void readBatteryStatus();
 
 private slots:
     //QLowEnergyController
@@ -54,21 +65,25 @@ private slots:
 
    void onCharacteristicRead(QLowEnergyCharacteristic,QByteArray);
    void onCharacteristicNotifications(QLowEnergyCharacteristic,QByteArray);
-
    void onControllerError(QLowEnergyController::Error);
-   void onStateChange(QLowEnergyController::ControllerState state);
-
    void onCharacteristicError(QLowEnergyService::ServiceError);
+
+   void onStateChange(QLowEnergyController::ControllerState state);
 
    void metwareIntialize();
 
 signals:
+    void connected();
+    void disconnected();
+
     double onBatteryPercentage(qint8);
     double onVoltage(quint16);
 
-    void connected();
-    void disconnected();
-    void onAcceleration(int64_t,float,float,float);
+    void onMagnetometer(qint64,float,float,float);
+    void onGyro(qint64, float, float, float);
+    void onAcceleration(qint64,float,float,float);
+    void onAmbientLight(qint64,qint32);
+
     void onEpoch(qint64);
 
     void metawareInitialized();

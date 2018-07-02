@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>817</width>
-    <height>582</height>
+    <width>829</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,79 +16,107 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QListWidget" name="sensorList"/>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetMinimumSize</enum>
+     <widget class="QStackedWidget" name="pages">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <item>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0" colspan="2">
-         <widget class="QPushButton" name="playButton">
-          <property name="text">
-           <string>Play</string>
+      <widget class="QWidget" name="Capture">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QListWidget" name="sensorList"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinimumSize</enum>
           </property>
-         </widget>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="playButton">
+              <property name="text">
+               <string>Play</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="triggerTime"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="triggerButton">
+              <property name="text">
+               <string>Trigger</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QPushButton" name="stopButton">
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTextEdit" name="description">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Description</string>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="triggerTime"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="triggerButton">
+        <item>
+         <widget class="QPushButton" name="save">
           <property name="text">
-           <string>Trigger</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QPushButton" name="stopButton">
-          <property name="text">
-           <string>Stop</string>
+           <string>save</string>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QTextEdit" name="description">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Ignored">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Description</string>
-        </property>
-        <property name="statusTip">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QPushButton" name="save">
-      <property name="text">
-       <string>save</string>
-      </property>
+      </widget>
+      <widget class="QWidget" name="Sessions"/>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>817</width>
-     <height>30</height>
-    </rect>
+  <widget class="QToolBar" name="toolBar">
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <italic>false</italic>
+     <underline>false</underline>
+     <strikeout>false</strikeout>
+    </font>
    </property>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="accessibleDescription">
+    <string/>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -96,29 +124,19 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddDevice"/>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
+   <addaction name="actionCapture"/>
+   <addaction name="actionSessions"/>
   </widget>
   <action name="actionAddDevice">
    <property name="icon">
-    <iconset resource="../icons.qrc">
-     <normaloff>:/icons/plus.svg</normaloff>:/icons/plus.svg</iconset>
+    <iconset resource="../qml.qrc">
+     <normaloff>:/icons/plus-solid.svg</normaloff>:/icons/plus-solid.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Add</string>
+    <string>Add Device</string>
    </property>
    <property name="iconText">
-    <string>Add</string>
+    <string>Add Device</string>
    </property>
    <property name="toolTip">
     <string>Add Device</string>
@@ -138,10 +156,28 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
+  <action name="actionSessions">
+   <property name="icon">
+    <iconset resource="../qml.qrc">
+     <normaloff>:/icons/history-solid.svg</normaloff>:/icons/history-solid.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Sessions</string>
+   </property>
+  </action>
+  <action name="actionCapture">
+   <property name="icon">
+    <iconset resource="../qml.qrc">
+     <normaloff>:/icons/download-solid.svg</normaloff>:/icons/download-solid.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Capture</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../qml.qrc"/>
  </resources>
  <connections>
   <connection>
