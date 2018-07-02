@@ -33,6 +33,7 @@ private slots:
 public slots:
     void setName(QString);
     void setOffset(qint64 offset);
+    void updateConfig();
 signals:
    void onConnected();
    void onBluetoothError(QLowEnergyController::Error e);
