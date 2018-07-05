@@ -34,7 +34,8 @@ SOURCES += \
     common/metawearwrapper.cpp \
     forms/metawearconfig.cpp \
     common/util.cpp \
-    forms/sessionentry.cpp
+    forms/sessionentry.cpp \
+    common/datacapture.cpp
 
 RESOURCES += qml.qrc
 
@@ -57,5 +58,6 @@ HEADERS += \
     common/metawearwrapper.h \
     forms/metawearconfig.h \
     common/util.h \
-    forms/sessionentry.h
+    forms/sessionentry.h \
+    common/datacapture.h
 

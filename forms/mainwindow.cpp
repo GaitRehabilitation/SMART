@@ -19,6 +19,9 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->actionSessions, &QAction::triggered,
           [=]() { this->ui->pages->setCurrentWidget(this->ui->Sessions); });
+
+  connect(ui->captureButton,&QAbstractButton::clicked,this,&MainWindow::startCapture);
+
 }
 
 void MainWindow::deviceAddWizard() {
@@ -39,6 +42,16 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
   // make the widget the same size as the panel
   listWidgetItem->setSizeHint(sensorPanel->sizeHint());
   ui->sensorList->setItemWidget(listWidgetItem, sensorPanel);
+}
+
+void MainWindow::startCapture()
+{
+
+}
+
+void MainWindow::stopCapture()
+{
+
 }
 
 MainWindow::~MainWindow() { delete ui; }

@@ -16,6 +16,8 @@ public:
   virtual ~MainWindow();
 public slots:
   void registerDevice(const QBluetoothDeviceInfo &info);
+  void startCapture();
+  void stopCapture();
 private slots:
   void deviceAddWizard();
 
