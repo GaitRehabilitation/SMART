@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(3rdparty/mbientlab.pro)
 include(3rdparty/qmsgpack/qmsgpack.pri)
+#include(3rdparty/quazip/quazip.pri)
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -35,7 +36,8 @@ SOURCES += \
     forms/metawearconfig.cpp \
     common/util.cpp \
     forms/sessionentry.cpp \
-    common/datacapture.cpp
+    common/datasink.cpp \
+    common/databundle.cpp
 
 RESOURCES += qml.qrc
 
@@ -59,5 +61,6 @@ HEADERS += \
     forms/metawearconfig.h \
     common/util.h \
     forms/sessionentry.h \
-    common/datacapture.h
+    common/datasink.h \
+    common/databundle.h
 

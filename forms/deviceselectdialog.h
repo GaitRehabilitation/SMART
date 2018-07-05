@@ -7,9 +7,9 @@
 #include <QMap>
 #include <QWizardPage>
 
-QT_FORWARD_DECLARE_CLASS(QBluetoothDeviceDiscoveryAgent)
-QT_FORWARD_DECLARE_CLASS(QBluetoothLocalDevice)
-QT_FORWARD_DECLARE_CLASS(QListWidgetItem)
+class QBluetoothDeviceDiscoveryAgent;
+class QBluetoothLocalDevice;
+class QListWidgetItem;
 
 namespace Ui {
 class DeviceSelectDialog;

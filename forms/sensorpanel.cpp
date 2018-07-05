@@ -108,18 +108,14 @@ void SensorPanel::setOffset(qint64 offset) {
 }
 
 void SensorPanel::updateConfig() {
-  if (this->m_metawearConfig->isAcceleromterActive())
-    this->m_wrapper->setAccelerationSamplerate(
-        this->m_metawearConfig->getAcceleromterSampleRate());
-  this->m_wrapper->setAccelerationCapture(
-      this->m_metawearConfig->isAcceleromterActive());
-  this->m_wrapper->setAmbientLightCapture(
-      this->m_metawearConfig->isAmbientLightActive());
+  if (this->m_metawearConfig->isAcceleromterActive()){
+    this->m_wrapper->setAccelerationSamplerate(this->m_metawearConfig->getAcceleromterSampleRate());
+  }
+  this->m_wrapper->setAccelerationCapture(this->m_metawearConfig->isAcceleromterActive());
+  this->m_wrapper->setAmbientLightCapture(this->m_metawearConfig->isAmbientLightActive());
   this->m_wrapper->setGyroCapture(this->m_metawearConfig->isGyroscopeActive());
-  this->m_wrapper->setMagnetometerCapture(
-      this->m_metawearConfig->isMagnetometerActive());
-  this->m_wrapper->setBarometerCapture(
-      this->m_metawearConfig->isPressureActive());
+  this->m_wrapper->setMagnetometerCapture(this->m_metawearConfig->isMagnetometerActive());
+  this->m_wrapper->setBarometerCapture(this->m_metawearConfig->isPressureActive());
 }
 
 void SensorPanel::onMetawareInitialized() {

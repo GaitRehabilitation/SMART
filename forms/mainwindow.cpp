@@ -20,8 +20,10 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->actionSessions, &QAction::triggered,
           [=]() { this->ui->pages->setCurrentWidget(this->ui->Sessions); });
 
-  connect(ui->captureButton,&QAbstractButton::clicked,this,&MainWindow::startCapture);
-
+  connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
+  connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
+  connect(ui->triggerButton,&QPushButton::clicked,this,[=](){
+  });
 }
 
 void MainWindow::deviceAddWizard() {

@@ -6,9 +6,9 @@
 #include <QLowEnergyController>
 #include <QWidget>
 
-QT_FORWARD_DECLARE_CLASS(MetawearWrapper)
-QT_FORWARD_DECLARE_CLASS(MblMwMetaWearBoard)
-QT_FORWARD_DECLARE_CLASS(QTimer)
+class MetawearWrapper;
+class MblMwMetaWearBoard;
+class QTimer;
 
 namespace Ui {
 class SensorPanel;
