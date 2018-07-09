@@ -40,15 +40,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
   connect(this->m_wrapper, SIGNAL(onBatteryPercentage(qint8)), this,
           SIGNAL(onBatteryPercentage(qint8)));
 
-  QCPGraph *xgraph = ui->plot->addGraph();
-  QCPGraph *ygraph = ui->plot->addGraph();
-  QCPGraph *zgraph = ui->plot->addGraph();
-  connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
-          [=](int64_t epoch, float x, float y, float z) {
-            xgraph->addData(epoch, x);
-            ygraph->addData(epoch, y);
-            zgraph->addData(epoch, z);
-          });
+  this->registerPlotHandlers();
 
   connect(this->m_wrapper, SIGNAL(metawareInitialized()), this,
           SLOT(onMetawareInitialized()));
@@ -98,6 +90,22 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
   connect(this->m_metawearConfig, SIGNAL(accepted()), SLOT(updateConfig()));
 }
 
+void SensorPanel::registerPlotHandlers()
+{
+
+    QCPGraph *xgraph = ui->plot->addGraph();
+    QCPGraph *ygraph = ui->plot->addGraph();
+    QCPGraph *zgraph = ui->plot->addGraph();
+    connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
+        [=](int64_t epoch, float x, float y, float z) {
+          xgraph->addData(epoch, x);
+          ygraph->addData(epoch, y);
+          zgraph->addData(epoch, z);
+        });
+
+
+}
+
 void SensorPanel::setName(QString name) { ui->sensorName->setText(name); }
 
 void SensorPanel::setOffset(qint64 offset) {
@@ -116,6 +124,17 @@ void SensorPanel::updateConfig() {
   this->m_wrapper->setGyroCapture(this->m_metawearConfig->isGyroscopeActive());
   this->m_wrapper->setMagnetometerCapture(this->m_metawearConfig->isMagnetometerActive());
   this->m_wrapper->setBarometerCapture(this->m_metawearConfig->isPressureActive());
+
+}
+
+void SensorPanel::startCapture()
+{
+
+}
+
+void SensorPanel::stopCapture()
+{
+
 }
 
 void SensorPanel::onMetawareInitialized() {
@@ -126,3 +145,10 @@ void SensorPanel::onMetawareInitialized() {
 }
 
 SensorPanel::~SensorPanel() { delete ui; }
+
+
+
+void SensorPanel::registerSignalHandlers()
+{
+
+}

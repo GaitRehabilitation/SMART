@@ -28,12 +28,16 @@ private:
   MetawearConfig *metwareConfig;
   QTimer *settingUpdateTimer;
   MetawearConfig *m_metawearConfig;
+
+  void registerSignalHandlers();
 private slots:
   void onMetawareInitialized();
 public slots:
   void setName(QString);
   void setOffset(qint64 offset);
   void updateConfig();
+  void startCapture();
+  void stopCapture();
 signals:
   void onConnected();
   void onBluetoothError(QLowEnergyController::Error e);

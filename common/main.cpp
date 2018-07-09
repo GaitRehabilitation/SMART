@@ -1,5 +1,6 @@
 #include "forms/mainwindow.h"
 #include <QApplication>
+#include <QLoggingCategory>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
