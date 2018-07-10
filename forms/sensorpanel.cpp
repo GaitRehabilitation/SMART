@@ -22,7 +22,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
       m_metawearConfig(new MetawearConfig(this)),
       settingUpdateTimer(new QTimer(this)), m_currentDevice(device),
-      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0){
+      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
   ui->setupUi(this);
 
   connect(this->m_wrapper, SIGNAL(onMagnetometer(qint64, float, float, float)),
@@ -42,6 +42,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
           SIGNAL(onBatteryPercentage(qint8)));
 
   this->registerPlotHandlers();
+  this->registerDataHandlers();
 
   connect(this->m_wrapper, SIGNAL(metawareInitialized()), this,
           SLOT(onMetawareInitialized()));
@@ -56,9 +57,6 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
   connect(this->m_wrapper, &MetawearWrapper::onBatteryPercentage,
           [=](qint8 amount) { this->ui->battery->setValue(amount); });
 
-  connect(this->m_wrapper, &MetawearWrapper::onVoltage, [=](qint16 value) {
-    this->ui->voltage->setText(QString("%1V").arg(((double)value) * .001));
-  });
 
   // read the battery status every minute
   connect(settingUpdateTimer, &QTimer::timeout,
@@ -66,9 +64,11 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
   connect(this->m_wrapper, &MetawearWrapper::onEpoch, this,
           [this](qint64 epoch) {
+            if(epoch < m_laststEpoch)
+                return;
+            m_laststEpoch = epoch;
 
             qint64 xpos = epoch - m_plotoffset;
-            this->ui->plot->rescaleAxes();
             this->ui->plot->xAxis->setRange(
                 xpos, this->ui->xScaleSlider->value(), Qt::AlignRight);
             double finalMax = 0;
@@ -80,13 +80,6 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             }
             this->ui->plot->replot();
           });
-
-//  this->ui->configButton->setEnabled(false);
-//  connect(this->ui->configButton, &QPushButton::clicked,
-//          [=]() { m_metawearConfig->show(); });
-
-//  connect(this->m_metawearConfig, SIGNAL(accepted()), SLOT(updateConfig()));
-
 
 }
 
@@ -107,33 +100,6 @@ void SensorPanel::registerPlotHandlers()
           ygraphAcc->addData(epoch - m_plotoffset, y);
           zgraphAcc->addData(epoch - m_plotoffset, z);
         });
-
-
-//    QCPGraph * xgraphMag = ui->plot->addGraph();
-//    xgraphMag->setName("X Mag");
-//    QCPGraph * ygraphMag = ui->plot->addGraph();
-//    ygraphMag->setName("Y Mag");
-//    QCPGraph * zgraphMag = ui->plot->addGraph();
-//    zgraphMag->setName("Z Mag");
-//    connect(this->m_wrapper,&MetawearWrapper::onMagnetometer,[=](qint64 epoch, float x, float y, float z){
-//        xgraphMag->addData(epoch - m_plotoffset, x);
-//        ygraphMag->addData(epoch - m_plotoffset, y);
-//        zgraphMag->addData(epoch - m_plotoffset, z);
-//    });
-
-//    QCPGraph * xgraphGyro = ui->plot->addGraph();
-//    xgraphGyro->setName("X gyro");
-//    QCPGraph * ygraphGyro = ui->plot->addGraph();
-//    ygraphGyro->setName("Y gyro");
-//    QCPGraph * zgraphGyro = ui->plot->addGraph();
-//    zgraphGyro->setName("Z gyro");
-//    connect(this->m_wrapper,&MetawearWrapper::onGyro,[=](qint64 epoch, float x, float y, float z){
-//        xgraphGyro->addData(epoch - m_plotoffset, x );
-//        ygraphGyro->addData(epoch - m_plotoffset, y);
-//        zgraphGyro->addData(epoch - m_plotoffset, z);
-//    });
-
-//    ui->plot->axisRect()->setupFullAxesBox();
 }
 
 void SensorPanel::registerDataHandlers()
@@ -154,7 +120,7 @@ void SensorPanel::registerDataHandlers()
                         if(!exist){
                            outStream << "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
                         }
-                        outStream << epoch << ','<< x << ','<< y << ','<< z;
+                        outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
                     }
                     file.close();
             }
@@ -168,20 +134,17 @@ void SensorPanel::setOffset(qint64 offset) {
  m_plotoffset = offset;
 }
 
+qint64 SensorPanel::getLatestEpoch()
+{
+    return m_laststEpoch;
+}
+
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
     m_temporaryDir = dir;
 }
 
-//void SensorPanel::updateConfig() {
-//  if (this->m_metawearConfig->isAcceleromterActive()){
-//    this->m_wrapper->setAccelerationSamplerate(this->m_metawearConfig->getAcceleromterSampleRate());
-//  }
-//  this->m_wrapper->setAccelerationCapture(this->m_metawearConfig->isAcceleromterActive());
-//  this->m_wrapper->setGyroCapture(this->m_metawearConfig->isGyroscopeActive());
-//  this->m_wrapper->setMagnetometerCapture(this->m_metawearConfig->isMagnetometerActive());
-//  this->clearPlots();
-//}
+
 
 void SensorPanel::stopCapture()
 {
@@ -200,8 +163,7 @@ void SensorPanel::clearPlots()
 
 
 void SensorPanel::onMetawareInitialized() {
-//  this->ui->configButton->setEnabled(true);
-//  this->updateConfig();
+  this->m_wrapper->setAccelerationCapture(true);
   this->m_wrapper->setAccelerationSamplerate(100);
   settingUpdateTimer->start(60000);
   this->m_wrapper->readBatteryStatus();

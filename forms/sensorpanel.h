@@ -31,6 +31,7 @@ private:
   QTimer *settingUpdateTimer;
   MetawearConfig *m_metawearConfig;
   qint64 m_plotoffset;
+  qint64 m_laststEpoch;
   DataBundle* m_bundle;
   QString m_dir;
   QTemporaryDir* m_temporaryDir;
@@ -42,7 +43,7 @@ private slots:
 public slots:
   void setName(QString);
   void setOffset(qint64 offset);
-//  void updateConfig();
+  qint64 getLatestEpoch();
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
   void clearPlots();

@@ -11,21 +11,25 @@
 #include "JlCompress.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),m_panels(),m_temporaryData(0) {
+    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
   ui->setupUi(this);
-  ui->save->setDisabled(true);
 
   connect(ui->actionAddDevice, SIGNAL(triggered()), this,
           SLOT(deviceAddWizard()));
-//  connect(ui->actionCapture, &QAction::triggered,
-//          [=]() { this->ui->pages->setCurrentWidget(this->ui->Capture); });
-
-//  connect(ui->actionSessions, JlCompress&QAction::triggered,
-//          [=]() { this->ui->pages->setCurrentWidget(this->ui->Sessions); });
-
   connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
   connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
+  m_triggerSingleShot.setSingleShot(true);
   connect(ui->triggerButton,&QPushButton::clicked,this,[=](){
+      m_triggerTime = this->ui->triggerTime->value();
+      m_triggerSingleShot.start(m_triggerTime * 1000);
+      m_updateTriggerTimer.start();
+      startCapture();
+  });
+
+  connect(&m_triggerSingleShot,SIGNAL(timeout()),this,SLOT(stopCapture()));
+
+  connect(&m_updateTriggerTimer,&QTimer::timeout,this,[=](){
+     this->ui->triggerTime->setValue(((float)m_triggerSingleShot.remainingTime())/1000.0);
   });
 }
 
@@ -38,31 +42,39 @@ void MainWindow::deviceAddWizard() {
 }
 
 void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
-  // created a new list widget
-  QListWidgetItem *listWidgetItem = new QListWidgetItem(ui->sensorList);
-
-  ui->sensorList->addItem(listWidgetItem);
-  SensorPanel *sensorPanel = new SensorPanel(info, this);
-
-  // make the widget the same size as the panel
-  listWidgetItem->setSizeHint(sensorPanel->sizeHint());
-  ui->sensorList->setItemWidget(listWidgetItem, sensorPanel);
+  ui->sensorContainer->addWidget(new SensorPanel(info,this));
 }
 
 void MainWindow::startCapture()
 {
-    if(!m_temporaryData){
-        delete m_temporaryData;
+    this->ui->captureButton->setEnabled(false);
+    this->ui->triggerButton->setEnabled(false);
+    this->ui->triggerTime->setEnabled(false);
+    this->ui->stopButton->setEnabled(true);
+
+
+    if(m_temporaryData){
+       delete(m_temporaryData);
         m_temporaryData = new QTemporaryDir();
     }
-    foreach (auto panel, m_panels) {
+    for(int x = 0; x < this->ui->sensorContainer->count();x++){
+        SensorPanel* panel = (SensorPanel*)this->ui->sensorContainer->itemAt(x);
+        panel->setOffset(panel->getLatestEpoch());
         panel->startCapture(m_temporaryData);
     }
 }
 
 void MainWindow::stopCapture()
 {
-    foreach (auto panel, m_panels) {
+    this->ui->captureButton->setEnabled(true);
+    this->ui->triggerButton->setEnabled(true);
+    this->ui->triggerTime->setEnabled(true);
+    this->ui->stopButton->setEnabled(false);
+    this->m_updateTriggerTimer.stop();
+    this->ui->triggerTime->setValue(m_triggerTime);
+
+    for(int x = 0; x < this->ui->sensorContainer->count();x++){
+        SensorPanel* panel = (SensorPanel*)this->ui->sensorContainer->itemAt(x);
         panel->stopCapture();
     }
 
@@ -70,15 +82,15 @@ void MainWindow::stopCapture()
     if (fileName.isEmpty())
            return;
      else {
-           QFile file(fileName);
-           if (!file.open(QIODevice::WriteOnly)) {
-               QMessageBox::information(this, tr("Unable to open file"),
-                   file.errorString());
-               return;
-           }
-
-//           QuaZip zip(file);
-
+//           QFile file(fileName);
+//           if (!file.open(QIODevice::WriteOnly)) {
+//               QMessageBox::information(this, tr("Unable to open file"),
+//                   file.errorString());
+//               return;
+//           }
+        if(!JlCompress::compressDir(fileName,m_temporaryData->path(),true)){
+            QMessageBox::information(this,tr("Error"),"Failed to save data.");
+        }
     }
 
 }
