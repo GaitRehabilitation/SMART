@@ -25,6 +25,8 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
       m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
   ui->setupUi(this);
 
+  settingUpdateTimer->setInterval(60000);
+
   connect(this->m_wrapper, SIGNAL(onMagnetometer(qint64, float, float, float)),
           this, SIGNAL(onMagnetometer(qint64, float, float, float)));
   connect(this->m_wrapper, SIGNAL(onGyro(qint64, float, float, float)), this,
@@ -58,7 +60,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
   timeTicker->setTimeFormat("%h:%m:%s");
   ui->plot->xAxis->setTicker(timeTicker);
   ui->plot->axisRect()->setupFullAxesBox();
-  ui->plot->yAxis->setRange(-4, 4);
+  ui->plot->yAxis->setRange(-2, 2);
 
   connect(this->m_wrapper, &MetawearWrapper::onBatteryPercentage,
           [=](qint8 amount) { this->ui->battery->setValue(amount); });
@@ -148,11 +150,13 @@ qint64 SensorPanel::getLatestEpoch()
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
     m_temporaryDir = dir;
+    settingUpdateTimer->stop();
 }
 
 void SensorPanel::stopCapture()
 {
     this->m_temporaryDir = nullptr;
+    settingUpdateTimer->start();
 }
 
 void SensorPanel::clearPlots()
@@ -165,10 +169,9 @@ void SensorPanel::clearPlots()
 
 
 void SensorPanel::onMetawareInitialized() {
-  this->m_wrapper->setAccelerationSamplerate(50);
+  this->m_wrapper->setAccelerationSamplerate(200);
   this->m_wrapper->setAccelerationCapture(true);
-//  settingUpdateTimer->start(60000);
-//  this->m_wrapper->readBatteryStatus();
+  this->m_wrapper->readBatteryStatus();
 }
 
 SensorPanel::~SensorPanel() { delete ui; }

@@ -359,7 +359,7 @@ void MetawearWrapper::metwareIntialize() {
 
             // subscribe to acceleration handler
             auto acc_signal =
-                mbl_mw_acc_get_acceleration_data_signal(wrapper->getBoard());
+                mbl_mw_acc_get_high_freq_acceleration_data_signal(wrapper->getBoard());
             mbl_mw_datasignal_subscribe(
                 acc_signal, wrapper,
                 [](void *context, const MblMwData *data) -> void {
