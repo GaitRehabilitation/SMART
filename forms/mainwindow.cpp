@@ -59,7 +59,7 @@ void MainWindow::startCapture()
         m_temporaryData = new QTemporaryDir();
     }
     for(int x = 0; x < this->ui->sensorContainer->count();x++){
-        SensorPanel* panel = (SensorPanel*)this->ui->sensorContainer->itemAt(x);
+        SensorPanel* panel = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x));
 //        panel->setOffset(panel->getLatestEpoch());
         panel->startCapture(m_temporaryData);
     }

@@ -72,7 +72,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
   connect(this->m_wrapper, &MetawearWrapper::onEpoch, this,
           [this](qint64 epoch) {
-            if(m_plotLock.tryLock(500)){
+            if(this->m_plotLock.tryLock(500)){
                     if(epoch < m_laststEpoch)
                         return;
                     m_laststEpoch = epoch;
@@ -87,7 +87,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
                       QCPGraph *graph = this->ui->plot->graph(x);
                       graph->data()->removeBefore(xpos - 50000);
                     }
-                    m_plotLock.unlock();
+                    this->m_plotLock.unlock();
                      this->ui->plot->replot();
       }
 
@@ -110,11 +110,11 @@ void SensorPanel::registerPlotHandlers()
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
         [=](int64_t epoch, float x, float y, float z) {
-             if(m_plotLock.tryLock()){
+             if(this->m_plotLock.tryLock()){
                 xgraphAcc->addData(epoch - m_plotoffset, x);
               ygraphAcc->addData(epoch - m_plotoffset, y);
               zgraphAcc->addData(epoch - m_plotoffset, z);
-              m_plotLock.unlock();
+              this->m_plotLock.unlock();
             }
         });
 }
@@ -174,12 +174,12 @@ void SensorPanel::stopCapture()
 
 void SensorPanel::clearPlots()
 {
-    m_plotLock.lock();
+    this->m_plotLock.lock();
     for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
       QCPGraph *graph = this->ui->plot->graph(x);
       graph->data()->clear();
     }
-    m_plotLock.unlock();
+    this->m_plotLock.unlock();
 
 }
 
