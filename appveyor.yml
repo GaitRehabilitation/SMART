@@ -1,0 +1,17 @@
+image: Visual Studio 2017
+branches:
+  only:
+    - master
+
+install:
+  - set QTDIR=C:\Qt\5.11.1\msvc2017_64
+  - set PATH=%PATH%;%QTDIR%\bin
+  
+before_build:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - git submodule init
+  - git submodule update
+
+build_script:
+  - qmake SensorCapture.pro
+  - cl.exe

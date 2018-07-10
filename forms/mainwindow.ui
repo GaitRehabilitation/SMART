@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Sensor Capture</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -33,7 +33,7 @@
              <x>0</x>
              <y>0</y>
              <width>791</width>
-             <height>444</height>
+             <height>438</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -113,6 +113,9 @@
             </property>
             <property name="statusTip">
              <string/>
+            </property>
+            <property name="placeholderText">
+             <string>Description</string>
             </property>
            </widget>
           </item>

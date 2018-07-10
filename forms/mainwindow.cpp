@@ -6,6 +6,7 @@
 #include "forms/sensorpanel.h"
 #include <QFileDialog>
 #include <QtDebug>
+#include <QTextEdit>
 #include <QListWidget>
 #include <QMessageBox>
 #include "JlCompress.h"
@@ -42,7 +43,16 @@ void MainWindow::deviceAddWizard() {
 }
 
 void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
-    SensorPanel* panel  =new SensorPanel(info,this);
+    SensorPanel* panel  = new SensorPanel(info,this);
+    connect(panel,&SensorPanel::onLatestEpoch,this,[=](qint64 epoch){
+        if(panel->getOffset() == 0){
+            for(int x = 0; x < this->ui->sensorContainer->count();x++){
+                SensorPanel* p = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
+                p->setOffset(p->getLatestEpoch());
+                p->clearPlots();
+            }
+        }
+    });
   ui->sensorContainer->addWidget(panel);
 }
 
@@ -52,7 +62,7 @@ void MainWindow::startCapture()
     this->ui->triggerButton->setEnabled(false);
     this->ui->triggerTime->setEnabled(false);
     this->ui->stopButton->setEnabled(true);
-
+    this->ui->description->setEnabled(false);
 
     if(m_temporaryData){
        delete(m_temporaryData);
@@ -71,6 +81,7 @@ void MainWindow::stopCapture()
     this->ui->triggerButton->setEnabled(true);
     this->ui->triggerTime->setEnabled(true);
     this->ui->stopButton->setEnabled(false);
+    this->ui->description->setEnabled(true);
     this->m_updateTriggerTimer.stop();
     this->ui->triggerTime->setValue(m_triggerTime);
 
@@ -78,16 +89,25 @@ void MainWindow::stopCapture()
         SensorPanel* panel = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
         panel->stopCapture();
     }
+    QFile descriptionFile(m_temporaryData->filePath("README"));
+    if(descriptionFile.open(QIODevice::ReadWrite)){
+        QTextStream stream(&descriptionFile);
+        stream << this->ui->description->toPlainText();
+    }
 
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Data"),"",tr("Zip (*.zip);;All Files (*)"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Data"),"",tr("All Files (*)"));
     if (fileName.isEmpty())
            return;
      else {
+        if(!fileName.endsWith(".zip")){
+            fileName.append(".zip");
+        }
         if(!JlCompress::compressDir(fileName,m_temporaryData->path(),true)){
             QMessageBox::information(this,tr("Error"),"Failed to save data.");
         }
     }
 
+    this->ui->description->clear();
 }
 
 MainWindow::~MainWindow() { delete ui; }

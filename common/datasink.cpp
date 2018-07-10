@@ -26,7 +26,7 @@ void DataSink::pushEntry(QList<QVariant>& data)
         if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
             QTextStream outStream(&file);
             if(!exist){
-               outStream << m_columns.join(', ') << '\n';
+                outStream << m_columns.join(', ') << '\n';
             }
             outStream << output << '\n';
         }

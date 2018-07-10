@@ -5,7 +5,12 @@ QT += charts
 QT += printsupport
 CONFIG += c++11
 
-LIBS += -Llibz -lz
+INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+unix {
+    LIBS += -Llibz -lz
+}
+
+
 
 FORMS += forms/mainwindow.ui \
     forms/deviceselectdialog.ui \
@@ -20,7 +25,6 @@ FORMS += forms/mainwindow.ui \
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include(3rdparty/mbientlab.pro)
-include(3rdparty/qmsgpack/qmsgpack.pri)
 include(3rdparty/quazip/quazip.pri)
 
 # You can also make your code fail to compile if you use deprecated APIs.

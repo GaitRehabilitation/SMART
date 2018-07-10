@@ -53,9 +53,13 @@ void DeviceSelectDialog::hostModeStateChanged(
 void DeviceSelectDialog::scanFinished() { ui->scan->setEnabled(true); }
 
 void DeviceSelectDialog::addDevice(const QBluetoothDeviceInfo &info) {
-  QString label =
+
+    if(info.name() != "MetaWear")
+        return;
+    QString label =
       QString("%1 %2").arg(info.address().toString()).arg(info.name());
   m_deviceInfo.insert(label, info);
+
 
   QList<QListWidgetItem *> items =
       ui->deviceList->findItems(label, Qt::MatchExactly);

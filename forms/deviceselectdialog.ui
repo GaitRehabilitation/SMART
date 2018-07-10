@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Select Device</string>
   </property>
   <property name="title" stdset="0">
    <string/>

@@ -40,10 +40,11 @@ private:
   void registerPlotHandlers();
   void registerDataHandlers();
 private slots:
-  void onMetawareInitialized();
+  void metawareInitialized();
 public slots:
   void setName(QString);
   void setOffset(qint64 offset);
+  qint64 getOffset();
   qint64 getLatestEpoch();
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
@@ -61,6 +62,8 @@ signals:
   void onGyro(qint64, float, float, float);
   void onAcceleration(qint64, float, float, float);
   void onAmbientLight(qint64, qint32);
+  void onMetawearInitilized();
+  void onLatestEpoch(qint64);
 
   void onEpoch(qint64);
 };
