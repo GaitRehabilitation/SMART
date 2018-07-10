@@ -29,16 +29,13 @@ private:
   MetawearWrapper *m_wrapper;
   Ui::SensorPanel *ui;
   QBluetoothDeviceInfo m_currentDevice;
-  MetawearConfig *metwareConfig;
-  QTimer *settingUpdateTimer;
   MetawearConfig *m_metawearConfig;
   qint64 m_plotoffset;
   qint64 m_laststEpoch;
-  DataBundle* m_bundle;
-  QString m_dir;
+  QTimer *settingUpdateTimer;
   QTemporaryDir* m_temporaryDir;
-  QMutex m_plot_lock;
-  QTimer m_plot_redrawTimer;
+  QMutex m_plotLock;
+  QMutex m_directoryLock;
 
   void registerPlotHandlers();
   void registerDataHandlers();

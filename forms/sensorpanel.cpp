@@ -22,10 +22,9 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
       m_metawearConfig(new MetawearConfig(this)),
       settingUpdateTimer(new QTimer(this)), m_currentDevice(device),
-      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0),m_plot_redrawTimer(){
+      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
   ui->setupUi(this);
 
-  settingUpdateTimer->setInterval(60000);
 
   connect(this->m_wrapper, SIGNAL(onMagnetometer(qint64, float, float, float)),
           this, SIGNAL(onMagnetometer(qint64, float, float, float)));
@@ -67,12 +66,13 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
 
   // read the battery status every minute
+  settingUpdateTimer->setInterval(60000);
   connect(settingUpdateTimer, &QTimer::timeout,
           [=]() { this->m_wrapper->readBatteryStatus(); });
 
   connect(this->m_wrapper, &MetawearWrapper::onEpoch, this,
           [this](qint64 epoch) {
-              if(m_plot_lock.tryLock()){
+            if(m_plotLock.tryLock(500)){
                     if(epoch < m_laststEpoch)
                         return;
                     m_laststEpoch = epoch;
@@ -87,15 +87,13 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
                       QCPGraph *graph = this->ui->plot->graph(x);
                       graph->data()->removeBefore(xpos - 50000);
                     }
+                    m_plotLock.unlock();
+                     this->ui->plot->replot();
+      }
 
-                 m_plot_lock.unlock();
-              }
+
           });
 
-  connect(&m_plot_redrawTimer,&QTimer::timeout,this,[=](){
-        this->ui->plot->replot();
-  });
-  m_plot_redrawTimer.start();
 
 }
 
@@ -112,11 +110,11 @@ void SensorPanel::registerPlotHandlers()
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
         [=](int64_t epoch, float x, float y, float z) {
-            if(m_plot_lock.tryLock()){
-              xgraphAcc->addData(epoch - m_plotoffset, x);
+             if(m_plotLock.tryLock()){
+                xgraphAcc->addData(epoch - m_plotoffset, x);
               ygraphAcc->addData(epoch - m_plotoffset, y);
               zgraphAcc->addData(epoch - m_plotoffset, z);
-              m_plot_lock.unlock();
+              m_plotLock.unlock();
             }
         });
 }
@@ -125,6 +123,7 @@ void SensorPanel::registerDataHandlers()
 {
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
         [=](int64_t epoch, float x, float y, float z) {
+            m_directoryLock.lock();
             if(m_temporaryDir && m_temporaryDir->isValid()){
                 QString title = ui->sensorName->text();
                 if(title.isEmpty())
@@ -143,6 +142,7 @@ void SensorPanel::registerDataHandlers()
                     }
                     file.close();
             }
+            m_directoryLock.unlock();
         });
 }
 
@@ -160,24 +160,27 @@ qint64 SensorPanel::getLatestEpoch()
 
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
+    m_directoryLock.lock();
     m_temporaryDir = dir;
-    settingUpdateTimer->stop();
+    m_directoryLock.unlock();
 }
 
 void SensorPanel::stopCapture()
 {
+    m_directoryLock.lock();
     this->m_temporaryDir = nullptr;
-    settingUpdateTimer->start();
+    m_directoryLock.unlock();
 }
 
 void SensorPanel::clearPlots()
 {
-    m_plot_lock.lock();
+    m_plotLock.lock();
     for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
       QCPGraph *graph = this->ui->plot->graph(x);
       graph->data()->clear();
     }
-    m_plot_lock.unlock();
+    m_plotLock.unlock();
+
 }
 
 
