@@ -22,8 +22,10 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
       m_metawearConfig(new MetawearConfig(this)),
       settingUpdateTimer(new QTimer(this)), m_currentDevice(device),
-      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
+      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0),m_plot_redrawTimer(){
   ui->setupUi(this);
+
+  settingUpdateTimer->setInterval(60000);
 
   connect(this->m_wrapper, SIGNAL(onMagnetometer(qint64, float, float, float)),
           this, SIGNAL(onMagnetometer(qint64, float, float, float)));
@@ -58,7 +60,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
   timeTicker->setTimeFormat("%h:%m:%s");
   ui->plot->xAxis->setTicker(timeTicker);
   ui->plot->axisRect()->setupFullAxesBox();
-  ui->plot->yAxis->setRange(-4, 4);
+  ui->plot->yAxis->setRange(-2, 2);
 
   connect(this->m_wrapper, &MetawearWrapper::onBatteryPercentage,
           [=](qint8 amount) { this->ui->battery->setValue(amount); });
@@ -70,22 +72,30 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
   connect(this->m_wrapper, &MetawearWrapper::onEpoch, this,
           [this](qint64 epoch) {
-            if(epoch < m_laststEpoch)
-                return;
-            m_laststEpoch = epoch;
+              if(m_plot_lock.tryLock()){
+                    if(epoch < m_laststEpoch)
+                        return;
+                    m_laststEpoch = epoch;
 
-            qint64 xpos = epoch - m_plotoffset;
-            this->ui->plot->xAxis->setRange(
-                xpos, this->ui->xScaleSlider->value(), Qt::AlignRight);
-            double finalMax = 0;
-            double finalMin = 0;
+                    qint64 xpos = epoch - m_plotoffset;
+                    this->ui->plot->xAxis->setRange(
+                        xpos, this->ui->xScaleSlider->value(), Qt::AlignRight);
+                    double finalMax = 0;
+                    double finalMin = 0;
 
-            for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
-              QCPGraph *graph = this->ui->plot->graph(x);
-              graph->data()->removeBefore(xpos - 50000);
-            }
-            this->ui->plot->replot();
+                    for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
+                      QCPGraph *graph = this->ui->plot->graph(x);
+                      graph->data()->removeBefore(xpos - 50000);
+                    }
+
+                 m_plot_lock.unlock();
+              }
           });
+
+  connect(&m_plot_redrawTimer,&QTimer::timeout,this,[=](){
+        this->ui->plot->replot();
+  });
+  m_plot_redrawTimer.start();
 
 }
 
@@ -102,9 +112,12 @@ void SensorPanel::registerPlotHandlers()
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
         [=](int64_t epoch, float x, float y, float z) {
-          xgraphAcc->addData(epoch - m_plotoffset, x);
-          ygraphAcc->addData(epoch - m_plotoffset, y);
-          zgraphAcc->addData(epoch - m_plotoffset, z);
+            if(m_plot_lock.tryLock()){
+              xgraphAcc->addData(epoch - m_plotoffset, x);
+              ygraphAcc->addData(epoch - m_plotoffset, y);
+              zgraphAcc->addData(epoch - m_plotoffset, z);
+              m_plot_lock.unlock();
+            }
         });
 }
 
@@ -148,26 +161,30 @@ qint64 SensorPanel::getLatestEpoch()
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
     m_temporaryDir = dir;
+    settingUpdateTimer->stop();
 }
 
 void SensorPanel::stopCapture()
 {
     this->m_temporaryDir = nullptr;
+    settingUpdateTimer->start();
 }
 
 void SensorPanel::clearPlots()
 {
+    m_plot_lock.lock();
     for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
       QCPGraph *graph = this->ui->plot->graph(x);
       graph->data()->clear();
     }
+    m_plot_lock.unlock();
 }
 
 
 void SensorPanel::onMetawareInitialized() {
-  this->m_wrapper->setAccelerationSamplerate(50);
+  this->m_wrapper->setAccelerationSamplerate(200);
   this->m_wrapper->setAccelerationCapture(true);
-  settingUpdateTimer->start(60000);
+  settingUpdateTimer->start();
   this->m_wrapper->readBatteryStatus();
 }
 

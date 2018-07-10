@@ -4,8 +4,10 @@
 #include "metawearconfig.h"
 #include <QBluetoothDeviceInfo>
 #include <QLowEnergyController>
+#include <QMutex>
 #include <QTemporaryDir>
 #include <QWidget>
+#include <qtimer.h>
 
 class MetawearWrapper;
 class MblMwMetaWearBoard;
@@ -35,6 +37,8 @@ private:
   DataBundle* m_bundle;
   QString m_dir;
   QTemporaryDir* m_temporaryDir;
+  QMutex m_plot_lock;
+  QTimer m_plot_redrawTimer;
 
   void registerPlotHandlers();
   void registerDataHandlers();
