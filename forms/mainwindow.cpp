@@ -42,7 +42,8 @@ void MainWindow::deviceAddWizard() {
 }
 
 void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
-  ui->sensorContainer->addWidget(new SensorPanel(info,this));
+    SensorPanel* panel  =new SensorPanel(info,this);
+  ui->sensorContainer->addWidget(panel);
 }
 
 void MainWindow::startCapture()
@@ -82,12 +83,6 @@ void MainWindow::stopCapture()
     if (fileName.isEmpty())
            return;
      else {
-//           QFile file(fileName);
-//           if (!file.open(QIODevice::WriteOnly)) {
-//               QMessageBox::information(this, tr("Unable to open file"),
-//                   file.errorString());
-//               return;
-//           }
         if(!JlCompress::compressDir(fileName,m_temporaryData->path(),true)){
             QMessageBox::information(this,tr("Error"),"Failed to save data.");
         }

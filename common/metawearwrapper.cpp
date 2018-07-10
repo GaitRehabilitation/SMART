@@ -162,8 +162,6 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
 
   m_controller = new QLowEnergyController(m_currentDevice, this);
 
-  // Make connections
-
   // Service Discovery
   connect(this->m_controller, SIGNAL(serviceDiscovered(QBluetoothUuid)), this,
           SLOT(onServiceDiscovered(QBluetoothUuid)));
@@ -436,22 +434,22 @@ void MetawearWrapper::onDisconnect() {
 void MetawearWrapper::onControllerError(QLowEnergyController::Error e) {
   switch (e) {
   case QLowEnergyController::Error::UnknownError:
-    qWarning() << "UnknownError";
+    qWarning() << "Controller UnknownError";
     break;
   case QLowEnergyController::Error::UnknownRemoteDeviceError:
-    qWarning() << "UnknownRemoteDeviceError";
+    qWarning() << "Controller UnknownRemoteDeviceError";
     break;
   case QLowEnergyController::Error::NetworkError:
-    qWarning() << "NetworkError";
+    qWarning() << "Controller NetworkError";
     break;
   case QLowEnergyController::Error::InvalidBluetoothAdapterError:
-    qWarning() << "InvalidBluetoothAdapterError";
+    qWarning() << "Controller InvalidBluetoothAdapterError";
     break;
   case QLowEnergyController::Error::ConnectionError:
-    qWarning() << "ConnectionError";
+    qWarning() << "Controller ConnectionError";
     break;
   case QLowEnergyController::Error::AdvertisingError:
-    qWarning() << "AdvertisingError";
+    qWarning() << "Controller AdvertisingError";
     break;
   }
 }
@@ -481,27 +479,28 @@ void MetawearWrapper::onStateChange(
     qDebug() << "AdvertisingState";
     break;
   }
+
 }
 
 void MetawearWrapper::onCharacteristicError(QLowEnergyService::ServiceError e) {
   switch (e) {
   case QLowEnergyService::ServiceError::UnknownError:
-    qWarning() << "UnknownError";
+    qWarning() << "Characteristic UnknownError";
     break;
   case QLowEnergyService::ServiceError::OperationError:
-    qWarning() << "OperationError";
+    qWarning() << "Characteristic OperationError";
     break;
   case QLowEnergyService::ServiceError::CharacteristicReadError:
-    qWarning() << "CharacteristicReadError";
+    qWarning() << "Characteristic CharacteristicReadError";
     break;
   case QLowEnergyService::ServiceError::CharacteristicWriteError:
-    qWarning() << "CharacteristicWriteError";
+    qWarning() << "Characteristic CharacteristicWriteError";
     break;
   case QLowEnergyService::ServiceError::DescriptorReadError:
-    qWarning() << "DescriptorReadError";
+    qWarning() << "Characteristic DescriptorReadError";
     break;
   case QLowEnergyService::ServiceError::DescriptorWriteError:
-    qWarning() << "DescriptorWriteError";
+    qWarning() << "Characteristic DescriptorWriteError";
     break;
   case QLowEnergyService::ServiceError::NoError:
     break;
@@ -510,7 +509,10 @@ void MetawearWrapper::onCharacteristicError(QLowEnergyService::ServiceError e) {
 
 MblMwMetaWearBoard *MetawearWrapper::getBoard() { return m_metaWearBoard; }
 
-MetawearWrapper::~MetawearWrapper() {}
+MetawearWrapper::~MetawearWrapper() {
+
+
+}
 
 QLowEnergyController *MetawearWrapper::getController() {
   return this->m_controller;

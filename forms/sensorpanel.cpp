@@ -33,7 +33,13 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
           this, SIGNAL(onAcceleration(qint64, float, float, float)));
   connect(this->m_wrapper, SIGNAL(onAmbientLight(qint64, qint32)), this,
           SIGNAL(onAmbientLight(qint64, qint32)));
-
+  connect(this->m_wrapper,SIGNAL(disconnected()),this,SIGNAL(onDisconnect()));
+  connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
+      this->deleteLater();
+  });
+  connect(this->m_wrapper,&MetawearWrapper::controllerError,this,[=](){
+      this->deleteLater();
+  });
   connect(this->m_wrapper, SIGNAL(onEpoch(qint64)), this,
           SIGNAL(onEpoch(qint64)));
   connect(this->m_wrapper, SIGNAL(onVoltage(quint16)), this,
@@ -144,8 +150,6 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
     m_temporaryDir = dir;
 }
 
-
-
 void SensorPanel::stopCapture()
 {
     this->m_temporaryDir = nullptr;
@@ -160,13 +164,11 @@ void SensorPanel::clearPlots()
 }
 
 
-
-
 void SensorPanel::onMetawareInitialized() {
+  this->m_wrapper->setAccelerationSamplerate(50);
   this->m_wrapper->setAccelerationCapture(true);
-  this->m_wrapper->setAccelerationSamplerate(100);
-  settingUpdateTimer->start(60000);
-  this->m_wrapper->readBatteryStatus();
+//  settingUpdateTimer->start(60000);
+//  this->m_wrapper->readBatteryStatus();
 }
 
 SensorPanel::~SensorPanel() { delete ui; }

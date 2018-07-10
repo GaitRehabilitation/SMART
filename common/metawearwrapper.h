@@ -49,6 +49,7 @@ public:
 
   int m_readyCharacteristicCount;
   bool m_isMetawareReady;
+  void tryReconnect();
 
 public slots:
 

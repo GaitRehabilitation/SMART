@@ -49,6 +49,7 @@ public slots:
   void clearPlots();
 signals:
   void onConnected();
+  void onDisconnect();
   void onBluetoothError(QLowEnergyController::Error e);
 
   double onBatteryPercentage(qint8);
