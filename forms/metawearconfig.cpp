@@ -41,13 +41,6 @@ bool MetawearConfig::isAcceleromterActive() {
   return this->ui->enableAccelerometer->isChecked();
 }
 
-bool MetawearConfig::isAmbientLightActive() {
-  return this->ui->enableAmbientLight->isChecked();
-}
-
-bool MetawearConfig::isPressureActive() {
-  return this->ui->enablePressure->isChecked();
-}
 
 void MetawearConfig::setAcceleromterSampleRate(double value) {
   QDoubleSpinBox *spintBox = this->ui->sampleRateAccelerometer;

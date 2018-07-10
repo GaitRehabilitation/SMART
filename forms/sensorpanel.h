@@ -4,11 +4,13 @@
 #include "metawearconfig.h"
 #include <QBluetoothDeviceInfo>
 #include <QLowEnergyController>
+#include <QTemporaryDir>
 #include <QWidget>
 
 class MetawearWrapper;
 class MblMwMetaWearBoard;
 class QTimer;
+class DataBundle;
 
 namespace Ui {
 class SensorPanel;
@@ -28,16 +30,22 @@ private:
   MetawearConfig *metwareConfig;
   QTimer *settingUpdateTimer;
   MetawearConfig *m_metawearConfig;
+  qint64 m_plotoffset;
+  DataBundle* m_bundle;
+  QString m_dir;
+  QTemporaryDir* m_temporaryDir;
 
-  void registerSignalHandlers();
+  void registerPlotHandlers();
+  void registerDataHandlers();
 private slots:
   void onMetawareInitialized();
 public slots:
   void setName(QString);
   void setOffset(qint64 offset);
-  void updateConfig();
-  void startCapture();
+//  void updateConfig();
+  void startCapture(QTemporaryDir* dir);
   void stopCapture();
+  void clearPlots();
 signals:
   void onConnected();
   void onBluetoothError(QLowEnergyController::Error e);
@@ -45,6 +53,7 @@ signals:
   double onBatteryPercentage(qint8);
   double onVoltage(quint16);
 
+  void setDir();
   void onMagnetometer(qint64, float, float, float);
   void onGyro(qint64, float, float, float);
   void onAcceleration(qint64, float, float, float);

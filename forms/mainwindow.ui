@@ -32,24 +32,31 @@
           </property>
           <item>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="0" colspan="2">
-             <widget class="QPushButton" name="captureButton">
-              <property name="text">
-               <string>Capture</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="1">
              <widget class="QDoubleSpinBox" name="triggerTime"/>
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="triggerButton">
               <property name="text">
-               <string>Trigger</string>
+               <string>Time</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0" colspan="2">
+            <item row="1" column="2">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>(sec)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="3">
+             <widget class="QPushButton" name="captureButton">
+              <property name="text">
+               <string>Record</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="3">
              <widget class="QPushButton" name="stopButton">
               <property name="text">
                <string>Stop</string>
@@ -75,13 +82,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="save">
-          <property name="text">
-           <string>save</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -124,8 +124,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddDevice"/>
-   <addaction name="actionCapture"/>
-   <addaction name="actionSessions"/>
   </widget>
   <action name="actionAddDevice">
    <property name="icon">
@@ -154,24 +152,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="actionSessions">
-   <property name="icon">
-    <iconset resource="../qml.qrc">
-     <normaloff>:/icons/history-solid.svg</normaloff>:/icons/history-solid.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Sessions</string>
-   </property>
-  </action>
-  <action name="actionCapture">
-   <property name="icon">
-    <iconset resource="../qml.qrc">
-     <normaloff>:/icons/download-solid.svg</normaloff>:/icons/download-solid.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Capture</string>
    </property>
   </action>
  </widget>

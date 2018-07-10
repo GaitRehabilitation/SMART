@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>706</width>
-    <height>380</height>
+    <height>381</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,14 +63,7 @@
       <string>Raw Data</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="5" column="1" colspan="2">
-       <widget class="QCheckBox" name="enablePressure">
-        <property name="text">
-         <string>Enable</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="2">
+      <item row="2" column="1" colspan="2">
        <widget class="QCheckBox" name="enableGyroscope">
         <property name="text">
          <string>Enable</string>
@@ -91,45 +84,24 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Ambient Light</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Magnetometer</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Gyroscope</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1" colspan="2">
+      <item row="3" column="1" colspan="2">
        <widget class="QCheckBox" name="enableMagnetometer">
         <property name="text">
          <string>Enable</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QCheckBox" name="enableAmbientLight">
-        <property name="text">
-         <string>Enable</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Pressure</string>
         </property>
        </widget>
       </item>
