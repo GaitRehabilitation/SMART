@@ -167,8 +167,8 @@ void SensorPanel::clearPlots()
 void SensorPanel::onMetawareInitialized() {
   this->m_wrapper->setAccelerationSamplerate(50);
   this->m_wrapper->setAccelerationCapture(true);
-//  settingUpdateTimer->start(60000);
-//  this->m_wrapper->readBatteryStatus();
+  settingUpdateTimer->start(60000);
+  this->m_wrapper->readBatteryStatus();
 }
 
 SensorPanel::~SensorPanel() { delete ui; }
