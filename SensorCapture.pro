@@ -37,8 +37,7 @@ SOURCES += \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
     common/metawearwrapper.cpp \
-    common/util.cpp \
-    forms/sessionentry.cpp
+    common/util.cpp
 
 RESOURCES += qml.qrc
 
@@ -59,6 +58,5 @@ HEADERS += \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
     common/metawearwrapper.h \
-    common/util.h \
-    forms/sessionentry.h
+    common/util.h
 
