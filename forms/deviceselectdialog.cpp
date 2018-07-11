@@ -1,7 +1,6 @@
 #include "deviceselectdialog.h"
 #include "ui_deviceselectdialog.h"
 #include <QListView>
-#include <QtCharts>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothservicediscoveryagent.h>
 #include <qbluetoothserviceinfo.h>

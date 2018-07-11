@@ -1,7 +1,6 @@
 #ifndef SENSORPANEL_H
 #define SENSORPANEL_H
 
-#include "metawearconfig.h"
 #include <QBluetoothDeviceInfo>
 #include <QLowEnergyController>
 #include <QMutex>
@@ -29,7 +28,6 @@ private:
   MetawearWrapper *m_wrapper;
   Ui::SensorPanel *ui;
   QBluetoothDeviceInfo m_currentDevice;
-  MetawearConfig *m_metawearConfig;
   qint64 m_plotoffset;
   qint64 m_laststEpoch;
   QTimer *settingUpdateTimer;

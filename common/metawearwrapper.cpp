@@ -19,8 +19,6 @@
 #include <QObject>
 #include <QThread>
 
-#include <bits/stl_vector.h>
-
 quint128 MetawearWrapper::convertQuint128(uint8_t *low, uint8_t *high) {
     quint128 result;
     for (int i = 0; i < 8; i++) {

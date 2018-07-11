@@ -9,18 +9,12 @@
 
 #include "qcustomplot.h"
 #include <QGraphicsLayout>
-#include <QSplineSeries>
 #include <QTimer>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QValueAxis>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 
-#include <common/databundle.h>
-
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      m_metawearConfig(new MetawearConfig(this)),
       settingUpdateTimer(new QTimer(this)), m_currentDevice(device),
       m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
     ui->setupUi(this);
