@@ -1,10 +1,24 @@
+version: '{build}-{branch}'
+
 image: Visual Studio 2017
 branches:
   only:
     - master
 
+enviroment:
+  matrix:
+  - QT: 5.11.1
+    platform: msvc2017_64
+  - qt: 5.11.1
+    platform: winrt_armv7_msvc2017
+  - qt: 5.11.1
+    platform: winrt_x86_msvc2017
+  - qt: 5.11.1
+    platform: winrt_x64_msvc2017
+           
+
 install:
-  - set QTDIR=C:\Qt\5.11.1\msvc2017_64
+  - set QTDIR=C:\Qt\%qt%\%platform%
   - set PATH=%PATH%;%QTDIR%\bin
   
 before_build:
@@ -18,21 +32,14 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a app.zip 
-    .\release\iconengines 
-    .\release\imageformats 
-    .\release\microsoft.system.package.metadata 
-    .\release\platforms\  
-    .\release\SensorCapture.tlog\  
-    .\release\translations\  
-    .\release\*.dll  
-    .\release\*.xml
-    .\release\*.resfiles
-    .\release\*.txt
-    .\release\*.log
-    .\release\*.exe
-    .\release\*.build.appxrecipe
+  - 7z a sensor_capture_%platform%_%qt%_%version%.zip 
+    %APPVEYOR_BUILD_FOLDER%\release\
+    -xr!*.cpp
+    -xr!*.obj
+    -xr!*.Cache
+    -xr!*.intermediate    
+
 
 artifacts:
-  - path: app.zip
+  - path: '*.zip'
     name: App
