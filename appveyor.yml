@@ -13,5 +13,27 @@ before_build:
   - git submodule update
 
 build_script:
-  - qmake SensorCapture.pro
-  - cl.exe
+  - qmake -tp vc
+  - msbuild /p:Configuration=Release
+  - windeployqt ./release/SensorCapture.exe
+
+after_build:
+  - 7z a app.zip >
+    %APPVEYOR_BUILD_FOLDER%\release\_pkginfo.txt 
+    %APPVEYOR_BUILD_FOLDER%\release\iconengines 
+    %APPVEYOR_BUILD_FOLDER%\release\imageformats 
+    %APPVEYOR_BUILD_FOLDER%\release\microsoft.system.package.metadata 
+    %APPVEYOR_BUILD_FOLDER%\release\platforms\  
+    %APPVEYOR_BUILD_FOLDER%\release\SensorCapture.tlog\  
+    %APPVEYOR_BUILD_FOLDER%\release\translations\  
+    %APPVEYOR_BUILD_FOLDER%\release\*.dll  
+    %APPVEYOR_BUILD_FOLDER%\release\*.xml
+    %APPVEYOR_BUILD_FOLDER%\release\*.resfiles
+    %APPVEYOR_BUILD_FOLDER%\release\*.txt
+    %APPVEYOR_BUILD_FOLDER%\release\*.log
+    %APPVEYOR_BUILD_FOLDER%\release\*.exe
+    %APPVEYOR_BUILD_FOLDER%\release\*.build.appxrecipe
+
+artifacts:
+  - path: app.zip
+    name: App

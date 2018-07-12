@@ -1,3 +1,5 @@
+TARGET = SensorCapture
+
 QT += quick
 QT += widgets
 QT += bluetooth
@@ -10,6 +12,11 @@ unix {
 }
 win32 {
     DEFINES += QUAZIP_STATIC
+
+    WINRT_MANIFEST.publisher = "GaitRehabilitation"
+    WINRT_MANIFEST.description = "A utility capture for for MbientLab's MetaMotion sensors"
+    WINRT_MANIFEST.publisherid = "CN=Gait Rehabilitation, O=Chapman Unversity, L=Orange, S=California, C=US"
+    WINRT_MANIFEST.version = "0.0.0.1"
 }
 
 FORMS += forms/mainwindow.ui \
