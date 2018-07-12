@@ -5,7 +5,7 @@ branches:
   only:
     - master
 
-enviroment:
+environment:
   matrix:
   - QT: 5.11.1
     platform: msvc2017_64
