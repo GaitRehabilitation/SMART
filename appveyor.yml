@@ -18,7 +18,7 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a app.zip >
+  - 7z a app.zip 
     .\release\iconengines 
     .\release\imageformats 
     .\release\microsoft.system.package.metadata 
