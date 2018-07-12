@@ -32,7 +32,7 @@ before_build:
 
 build_script:
   - qmake -tp vc
-  - msbuild /p:Configuration=Release && exit 0
+  - msbuild /p:Configuration=Release /p:AppxPackageSigningEnabled=false
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
