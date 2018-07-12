@@ -9,20 +9,20 @@ environment:
   matrix:
   - QT: 5.11.1
     build: 64
-    platform: msvc2017_64
+    qt_target: msvc2017_64
   - qt: 5.11.1
     build: 64
-    platform: winrt_armv7_msvc2017
+    qt_target: winrt_armv7_msvc2017
   - qt: 5.11.1
     build: 32
-    platform: winrt_x86_msvc2017
+    qt_target: winrt_x86_msvc2017
   - qt: 5.11.1
     build: 64
-    platform: winrt_x64_msvc2017
+    qt_target: winrt_x64_msvc2017
            
 
 install:
-  - set QTDIR=C:\Qt\%qt%\%platform%
+  - set QTDIR=C:\Qt\%qt%\%qt_target%
   - set PATH=%PATH%;%QTDIR%\bin
   
 before_build:
@@ -36,7 +36,7 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a sensor_capture_%platform%_%qt%_%version%.zip 
+  - 7z a sensor_capture_%qt_target%_%qt%_%version%.zip 
     %APPVEYOR_BUILD_FOLDER%\release\
     -xr!*.cpp
     -xr!*.obj
