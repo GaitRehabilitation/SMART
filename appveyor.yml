@@ -6,6 +6,7 @@ branches:
 install:
   - set QTDIR=C:\Qt\5.11.1\msvc2017_64
   - set PATH=%PATH%;%QTDIR%\bin
+  - set APPVEYOR_BUILD_FOLDER=C:\projects\sensorcapture
   
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
