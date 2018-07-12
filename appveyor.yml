@@ -6,7 +6,6 @@ branches:
 install:
   - set QTDIR=C:\Qt\5.11.1\msvc2017_64
   - set PATH=%PATH%;%QTDIR%\bin
-  - set APPVEYOR_BUILD_FOLDER=C:\projects\sensorcapture
   
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -20,19 +19,19 @@ build_script:
 
 after_build:
   - 7z a app.zip >
-    %APPVEYOR_BUILD_FOLDER%\release\iconengines 
-    %APPVEYOR_BUILD_FOLDER%\release\imageformats 
-    %APPVEYOR_BUILD_FOLDER%\release\microsoft.system.package.metadata 
-    %APPVEYOR_BUILD_FOLDER%\release\platforms\  
-    %APPVEYOR_BUILD_FOLDER%\release\SensorCapture.tlog\  
-    %APPVEYOR_BUILD_FOLDER%\release\translations\  
-    %APPVEYOR_BUILD_FOLDER%\release\*.dll  
-    %APPVEYOR_BUILD_FOLDER%\release\*.xml
-    %APPVEYOR_BUILD_FOLDER%\release\*.resfiles
-    %APPVEYOR_BUILD_FOLDER%\release\*.txt
-    %APPVEYOR_BUILD_FOLDER%\release\*.log
-    %APPVEYOR_BUILD_FOLDER%\release\*.exe
-    %APPVEYOR_BUILD_FOLDER%\release\*.build.appxrecipe
+    .\release\iconengines 
+    .\release\imageformats 
+    .\release\microsoft.system.package.metadata 
+    .\release\platforms\  
+    .\release\SensorCapture.tlog\  
+    .\release\translations\  
+    .\release\*.dll  
+    .\release\*.xml
+    .\release\*.resfiles
+    .\release\*.txt
+    .\release\*.log
+    .\release\*.exe
+    .\release\*.build.appxrecipe
 
 artifacts:
   - path: app.zip
