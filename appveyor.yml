@@ -8,12 +8,16 @@ branches:
 environment:
   matrix:
   - QT: 5.11.1
+    build: 64
     platform: msvc2017_64
   - qt: 5.11.1
+    build: 64
     platform: winrt_armv7_msvc2017
   - qt: 5.11.1
+    build: 32
     platform: winrt_x86_msvc2017
   - qt: 5.11.1
+    build: 64
     platform: winrt_x64_msvc2017
            
 
@@ -22,13 +26,13 @@ install:
   - set PATH=%PATH%;%QTDIR%\bin
   
 before_build:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule init
   - git submodule update
 
 build_script:
   - qmake -tp vc
-  - msbuild /p:Configuration=Release
+  - msbuild /p:Configuration=Release && exit 0
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
@@ -36,6 +40,7 @@ after_build:
     %APPVEYOR_BUILD_FOLDER%\release\
     -xr!*.cpp
     -xr!*.obj
+    -xr!*.h
     -xr!*.Cache
     -xr!*.intermediate    
 
