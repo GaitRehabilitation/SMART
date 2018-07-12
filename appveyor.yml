@@ -19,7 +19,6 @@ build_script:
 
 after_build:
   - 7z a app.zip >
-    %APPVEYOR_BUILD_FOLDER%\release\_pkginfo.txt 
     %APPVEYOR_BUILD_FOLDER%\release\iconengines 
     %APPVEYOR_BUILD_FOLDER%\release\imageformats 
     %APPVEYOR_BUILD_FOLDER%\release\microsoft.system.package.metadata 
