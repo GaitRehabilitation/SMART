@@ -15,7 +15,7 @@
 
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      settingUpdateTimer(new QTimer(this)), m_currentDevice(device),
+      settingUpdateTimer(new QTimer(this)), m_currentDevice(device),m_plotUpdatetimer(),
       m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
     ui->setupUi(this);
 
@@ -70,10 +70,11 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             return;
         m_laststEpoch = epoch;
         emit onLatestEpoch(m_laststEpoch);
+    });
 
-        if(this->m_plotLock.tryLock(500)){
-
-            qint64 xpos = epoch - m_plotoffset;
+    connect(&m_plotUpdatetimer,&QTimer::timeout,this,[=](){
+        if(this->m_plotLock.tryLock(100)){
+            qint64 xpos = this->m_laststEpoch - m_plotoffset;
             this->ui->plot->xAxis->setRange(
                         xpos, this->ui->xScaleSlider->value(), Qt::AlignRight);
             double finalMax = 0;
@@ -87,6 +88,8 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             this->ui->plot->replot();
         }
     });
+    m_plotUpdatetimer.setInterval(50);
+    m_plotUpdatetimer.start();
 }
 
 void SensorPanel::registerPlotHandlers()
@@ -102,12 +105,11 @@ void SensorPanel::registerPlotHandlers()
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
-        if(this->m_plotLock.tryLock()){
+            this->m_plotLock.lock();
             xgraphAcc->addData(epoch - m_plotoffset, x);
             ygraphAcc->addData(epoch - m_plotoffset, y);
             zgraphAcc->addData(epoch - m_plotoffset, z);
             this->m_plotLock.unlock();
-        }
     });
 }
 

@@ -30,6 +30,7 @@ private:
   QBluetoothDeviceInfo m_currentDevice;
   qint64 m_plotoffset;
   qint64 m_laststEpoch;
+  QTimer m_plotUpdatetimer;
   QTimer *settingUpdateTimer;
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
