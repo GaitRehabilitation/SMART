@@ -7,7 +7,7 @@ branches:
 
 environment:
   matrix:
-  - QT: 5.11.1
+  - QT: 5.11.1  
     build: 64
     qt_target: msvc2017_64
   - qt: 5.11.1
@@ -36,7 +36,7 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a sensor_capture_%qt_target%_qt_%qt%_ver_$(appveyor_build_version).zip 
+  - 7z a sensor_capture_%qt_target%_qt_%qt%_ver_%appveyor_build_version%.zip 
     %APPVEYOR_BUILD_FOLDER%\release\
     -xr!*.cpp
     -xr!*.obj
