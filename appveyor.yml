@@ -10,9 +10,9 @@ environment:
   - QT: 5.11.1  
     build: 64
     qt_target: msvc2017_64
-  - qt: 5.11.1
-    build: 64
-    qt_target: winrt_armv7_msvc2017
+#  - qt: 5.11.1
+#    build: 64
+#    qt_target: winrt_armv7_msvc2017
   - qt: 5.11.1
     build: 32
     qt_target: winrt_x86_msvc2017
@@ -27,8 +27,7 @@ install:
   
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
-  - git submodule init
-  - git submodule update
+  - git submodule update --init --recursive
 
 build_script:
   - qmake -tp vc
@@ -36,7 +35,7 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a sensor_capture_%qt_target%_qt_%qt%_ver_%appveyor_build_version%.zip 
+  - 7z a smart_%appveyor_build_version%.zip 
     %APPVEYOR_BUILD_FOLDER%\release\
     -xr!*.cpp
     -xr!*.obj
@@ -47,4 +46,4 @@ after_build:
 
 artifacts:
   - path: '*.zip'
-    name: App
+    name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
