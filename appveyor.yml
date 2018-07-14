@@ -47,3 +47,10 @@ after_build:
 artifacts:
   - path: '*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
+
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: cfQYapw1kaToQWhkDuAZI7Q6VUBCDmRqm/+eziQ8yJoekJXgT3l8JBAflzCtpLVe
+  repository: GaitRehabilitation/SMART
+  artifact: /.*\.zip/
