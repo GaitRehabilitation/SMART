@@ -1,4 +1,4 @@
-version: '{build}-{branch}'
+version: '{branch}-0.0.{build}'
 
 image: Visual Studio 2017
 branches:
@@ -35,7 +35,7 @@ build_script:
   - windeployqt ./release/SensorCapture.exe
 
 after_build:
-  - 7z a smart-%qt_target%-%appveyor_build_version%.zip 
+  - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip 
     %APPVEYOR_BUILD_FOLDER%\release\
     -xr!*.cpp
     -xr!*.obj
