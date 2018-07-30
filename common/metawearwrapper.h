@@ -24,6 +24,7 @@
 
 #include "metawear/platform/btle_connection.h"
 #include "metawear/sensor/accelerometer.h"
+#include "metawear/sensor/gyro_bmi160.h"
 
 class MblMwMetaWearBoard;
 
@@ -41,6 +42,7 @@ private:
   QMap<QString, QLowEnergyService *> m_services;
   QBluetoothDeviceInfo m_currentDevice;
   bool m_isSensorEnabled;
+
 
   static quint128 convertQuint128(uint8_t *low, uint8_t *high);
   static void read_gatt_char_qt(void *context, const void *caller,
@@ -68,11 +70,12 @@ public:
   bool m_isMetawareReady;
   void tryReconnect();
 
+
 public slots:
 
   void setAccelerationSamplerate(float);
   void setAmbientLightSamplerate(float);
-  void setGyroSamplerate(float);
+  void setGyroSamplerate(MblMwGyroBmi160Odr sample);
   void setMagnetometerRate(float);
 
   void setAccelerationCapture(bool);

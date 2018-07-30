@@ -161,9 +161,9 @@ void MetawearWrapper::on_disconnect_qt(void *context, const void *caller,
 MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
                                  QObject *parent)
     : QObject(parent), m_services(QMap<QString, QLowEnergyService *>()),
-      m_controller(0), m_serviceReady(0), m_isMetawareReady(0),
-      m_readyCharacteristicCount(0), m_notificationHandler(0),
-      m_disconnectedHandler(0), m_readGattHandler(0), m_isSensorEnabled(0) {
+      m_controller(nullptr), m_serviceReady(0), m_isMetawareReady(0),
+      m_readyCharacteristicCount(0), m_notificationHandler(nullptr),
+      m_disconnectedHandler(nullptr), m_readGattHandler(nullptr), m_isSensorEnabled(0) {
 
     this->m_currentDevice = device;
 
@@ -228,11 +228,8 @@ void MetawearWrapper::setAmbientLightSamplerate(float sample) {
     mbl_mw_als_ltr329_write_config(this->getBoard());
 }
 
-void MetawearWrapper::setGyroSamplerate(float value) {
-    static const std::vector<float> MBL_MW_GYRO_BMI160_RATE_VALUES = {
-        25.0f, 50.0f, 100.0f, 200.0f, 400.0f, 800.0f, 1600.0f, 3200.0f};
-    int index = closest_index(MBL_MW_GYRO_BMI160_RATE_VALUES, value);
-    mbl_mw_gyro_bmi160_set_odr(this->getBoard(), (MblMwGyroBmi160Odr)(6 + index));
+void MetawearWrapper::setGyroSamplerate(MblMwGyroBmi160Odr sample) {
+    mbl_mw_gyro_bmi160_set_odr(this->getBoard(), sample);
     mbl_mw_gyro_bmi160_write_config(this->getBoard());
 }
 

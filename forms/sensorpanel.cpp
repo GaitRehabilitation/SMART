@@ -28,11 +28,18 @@
 #include <QTimer>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
+#include <common/metawearwrapper.h>
 
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      settingUpdateTimer(new QTimer(this)), m_currentDevice(device),m_plotUpdatetimer(),
-      m_wrapper(new MetawearWrapper(device, this)),m_plotoffset(0),m_temporaryDir(0),m_laststEpoch(0){
+      settingUpdateTimer(new QTimer(this)),
+      m_currentDevice(device),
+      m_plotUpdatetimer(),
+      m_wrapper(new MetawearWrapper(device, this)),
+      m_plotoffset(0),
+      m_temporaryDir(nullptr),
+      m_laststEpoch(0),
+      m_isReadyToCapture(false){
     ui->setupUi(this);
 
     connect(this->m_wrapper, SIGNAL(onMagnetometer(qint64, float, float, float)),
@@ -57,13 +64,40 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     connect(this->m_wrapper, SIGNAL(onBatteryPercentage(qint8)), this,
             SIGNAL(onBatteryPercentage(qint8)));
 
+    // watch for a text change and remove characters that can cause problems for the path
+    connect(ui->sensorName,&QLineEdit::textChanged,this,[=](const QString& text){
+        QString updated(text);
+        if(updated.isEmpty()){
+            updated = this->ui->deviceAddress->text();
+        }
+
+        updated.replace(":","_");
+        updated.replace(" ","_");
+
+        updated.replace("<","");
+        updated.replace(">","");
+        updated.replace("/","");
+        updated.replace("|","");
+        updated.replace("*","");
+        updated.replace("\\","");
+        updated.replace(".","");
+        updated.replace("?","");
+        updated.replace("!","");
+
+        ui->sensorName->setText(updated);
+    });
+
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
     connect(this->m_wrapper, SIGNAL(metawareInitialized()), this,
             SLOT(metawareInitialized()));
     connect(this->m_wrapper,SIGNAL(metawareInitialized()),this,SIGNAL(onMetawearInitilized()));
+    connect(this->m_wrapper,&MetawearWrapper::metawareInitialized,[=](){
+        m_isReadyToCapture = true;
+    });
     ui->deviceAddress->setText(device.address().toString());
+    ui->sensorName->setText(device.address().toString());
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -93,9 +127,6 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             qint64 xpos = this->m_laststEpoch - m_plotoffset;
             this->ui->plot->xAxis->setRange(
                         xpos, this->ui->xScaleSlider->value(), Qt::AlignRight);
-            double finalMax = 0;
-            double finalMin = 0;
-
             for (int x = 0; x < this->ui->plot->graphCount(); ++x) {
                 QCPGraph *graph = this->ui->plot->graph(x);
                 graph->data()->removeBefore(xpos - 50000);
@@ -122,9 +153,9 @@ void SensorPanel::registerPlotHandlers()
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
             this->m_plotLock.lock();
-            xgraphAcc->addData(epoch - m_plotoffset, x);
-            ygraphAcc->addData(epoch - m_plotoffset, y);
-            zgraphAcc->addData(epoch - m_plotoffset, z);
+            xgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(x));
+            ygraphAcc->addData(epoch - m_plotoffset, static_cast<double>(y));
+            zgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(z));
             this->m_plotLock.unlock();
     });
 }
@@ -133,14 +164,9 @@ void SensorPanel::registerDataHandlers()
 {
     connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
-        m_directoryLock.lock();
+//        m_directoryLock.lock();
         if(m_temporaryDir && m_temporaryDir->isValid()){
-            QString title = ui->sensorName->text();
-            if(title.isEmpty())
-            {
-                title = this->ui->deviceAddress->text();
-            }
-            QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(title,"acc")) ;
+            QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")) ;
             QFile file(path);
             bool exist = file.exists();
             if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
@@ -152,7 +178,25 @@ void SensorPanel::registerDataHandlers()
             }
             file.close();
         }
-        m_directoryLock.unlock();
+//        m_directoryLock.unlock();
+    });
+
+    connect(this->m_wrapper,&MetawearWrapper::onGyro,this,[=](int64_t epoch, float x, float y, float z){
+//        m_directoryLock.lock();
+        if(m_temporaryDir && m_temporaryDir->isValid()){
+            QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"gyro")) ;
+            QFile file(path);
+            bool exist = file.exists();
+            if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
+                QTextStream outStream(&file);
+                if(!exist){
+                    outStream << "epoch(ms),gyro_x(fdps),gyro_y(fdps),gyro_z(fdps)" << '\n';
+                }
+                outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
+            }
+            file.close();
+        }
+//        m_directoryLock.unlock();
     });
 }
 
@@ -175,10 +219,11 @@ qint64 SensorPanel::getLatestEpoch()
 
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
-    m_directoryLock.lock();
-
-    m_temporaryDir = dir;
-    m_directoryLock.unlock();
+    if(m_isReadyToCapture){
+        m_directoryLock.lock();
+        m_temporaryDir = dir;
+        m_directoryLock.unlock();
+    }
 }
 
 void SensorPanel::stopCapture()
@@ -200,10 +245,13 @@ void SensorPanel::clearPlots()
 
 
 void SensorPanel::metawareInitialized() {
-    this->m_wrapper->setAccelerationSamplerate(200);
+    this->m_wrapper->setAccelerationSamplerate(100);
+    this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_ODR_50Hz);
+    this->m_wrapper->setGyroCapture(true);
     this->m_wrapper->setAccelerationCapture(true);
     settingUpdateTimer->start();
     this->m_wrapper->readBatteryStatus();
+
 }
 
 SensorPanel::~SensorPanel() { delete ui; }

@@ -33,7 +33,7 @@
              <x>0</x>
              <y>0</y>
              <width>791</width>
-             <height>444</height>
+             <height>438</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -65,7 +65,11 @@
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="triggerTime"/>
+             <widget class="QDoubleSpinBox" name="triggerTime">
+              <property name="maximum">
+               <double>5000.000000000000000</double>
+              </property>
+             </widget>
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="triggerButton">
