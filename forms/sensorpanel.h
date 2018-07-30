@@ -37,7 +37,7 @@ class SensorPanel : public QWidget {
 
   Q_OBJECT
 public:
-  explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = 0);
+  explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
 
 private:
@@ -51,6 +51,7 @@ private:
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
   QMutex m_directoryLock;
+  bool m_isReadyToCapture;
 
   void registerPlotHandlers();
   void registerDataHandlers();
