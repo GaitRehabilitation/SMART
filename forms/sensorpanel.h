@@ -39,6 +39,7 @@ class SensorPanel : public QWidget {
 public:
   explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
+  bool isReadyToCapture();
 
 private:
   MetawearWrapper *m_wrapper;
@@ -50,7 +51,6 @@ private:
   QTimer *settingUpdateTimer;
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
-  QMutex m_directoryLock;
   bool m_isReadyToCapture;
 
   void registerPlotHandlers();
@@ -66,6 +66,10 @@ public slots:
   void stopCapture();
   void clearPlots();
 signals:
+  /**
+   * @brief onConnected
+   * Signals when the panel connects to the bluetooth device
+   */
   void onConnected();
   void onDisconnect();
   void onBluetoothError(QLowEnergyController::Error e);

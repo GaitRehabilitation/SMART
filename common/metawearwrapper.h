@@ -31,20 +31,20 @@ class MblMwMetaWearBoard;
 class MetawearWrapper : public QObject {
   Q_OBJECT
 private:
+  // metware configurations
   MblMwFnIntVoidPtrArray m_readGattHandler;
   MblMwFnVoidVoidPtrInt m_disconnectedHandler;
   MblMwFnIntVoidPtrArray m_notificationHandler;
-
-  QLowEnergyController *m_controller;
   MblMwMetaWearBoard *m_metaWearBoard;
-  int m_serviceReady;
 
+  QLowEnergyController *m_controller;  
   QMap<QString, QLowEnergyService *> m_services;
   QBluetoothDeviceInfo m_currentDevice;
+
+  int m_serviceReady;
   bool m_isSensorEnabled;
 
 
-  static quint128 convertQuint128(uint8_t *low, uint8_t *high);
   static void read_gatt_char_qt(void *context, const void *caller,
                                 const MblMwGattChar *characteristic,
                                 MblMwFnIntVoidPtrArray handler);
@@ -61,7 +61,7 @@ private:
 
 public:
   explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
-                           QObject *parent = 0);
+                           QObject *parent = nullptr);
   virtual ~MetawearWrapper();
   QLowEnergyController *getController();
   MblMwMetaWearBoard *getBoard();

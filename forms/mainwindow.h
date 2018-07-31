@@ -35,7 +35,7 @@ private:
     QTimer m_updateTriggerTimer;
     float m_triggerTime;
 public:
-  MainWindow(QWidget *parent = 0);
+  MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
 public slots:
   void registerDevice(const QBluetoothDeviceInfo &info);
