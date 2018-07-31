@@ -26,6 +26,7 @@
 #include <QListWidget>
 #include <QMessageBox>
 #include "JlCompress.h"
+#include <common/metawearwrapper.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
@@ -60,11 +61,11 @@ void MainWindow::deviceAddWizard() {
 
 void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
     SensorPanel* panel  = new SensorPanel(info,this);
-    connect(panel,&SensorPanel::onLatestEpoch,this,[=](qint64 epoch){
+    connect(panel->getMetwareWrapper(),&MetawearWrapper::onLastEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){
                 SensorPanel* p = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
-                p->setOffset(p->getLatestEpoch());
+                p->setOffset(epoch);
                 p->clearPlots();
             }
         }
@@ -86,7 +87,7 @@ void MainWindow::startCapture()
     }
     for(int x = 0; x < this->ui->sensorContainer->count();x++){
         SensorPanel* panel = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
-        panel->setOffset(panel->getLatestEpoch());
+        panel->setOffset(panel->getMetwareWrapper()->getLatestEpoch());
         panel->startCapture(m_temporaryData);
     }
 }

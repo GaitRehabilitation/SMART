@@ -35,7 +35,7 @@ class DeviceSelectDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DeviceSelectDialog(QWidget *parent = 0);
+  explicit DeviceSelectDialog(QWidget *parent = nullptr);
   ~DeviceSelectDialog();
 
 private:
