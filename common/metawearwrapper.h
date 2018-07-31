@@ -41,6 +41,8 @@ private:
   QMap<QString, QLowEnergyService *> m_services;
   QBluetoothDeviceInfo m_currentDevice;
 
+  qint64 m_laststEpoch;
+
   int m_serviceReady;
   bool m_isSensorEnabled;
 
@@ -59,6 +61,7 @@ private:
   static void on_disconnect_qt(void *context, const void *caller,
                                MblMwFnVoidVoidPtrInt handler);
 
+  void handleEpoch(qint64 epoch);
 public:
   explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
                            QObject *parent = nullptr);
@@ -69,13 +72,13 @@ public:
   int m_readyCharacteristicCount;
   bool m_isMetawareReady;
   void tryReconnect();
-
+  qint64 getLatestEpoch();
 
 public slots:
 
-  void setAccelerationSamplerate(float);
+  void setAccelerationSamplerate(float,float);
   void setAmbientLightSamplerate(float);
-  void setGyroSamplerate(MblMwGyroBmi160Odr sample);
+  void setGyroSamplerate(MblMwGyroBmi160Range range, MblMwGyroBmi160Odr sample);
   void setMagnetometerRate(float);
 
   void setAccelerationCapture(bool);
@@ -88,16 +91,16 @@ public slots:
 
 private slots:
   // QLowEnergyController
-  void onServiceDiscovered(const QBluetoothUuid &newService);
-  void onServiceDiscoveryFinished();
+  void handleServiceDiscovered(const QBluetoothUuid &newService);
+  void handleServiceDiscoveryFinished();
 
-  void onConnected();
-  void onDisconnect();
+  void handleConnected();
+  void handleDisconnect();
 
-  void onCharacteristicRead(QLowEnergyCharacteristic, QByteArray);
-  void onCharacteristicNotifications(QLowEnergyCharacteristic, QByteArray);
-  void onControllerError(QLowEnergyController::Error);
-  void onCharacteristicError(QLowEnergyService::ServiceError);
+  void handleCharacteristicRead(QLowEnergyCharacteristic, QByteArray);
+  void handleCharacteristicNotifications(QLowEnergyCharacteristic, QByteArray);
+  void handleControllerError(QLowEnergyController::Error);
+  void handleCharacteristicError(QLowEnergyService::ServiceError);
 
   void onStateChange(QLowEnergyController::ControllerState state);
 
@@ -114,8 +117,7 @@ signals:
   void onGyro(qint64, float, float, float);
   void onAcceleration(qint64, float, float, float);
   void onAmbientLight(qint64, qint32);
-
-  void onEpoch(qint64);
+  void onLastEpoch(qint64);
 
   void metawareInitialized();
   void metawareFailedToInitialized(int32_t status);

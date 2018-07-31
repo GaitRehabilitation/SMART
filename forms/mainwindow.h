@@ -30,22 +30,24 @@ QT_FORWARD_DECLARE_CLASS(QFileDialog)
 class MainWindow : public QMainWindow {
   Q_OBJECT
 private:
+    Ui::MainWindow *ui;
+    double m_triggerTime;
     QTemporaryDir* m_temporaryData;
     QTimer m_triggerSingleShot;
     QTimer m_updateTriggerTimer;
-    float m_triggerTime;
 public:
   MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
+
 public slots:
+
   void registerDevice(const QBluetoothDeviceInfo &info);
   void startCapture();
   void stopCapture();
+
 private slots:
   void deviceAddWizard();
 
-private:
-  Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
