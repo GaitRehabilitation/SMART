@@ -24,13 +24,14 @@
 #include <QTimer>
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 class SensorPanel;
 class DeviceSelectDialog;
 class QFileDialog;
+
 class MainWindow : public QMainWindow {
-  Q_OBJECT
+    Q_OBJECT
 private:
     Ui::MainWindow *ui;
     double m_triggerTime;
@@ -38,21 +39,15 @@ private:
     QTimer m_triggerSingleShot;
     QTimer m_updateTriggerTimer;
     DeviceSelectDialog* m_deviceSelectDialog;
-
 public:
   MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
-
-public slots:
 
   void updateConnectedDevices();
   void registerDevice(const QBluetoothDeviceInfo &info);
   void startCapture();
   void stopCapture();
 
-
-private slots:
-  void deviceAddWizard();
 signals:
   void onConnectedDevices(const QList<QBluetoothDeviceInfo>&);
 };

@@ -29,8 +29,23 @@
 class MblMwMetaWearBoard;
 
 class MetawearWrapper : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 private:
+    static void read_gatt_char_qt(void *context, const void *caller,
+                                  const MblMwGattChar *characteristic,
+                                  MblMwFnIntVoidPtrArray handler);
+    static void write_gatt_char_qt(void *context, const void *caller,
+                                   MblMwGattCharWriteType writeType,
+                                   const MblMwGattChar *characteristic,
+                                   const uint8_t *value, uint8_t length);
+    static void enable_char_notify_qt(void *context, const void *caller,
+                                      const MblMwGattChar *characteristic,
+                                      MblMwFnIntVoidPtrArray handler,
+                                      MblMwFnVoidVoidPtrInt ready);
+    static void on_disconnect_qt(void *context, const void *caller,
+                                 MblMwFnVoidVoidPtrInt handler);
+
+
   // metware configurations
   MblMwFnIntVoidPtrArray m_readGattHandler;
   MblMwFnVoidVoidPtrInt m_disconnectedHandler;
@@ -46,35 +61,20 @@ private:
   int m_serviceReady;
   bool m_isSensorEnabled;
 
-
-  static void read_gatt_char_qt(void *context, const void *caller,
-                                const MblMwGattChar *characteristic,
-                                MblMwFnIntVoidPtrArray handler);
-  static void write_gatt_char_qt(void *context, const void *caller,
-                                 MblMwGattCharWriteType writeType,
-                                 const MblMwGattChar *characteristic,
-                                 const uint8_t *value, uint8_t length);
-  static void enable_char_notify_qt(void *context, const void *caller,
-                                    const MblMwGattChar *characteristic,
-                                    MblMwFnIntVoidPtrArray handler,
-                                    MblMwFnVoidVoidPtrInt ready);
-  static void on_disconnect_qt(void *context, const void *caller,
-                               MblMwFnVoidVoidPtrInt handler);
-
-  void handleEpoch(qint64 epoch);
+  void subscribeMetawearHandlers();
+  void updateEpoch(qint64 epoch);
 public:
   explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
                            QObject *parent = nullptr);
   virtual ~MetawearWrapper();
+
   QLowEnergyController *getController();
   MblMwMetaWearBoard *getBoard();
 
   int m_readyCharacteristicCount;
   bool m_isMetawareReady;
   void tryReconnect();
-  qint64 getLatestEpoch();
 
-public slots:
 
   void setAccelerationSamplerate(float,float);
   void setAmbientLightSamplerate(float);
@@ -89,35 +89,19 @@ public slots:
 
   void readBatteryStatus();
 
-private slots:
-  // QLowEnergyController
-  void handleServiceDiscovered(const QBluetoothUuid &newService);
-  void handleServiceDiscoveryFinished();
-
-  void handleConnected();
-  void handleDisconnect();
-
-  void handleCharacteristicRead(QLowEnergyCharacteristic, QByteArray);
-  void handleCharacteristicNotifications(QLowEnergyCharacteristic, QByteArray);
-  void handleControllerError(QLowEnergyController::Error);
-  void handleCharacteristicError(QLowEnergyService::ServiceError);
-
-  void onStateChange(QLowEnergyController::ControllerState state);
-
-  void metwareIntialize();
-
+  qint64 getLatestEpoch();
 signals:
-  void onConnected();
-  void onDisconnected();
+  void connected();
+  void disconnected();
 
-  double onBatteryPercentage(qint8);
-  double onVoltage(quint16);
+  double batteryPercentage(qint8);
+  double voltage(quint16);
 
-  void onMagnetometer(qint64, float, float, float);
-  void onGyro(qint64, float, float, float);
-  void onAcceleration(qint64, float, float, float);
-  void onAmbientLight(qint64, qint32);
-  void onLastEpoch(qint64);
+  void magnetometer(qint64, float, float, float);
+  void gyro(qint64, float, float, float);
+  void acceleration(qint64, float, float, float);
+  void ambientLight(qint64, qint32);
+  void lastEpoch(qint64);
 
   void onMetawareInitialized();
   void onMetawareFailedToInitialized(int32_t status);
