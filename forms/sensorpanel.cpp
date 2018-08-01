@@ -41,15 +41,14 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
       m_isReadyToCapture(false){
     ui->setupUi(this);
 
-
-    connect(this->m_wrapper,SIGNAL(MetawearWrapper::metawareInitialized),this,SIGNAL(onMetawearInitilized()));
-    connect(this->m_wrapper,SIGNAL(disconnected()),this,SIGNAL(onDisconnect()));
-    connect(this->m_wrapper,SIGNAL(connect()),this,SIGNAL(onConnected()));
+    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::metawearInitilized);
+    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,&SensorPanel::disconnect);
+    connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
 
     connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
         this->deleteLater();
     });
-    connect(this->m_wrapper,&MetawearWrapper::controllerError,this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](){
         this->deleteLater();
     });
 
@@ -60,6 +59,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             updated = this->ui->deviceAddress->text();
         }
 
+        //remove illegal symbols
         updated.replace(":","_");
         updated.replace(" ","_");
 
@@ -79,7 +79,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    connect(this->m_wrapper,&MetawearWrapper::metawareInitialized, this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
         this->m_wrapper->setAccelerationSamplerate(4.f,50.f);
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_50Hz);
         this->m_wrapper->setGyroCapture(true);
@@ -98,7 +98,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     ui->plot->axisRect()->setupFullAxesBox();
     ui->plot->yAxis->setRange(-2, 2);
 
-    connect(this->m_wrapper, &MetawearWrapper::onBatteryPercentage,
+    connect(this->m_wrapper, &MetawearWrapper::batteryPercentage,
             [=](qint8 amount) { this->ui->battery->setValue(amount); });
 
 
@@ -135,19 +135,19 @@ void SensorPanel::registerPlotHandlers()
     QCPGraph *zgraphAcc = ui->plot->addGraph();
     zgraphAcc->setName("Z Acc");
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
-    connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
+    connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
-            this->m_plotLock.lock();
-            xgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(x));
-            ygraphAcc->addData(epoch - m_plotoffset, static_cast<double>(y));
-            zgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(z));
-            this->m_plotLock.unlock();
+        this->m_plotLock.lock();
+        xgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(x));
+        ygraphAcc->addData(epoch - m_plotoffset, static_cast<double>(y));
+        zgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(z));
+        this->m_plotLock.unlock();
     });
 }
 
 void SensorPanel::registerDataHandlers()
 {
-    connect(this->m_wrapper, &MetawearWrapper::onAcceleration, this,
+    connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
         if(m_temporaryDir && m_temporaryDir->isValid()){
             QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")) ;
@@ -164,7 +164,7 @@ void SensorPanel::registerDataHandlers()
         }
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::onMagnetometer,this,[=](int64_t epoch, float x, float y, float z){
+    connect(this->m_wrapper,&MetawearWrapper::magnetometer,this,[=](int64_t epoch, float x, float y, float z){
         if(m_temporaryDir && m_temporaryDir->isValid()){
             QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")) ;
             QFile file(path);
@@ -180,7 +180,7 @@ void SensorPanel::registerDataHandlers()
         }
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::onGyro,this,[=](int64_t epoch, float x, float y, float z){
+    connect(this->m_wrapper,&MetawearWrapper::gyro,this,[=](int64_t epoch, float x, float y, float z){
         if(m_temporaryDir && m_temporaryDir->isValid()){
             QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"gyro")) ;
             QFile file(path);
@@ -235,8 +235,13 @@ void SensorPanel::clearPlots()
 
 
 
-MetawearWrapper* SensorPanel::getMetwareWrapper(){
+MetawearWrapper* SensorPanel::getMetwareWrapper() {
     return this->m_wrapper;
+}
+
+QBluetoothDeviceInfo SensorPanel::getDeviceInfo()
+{
+    return m_currentDevice;
 }
 
 SensorPanel::~SensorPanel() { delete ui; }

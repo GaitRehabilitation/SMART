@@ -32,26 +32,22 @@ class DeviceSelectDialog;
 }
 
 class DeviceSelectDialog : public QDialog {
-  Q_OBJECT
-
-public:
-  explicit DeviceSelectDialog(QWidget *parent = nullptr);
-  ~DeviceSelectDialog();
-
+    Q_OBJECT
 private:
   Ui::DeviceSelectDialog *ui;
   QBluetoothDeviceDiscoveryAgent *discoveryAgent;
   QBluetoothLocalDevice *localDevice;
   QMap<QString, QBluetoothDeviceInfo> m_deviceInfo;
+  QList<QString> m_deviceBlackList;
 
-public slots:
-  void addDevice(const QBluetoothDeviceInfo &);
+public:
+  explicit DeviceSelectDialog(QWidget *parent = nullptr);
+  ~DeviceSelectDialog();
+
+  void addDevice(const QBluetoothDeviceInfo&);
+  void updateDeviceBlackList(const QList<QBluetoothDeviceInfo>&);
   void accept();
-private slots:
-  void startScan();
-  void hostModeStateChanged(QBluetoothLocalDevice::HostMode);
-  void scanFinished();
-  void onItemSelection();
+
 signals:
   void onBluetoothDeviceAccepted(const QBluetoothDeviceInfo &info);
 };

@@ -34,9 +34,7 @@ class SensorPanel;
 }
 
 class SensorPanel : public QWidget {
-
-  Q_OBJECT
-
+    Q_OBJECT
 private:
   MetawearWrapper *m_wrapper;
   Ui::SensorPanel *ui;
@@ -51,13 +49,13 @@ private:
   void registerPlotHandlers();
   void registerDataHandlers();
 
-
 public:
   explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
+
   bool isReadyToCapture();
   MetawearWrapper* getMetwareWrapper();
-public slots:
+  QBluetoothDeviceInfo getDeviceInfo();
   void setName(QString);
   void setOffset(qint64 offset);
   qint64 getOffset();
@@ -65,18 +63,11 @@ public slots:
   void stopCapture();
   void clearPlots();
 signals:
-  /**
-   * @brief onConnected
-   * Signals when the panel connects to the bluetooth device
-   */
-  void onConnected();
-  void onDisconnect();
-  void onBluetoothError(QLowEnergyController::Error e);
+  void connected();
+  void disconnect();
+  void bluetoothError(QLowEnergyController::Error e);
 
-  void onMetawearInitilized();
-
-
-  void setDir();
+  void metawearInitilized();
 };
 
 #endif // SENSORPANEL_H

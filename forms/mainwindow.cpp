@@ -29,39 +29,40 @@
 #include <common/metawearwrapper.h>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
-  ui->setupUi(this);
+    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_deviceSelectDialog(new DeviceSelectDialog(this)),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
+    ui->setupUi(this);
 
-  connect(ui->actionAddDevice, SIGNAL(triggered()), this,
-          SLOT(deviceAddWizard()));
-  connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
-  connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
-  m_triggerSingleShot.setSingleShot(true);
-  connect(ui->triggerButton,&QPushButton::clicked,this,[=](){
-      m_triggerTime = this->ui->triggerTime->value();
-      m_triggerSingleShot.start(m_triggerTime * 1000);
-      m_updateTriggerTimer.start();
-      startCapture();
-  });
 
-  connect(&m_triggerSingleShot,SIGNAL(timeout()),this,SLOT(stopCapture()));
+    connect(m_deviceSelectDialog,&DeviceSelectDialog::onBluetoothDeviceAccepted, this,&MainWindow::registerDevice);
+    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
 
-  connect(&m_updateTriggerTimer,&QTimer::timeout,this,[=](){
-     this->ui->triggerTime->setValue(((float)m_triggerSingleShot.remainingTime())/1000.0);
-  });
+    connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
+        m_deviceSelectDialog->show();
+    });
+    connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
+    connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
+    connect(&m_triggerSingleShot,&QTimer::timeout,this,&MainWindow::stopCapture);
+
+
+    connect(ui->triggerButton,&QPushButton::clicked,this,[=](){
+        m_triggerTime = this->ui->triggerTime->value();
+        m_triggerSingleShot.start(m_triggerTime * 1000);
+        m_updateTriggerTimer.start();
+        startCapture();
+    });
+    connect(&m_updateTriggerTimer,&QTimer::timeout,this,[=](){
+        this->ui->triggerTime->setValue(((float)m_triggerSingleShot.remainingTime())/1000.0);
+    });
+
+    m_triggerSingleShot.setSingleShot(true);
+
 }
 
-void MainWindow::deviceAddWizard() {
-  DeviceSelectDialog deviceSelectDialog(this);
-  connect(&deviceSelectDialog,
-          SIGNAL(onBluetoothDeviceAccepted(QBluetoothDeviceInfo)), this,
-          SLOT(registerDevice(QBluetoothDeviceInfo)));
-  deviceSelectDialog.exec();
-}
+
 
 void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
-    SensorPanel* panel  = new SensorPanel(info,this);
-    connect(panel->getMetwareWrapper(),&MetawearWrapper::onLastEpoch,this,[=](qint64 epoch){
+    SensorPanel* panel = new SensorPanel(info,this);
+    connect(panel->getMetwareWrapper(),&MetawearWrapper::lastEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){
                 SensorPanel* p = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
@@ -70,7 +71,8 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
             }
         }
     });
-  ui->sensorContainer->addWidget(panel);
+    ui->sensorContainer->addWidget(panel);
+    updateConnectedDevices();
 }
 
 void MainWindow::startCapture()
@@ -82,7 +84,7 @@ void MainWindow::startCapture()
     this->ui->description->setEnabled(false);
 
     if(m_temporaryData){
-       delete(m_temporaryData);
+        delete(m_temporaryData);
         m_temporaryData = new QTemporaryDir();
     }
     for(int x = 0; x < this->ui->sensorContainer->count();x++){
@@ -114,8 +116,8 @@ void MainWindow::stopCapture()
 
     QString fileName = QFileDialog::getSaveFileName(this,tr("Save Data"),"",tr("All Files (*)"));
     if (fileName.isEmpty())
-           return;
-     else {
+        return;
+    else {
         if(!fileName.endsWith(".zip")){
             fileName.append(".zip");
         }
@@ -128,3 +130,14 @@ void MainWindow::stopCapture()
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::updateConnectedDevices()
+{
+    QList<QBluetoothDeviceInfo> devices;
+    QObjectList children =  ui->sensorContainer->children();
+    for(int i = 0; i < ui->sensorContainer->count(); ++i){
+        SensorPanel* panel =  dynamic_cast<SensorPanel*>(ui->sensorContainer->itemAt(i)->widget());
+        devices.append(panel->getDeviceInfo());
+    }
+    emit onConnectedDevices(devices);
+}
