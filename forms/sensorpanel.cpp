@@ -32,7 +32,7 @@
 
 SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      settingUpdateTimer(new QTimer(this)),
+      m_settingUpdateTimer(this),
       m_currentDevice(device),
       m_plotUpdatetimer(),
       m_wrapper(new MetawearWrapper(device, this)),
@@ -49,8 +49,15 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         this->deleteLater();
     });
     connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](){
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error",QString("Failed to connect to devce: %0").arg(device.address().toString()) );
+        messageBox.setFixedSize(500,200);
         this->deleteLater();
     });
+    connect(ui->remove,&QPushButton::clicked,this,[=](){
+       this->deleteLater();
+    });
+
 
     // watch for a text change and remove characters that can cause problems for the path
     connect(ui->sensorName,&QLineEdit::textChanged,this,[=](const QString& text){
@@ -84,7 +91,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_50Hz);
         this->m_wrapper->setGyroCapture(true);
         this->m_wrapper->setAccelerationCapture(true);
-        settingUpdateTimer->start();
+        m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
         m_isReadyToCapture = true;
     });
@@ -103,8 +110,8 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
 
     // read the battery status every minute
-    settingUpdateTimer->setInterval(60000);
-    connect(settingUpdateTimer, &QTimer::timeout,
+    m_settingUpdateTimer.setInterval(60000);
+    connect(&m_settingUpdateTimer, &QTimer::timeout,
             [=]() { this->m_wrapper->readBatteryStatus(); });
 
     connect(&m_plotUpdatetimer,&QTimer::timeout,this,[=](){
@@ -214,12 +221,14 @@ qint64 SensorPanel::getOffset()
 void SensorPanel::startCapture(QTemporaryDir* dir)
 {
     if(m_isReadyToCapture){
+        ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
     }
 }
 
 void SensorPanel::stopCapture()
 {
+    ui->sensorName->setEnabled(true);
     this->m_temporaryDir = nullptr;
 }
 

@@ -36,6 +36,9 @@ DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
         ui->scan->setEnabled(false);
         discoveryAgent->start();
     });
+    connect(ui->clear, &QPushButton::clicked,this,[=](){
+        ui->deviceList->clear();
+    });
     connect(discoveryAgent,&QBluetoothDeviceDiscoveryAgent::finished, this, [=](){ui->scan->setEnabled(true); });
 
     // An entry is added for every device connected

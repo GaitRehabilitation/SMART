@@ -36,19 +36,24 @@ class SensorPanel;
 class SensorPanel : public QWidget {
     Q_OBJECT
 private:
+    Ui::SensorPanel *ui;
+
   MetawearWrapper *m_wrapper;
-  Ui::SensorPanel *ui;
   QBluetoothDeviceInfo m_currentDevice;
+
   qint64 m_plotoffset;
+
   QTimer m_plotUpdatetimer;
-  QTimer *settingUpdateTimer;
+  QTimer m_settingUpdateTimer;
+
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
+
   bool m_isReadyToCapture;
 
   void registerPlotHandlers();
   void registerDataHandlers();
-
+  void configureWrapper(QBluetoothDeviceInfo device);
 public:
   explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
