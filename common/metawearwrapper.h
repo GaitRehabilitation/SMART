@@ -63,17 +63,17 @@ private:
 
   void subscribeMetawearHandlers();
   void updateEpoch(qint64 epoch);
+  void configureController();
 public:
   explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
                            QObject *parent = nullptr);
   virtual ~MetawearWrapper();
 
-  QLowEnergyController *getController();
-  MblMwMetaWearBoard *getBoard();
 
   int m_readyCharacteristicCount;
   bool m_isMetawareReady;
-  void tryReconnect();
+
+  void tryConnect();
 
 
   void setAccelerationSamplerate(float,float);
