@@ -42,14 +42,14 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     ui->setupUi(this);
 
 
-    connect(this->m_wrapper,SIGNAL(MetawearWrapper::metawareInitialized),this,SIGNAL(onMetawearInitilized()));
-    connect(this->m_wrapper,SIGNAL(disconnected()),this,SIGNAL(onDisconnect()));
-    connect(this->m_wrapper,SIGNAL(connect()),this,SIGNAL(onConnected()));
+    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::onMetawearInitilized);
+    connect(this->m_wrapper,&MetawearWrapper::onDisconnected,this,&SensorPanel::onDisconnect);
+    connect(this->m_wrapper,&MetawearWrapper::onConnected,this,&SensorPanel::onConnected);
 
-    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::onDisconnected,this,[=](){
         this->deleteLater();
     });
-    connect(this->m_wrapper,&MetawearWrapper::controllerError,this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](){
         this->deleteLater();
     });
 
@@ -60,6 +60,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             updated = this->ui->deviceAddress->text();
         }
 
+        //remove illegal symbols
         updated.replace(":","_");
         updated.replace(" ","_");
 
@@ -79,7 +80,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    connect(this->m_wrapper,&MetawearWrapper::metawareInitialized, this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
         this->m_wrapper->setAccelerationSamplerate(4.f,50.f);
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_50Hz);
         this->m_wrapper->setGyroCapture(true);
@@ -235,8 +236,13 @@ void SensorPanel::clearPlots()
 
 
 
-MetawearWrapper* SensorPanel::getMetwareWrapper(){
+MetawearWrapper* SensorPanel::getMetwareWrapper() {
     return this->m_wrapper;
+}
+
+QBluetoothDeviceInfo SensorPanel::getDeviceInfo()
+{
+    return m_currentDevice;
 }
 
 SensorPanel::~SensorPanel() { delete ui; }

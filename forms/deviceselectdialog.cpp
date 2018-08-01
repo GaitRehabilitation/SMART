@@ -25,7 +25,8 @@
 DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::DeviceSelectDialog),
       m_deviceInfo(QMap<QString, QBluetoothDeviceInfo>()),
-      localDevice(new QBluetoothLocalDevice) {
+      localDevice(new QBluetoothLocalDevice),
+      m_deviceBlackList(){
   ui->setupUi(this);
 
   discoveryAgent = new QBluetoothDeviceDiscoveryAgent();
@@ -71,25 +72,39 @@ void DeviceSelectDialog::addDevice(const QBluetoothDeviceInfo &info) {
 
     if(info.name() != "MetaWear")
         return;
-    QString label =
-      QString("%1 %2").arg(info.address().toString()).arg(info.name());
-  m_deviceInfo.insert(label, info);
+    if(m_deviceBlackList.contains(info.address().toString()))
+        return;
 
+    QString label = QString("%1 %2").arg(info.address().toString()).arg(info.name());
+    m_deviceInfo.insert(label, info);
 
-  QList<QListWidgetItem *> items =
-      ui->deviceList->findItems(label, Qt::MatchExactly);
+  QList<QListWidgetItem *> items = ui->deviceList->findItems(label, Qt::MatchExactly);
   if (items.empty()) {
     QListWidgetItem *item = new QListWidgetItem(label);
-    QBluetoothLocalDevice::Pairing lpairingStatus =
-        localDevice->pairingStatus(info.address());
-    if (lpairingStatus == QBluetoothLocalDevice::Paired ||
-        lpairingStatus == QBluetoothLocalDevice::AuthorizedPaired) {
+    QBluetoothLocalDevice::Pairing lpairingStatus = localDevice->pairingStatus(info.address());
+    if (lpairingStatus == QBluetoothLocalDevice::Paired || lpairingStatus == QBluetoothLocalDevice::AuthorizedPaired) {
       item->setTextColor(QColor(Qt::green));
     } else {
       item->setTextColor(QColor(Qt::black));
     }
     ui->deviceList->addItem(item);
   }
+}
+
+void DeviceSelectDialog::updateDeviceBlackList(const QList<QBluetoothDeviceInfo> &info)
+{
+    m_deviceBlackList.clear();
+    for(int i = 0; i < info.length(); ++i){
+        m_deviceBlackList.append(info[i].address().toString());
+    }
+    QMap<QString, QBluetoothDeviceInfo> temp = m_deviceInfo;
+    ui->deviceList->clear();
+    m_deviceInfo.clear();
+
+    QMap<QString, QBluetoothDeviceInfo>::iterator i;
+    for (auto i = temp.begin(); i != temp.end(); ++i){
+        addDevice(i.value());
+    }
 }
 
 void DeviceSelectDialog::onItemSelection() {

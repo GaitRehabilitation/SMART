@@ -16,7 +16,9 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QBluetoothDeviceInfo>
+#include <QBluetoothHostInfo>
 #include <QMainWindow>
 #include <QTemporaryDir>
 #include <QTimer>
@@ -25,8 +27,8 @@ namespace Ui {
 class MainWindow;
 }
 class SensorPanel;
-QT_FORWARD_DECLARE_CLASS(QFileDialog)
-
+class DeviceSelectDialog;
+class QFileDialog;
 class MainWindow : public QMainWindow {
   Q_OBJECT
 private:
@@ -35,19 +37,24 @@ private:
     QTemporaryDir* m_temporaryData;
     QTimer m_triggerSingleShot;
     QTimer m_updateTriggerTimer;
+    DeviceSelectDialog* m_deviceSelectDialog;
+
 public:
   MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
 
 public slots:
 
+  void updateConnectedDevices();
   void registerDevice(const QBluetoothDeviceInfo &info);
   void startCapture();
   void stopCapture();
 
+
 private slots:
   void deviceAddWizard();
-
+signals:
+  void onConnectedDevices(const QList<QBluetoothDeviceInfo>&);
 };
 
 #endif // MAINWINDOW_H

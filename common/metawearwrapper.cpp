@@ -178,19 +178,15 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
     m_controller = new QLowEnergyController(m_currentDevice, this);
 
     // Service Discovery
-    connect(this->m_controller, SIGNAL(serviceDiscovered(QBluetoothUuid)), this,
-            SLOT(handleServiceDiscovered(QBluetoothUuid)));
-    connect(this->m_controller, SIGNAL(discoveryFinished()), this,
-            SLOT(handleServiceDiscoveryFinished()));
+    connect(this->m_controller, SIGNAL(serviceDiscovered(QBluetoothUuid)), this,SLOT(handleServiceDiscovered(QBluetoothUuid)));
+    connect(this->m_controller, SIGNAL(discoveryFinished()), this,SLOT(handleServiceDiscoveryFinished()));
 
     // controller connection/disconnect
-    connect(this->m_controller, SIGNAL(disconnected()), this,
-            SLOT(handleDisconnect()));
-    connect(this->m_controller, SIGNAL(connected()), this, SLOT(handleConnected()));
+    connect(this->m_controller, &QLowEnergyController::connected, this,&MetawearWrapper::handleConnected);
+    connect(this->m_controller, &QLowEnergyController::disconnected, this,&MetawearWrapper::handleDisconnect);
 
     // controller error
-    connect(this->m_controller, SIGNAL(error(QLowEnergyController::Error)), this,
-            SLOT(handleControllerError(QLowEnergyController::Error)));
+    connect(this->m_controller, SIGNAL(error(QLowEnergyController::Error)), this, SLOT(handleControllerError(QLowEnergyController::Error)));
 
     MblMwBtleConnection btleConnection;
     btleConnection.context = this;
@@ -411,10 +407,10 @@ void MetawearWrapper::metwareIntialize() {
                     wrapper->handleEpoch(data->epoch);
                 });
 
-                emit wrapper->metawareInitialized();
+                emit wrapper->onMetawareInitialized();
             } else {
                 qWarning() << "Error initializing board:" << status;
-                emit wrapper->metawareFailedToInitialized(status);
+                emit wrapper->onMetawareFailedToInitialized(status);
             }
         });
         this->m_isMetawareReady = true;
@@ -424,12 +420,12 @@ void MetawearWrapper::metwareIntialize() {
 void MetawearWrapper::handleConnected() {
     qDebug() << "Controller conected. Search services..";
     this->m_controller->discoverServices();
-    emit connected();
+    emit onConnected();
 }
 
 void MetawearWrapper::handleDisconnect() {
     qDebug() << "LowEnergy controller disconnected";
-    emit disconnected();
+    emit onDisconnected();
 }
 
 void MetawearWrapper::handleControllerError(QLowEnergyController::Error e) {
@@ -516,7 +512,6 @@ qint64 MetawearWrapper::getLatestEpoch()
 }
 
 MetawearWrapper::~MetawearWrapper() {
-
 
 }
 

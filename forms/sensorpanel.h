@@ -51,12 +51,13 @@ private:
   void registerPlotHandlers();
   void registerDataHandlers();
 
-
 public:
   explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
+
   bool isReadyToCapture();
   MetawearWrapper* getMetwareWrapper();
+  QBluetoothDeviceInfo getDeviceInfo();
 public slots:
   void setName(QString);
   void setOffset(qint64 offset);
@@ -74,8 +75,6 @@ signals:
   void onBluetoothError(QLowEnergyController::Error e);
 
   void onMetawearInitilized();
-
-
   void setDir();
 };
 

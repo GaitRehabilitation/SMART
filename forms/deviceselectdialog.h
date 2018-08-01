@@ -43,9 +43,11 @@ private:
   QBluetoothDeviceDiscoveryAgent *discoveryAgent;
   QBluetoothLocalDevice *localDevice;
   QMap<QString, QBluetoothDeviceInfo> m_deviceInfo;
+  QList<QString> m_deviceBlackList;
 
 public slots:
-  void addDevice(const QBluetoothDeviceInfo &);
+  void addDevice(const QBluetoothDeviceInfo&);
+  void updateDeviceBlackList(const QList<QBluetoothDeviceInfo>&);
   void accept();
 private slots:
   void startScan();

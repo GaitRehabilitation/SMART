@@ -107,8 +107,8 @@ private slots:
   void metwareIntialize();
 
 signals:
-  void connected();
-  void disconnected();
+  void onConnected();
+  void onDisconnected();
 
   double onBatteryPercentage(qint8);
   double onVoltage(quint16);
@@ -119,11 +119,11 @@ signals:
   void onAmbientLight(qint64, qint32);
   void onLastEpoch(qint64);
 
-  void metawareInitialized();
-  void metawareFailedToInitialized(int32_t status);
+  void onMetawareInitialized();
+  void onMetawareFailedToInitialized(int32_t status);
 
-  void controllerError(QLowEnergyController::Error);
-  void characteristicError(QLowEnergyService::ServiceError);
+  void onControllerError(QLowEnergyController::Error);
+  void onCharacteristicError(QLowEnergyService::ServiceError);
 };
 
 #endif // METAWEARWRAPPER_H
