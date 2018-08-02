@@ -32,11 +32,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_deviceSelectDialog(new DeviceSelectDialog(this)),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
     ui->setupUi(this);
 
-
     connect(m_deviceSelectDialog,&DeviceSelectDialog::onBluetoothDeviceAccepted, this,&MainWindow::registerDevice);
     connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
 
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
+        updateConnectedDevices();
         m_deviceSelectDialog->show();
     });
     connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
@@ -72,7 +72,7 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
         }
     });
     ui->sensorContainer->addWidget(panel);
-    updateConnectedDevices();
+
 }
 
 void MainWindow::startCapture()

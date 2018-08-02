@@ -43,7 +43,24 @@
       </sizepolicy>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="5" column="0" colspan="2">
+      <item row="4" column="0" colspan="2">
+       <widget class="QProgressBar" name="battery">
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="format">
+         <string>Battery %p%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLineEdit" name="sensorName">
+        <property name="placeholderText">
+         <string>Sensor Title</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0" colspan="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -63,20 +80,10 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QProgressBar" name="battery">
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="format">
-         <string>Battery %p%</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLineEdit" name="sensorName">
-        <property name="placeholderText">
-         <string>Sensor Title</string>
+      <item row="7" column="0" colspan="2">
+       <widget class="QPushButton" name="remove">
+        <property name="text">
+         <string>Remove</string>
         </property>
        </widget>
       </item>
