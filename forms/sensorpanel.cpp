@@ -157,17 +157,14 @@ void SensorPanel::registerDataHandlers()
     connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
         if(m_temporaryDir && m_temporaryDir->isValid()){
-            QString path =  m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")) ;
-            QFile file(path);
-            bool exist = file.exists();
-            if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
-                QTextStream outStream(&file);
+           bool exist = m_accFile->exists();
+            if(m_accFile->open(QIODevice::WriteOnly | QIODevice::Append)){
+                QTextStream outStream(m_accFile);
                 if(!exist){
                     outStream << "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
                 }
                 outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
             }
-            file.close();
         }
     });
 
