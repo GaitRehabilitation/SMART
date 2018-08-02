@@ -112,10 +112,8 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
     connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
         this->m_wrapper->setAccelerationSamplerate(4.f,25.f);
-        this->m_wrapper->setAccelerationCapture(true);
 
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
-        this->m_wrapper->setGyroCapture(true);
 
 
         m_settingUpdateTimer.start();
@@ -255,6 +253,8 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
     if(m_isReadyToCapture){
         ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
+        this->m_wrapper->setGyroCapture(true);
+        this->m_wrapper->setAccelerationCapture(true);
 
 
         m_magFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")),this);
