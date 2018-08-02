@@ -43,17 +43,23 @@ private:
 
   qint64 m_plotoffset;
 
+  QTimer m_reconnectTimer;
   QTimer m_plotUpdatetimer;
   QTimer m_settingUpdateTimer;
 
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
 
+  QFile* m_magFile;
+  QFile* m_accFile;
+  QFile* m_gyroFile;
+
   bool m_isReadyToCapture;
 
   void registerPlotHandlers();
   void registerDataHandlers();
   void configureWrapper(QBluetoothDeviceInfo device);
+
 public:
   explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
   virtual ~SensorPanel();
@@ -67,6 +73,7 @@ public:
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
   void clearPlots();
+
 signals:
   void connected();
   void disconnect();

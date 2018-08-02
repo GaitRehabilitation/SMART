@@ -44,7 +44,7 @@ public:
   virtual ~MainWindow();
 
   void updateConnectedDevices();
-  void registerDevice(const QBluetoothDeviceInfo &info);
+  SensorPanel *registerDevice(const QBluetoothDeviceInfo &info);
   void startCapture();
   void stopCapture();
 

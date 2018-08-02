@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
+SensorPanel* MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
     SensorPanel* panel = new SensorPanel(info,this);
     connect(panel->getMetwareWrapper(),&MetawearWrapper::lastEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
@@ -72,7 +72,7 @@ void MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
         }
     });
     ui->sensorContainer->addWidget(panel);
-
+    return panel;
 }
 
 void MainWindow::startCapture()

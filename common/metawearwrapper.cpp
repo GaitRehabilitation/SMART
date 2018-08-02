@@ -29,6 +29,7 @@
 #include "metawear/sensor/magnetometer_bmm150.h"
 
 #include <QBluetoothAddress>
+#include <QBluetoothSocket>
 #include <QBluetoothUuid>
 #include <QByteArray>
 #include <QLowEnergyController>
@@ -51,6 +52,7 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
                                         MblMwFnIntVoidPtrArray handler) {
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
     wrapper->m_readGattHandler = handler;
+
 
     QBluetoothUuid service_uuid = QBluetoothUuid(
                 convertQuint128((uint8_t *)&characteristic->service_uuid_low,
@@ -182,7 +184,8 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
     btleConnection.on_disconnect = on_disconnect_qt;
     this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
 
-    m_controller = new QLowEnergyController(m_currentDevice, this);
+    m_controller = QLowEnergyController::createCentral(m_currentDevice,this);
+
 
     // Service Discovery
     connect(this->m_controller, &QLowEnergyController::serviceDiscovered, this,[=](QBluetoothUuid newService){
@@ -305,6 +308,27 @@ void MetawearWrapper::tryConnect()
     }
 }
 
+void MetawearWrapper::tryDisconnect()
+{
+    this->m_controller->disconnectFromDevice();
+}
+
+void MetawearWrapper::invalidateServices()
+{
+    foreach (QString key, this->m_services.keys()) {
+        QLowEnergyService *lowEnergyService = this->m_services.value(key);
+        foreach(auto c, lowEnergyService->characteristics()){
+            if(c.isValid() && lowEnergyService){
+                lowEnergyService->writeDescriptor(c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration), QByteArray::fromHex("0000"));
+            }
+            else{
+                lowEnergyService->deleteLater();
+            }
+        }
+    }
+    this->m_services.clear();
+}
+
 
 
 void MetawearWrapper::updateEpoch(qint64 epoch)
@@ -404,6 +428,8 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                 wrapper->m_isSensorEnabled = true;
 
                 qDebug() << "Board initialized";
+
+
                 auto dev_info = mbl_mw_metawearboard_get_device_information(board);
                 qDebug() << "firmware = " << dev_info->firmware_revision;
                 mbl_mw_memory_free((void *)dev_info);
