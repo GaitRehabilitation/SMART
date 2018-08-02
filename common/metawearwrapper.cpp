@@ -308,6 +308,27 @@ void MetawearWrapper::tryConnect()
     }
 }
 
+void MetawearWrapper::tryDisconnect()
+{
+    this->m_controller->disconnectFromDevice();
+}
+
+void MetawearWrapper::invalidateServices()
+{
+    foreach (QString key, this->m_services.keys()) {
+        QLowEnergyService *lowEnergyService = this->m_services.value(key);
+        foreach(auto c, lowEnergyService->characteristics()){
+            if(c.isValid() && lowEnergyService){
+                lowEnergyService->writeDescriptor(c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration), QByteArray::fromHex("0000"));
+            }
+            else{
+                lowEnergyService->deleteLater();
+            }
+        }
+    }
+    this->m_services.clear();
+}
+
 
 
 void MetawearWrapper::updateEpoch(qint64 epoch)

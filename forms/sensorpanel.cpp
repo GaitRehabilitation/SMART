@@ -38,21 +38,42 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
       m_wrapper(new MetawearWrapper(device, this)),
       m_plotoffset(0),
       m_temporaryDir(nullptr),
+      m_reconnectTimer(),
       m_isReadyToCapture(false){
     ui->setupUi(this);
+    m_reconnectTimer.setSingleShot(true);
+
+    connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
+        this->m_wrapper->tryConnect();
+    });
 
     connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::metawearInitilized);
     connect(this->m_wrapper,&MetawearWrapper::disconnected,this,&SensorPanel::disconnect);
     connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
 
-    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
-        this->deleteLater();
+    connect(this->m_wrapper,&MetawearWrapper::connected,this,[=](){
+        m_reconnectTimer.setInterval(0);
     });
-    connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](){
+    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
+        if(m_reconnectTimer.interval() == 0)
+            m_reconnectTimer.setInterval(200);
+        this->m_wrapper->invalidateServices();
+        qDebug() << "trying to reconnect to " << device.address().toString() << " with timeout " << m_reconnectTimer.interval();
+        if(m_reconnectTimer.interval() > 10000){
+            this->m_wrapper->deleteLater();
+            QMessageBox messageBox;
+            messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
+            messageBox.setFixedSize(500,200);
+            return;
+        }
+        m_reconnectTimer.setInterval(m_reconnectTimer.interval() * 2);
+        m_reconnectTimer.start();
+    });
+    connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
+         this->deleteLater();
         QMessageBox messageBox;
-        messageBox.critical(0,"Error",QString("Failed to connect to devce: %0").arg(device.address().toString()) );
+        messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
         messageBox.setFixedSize(500,200);
-        this->deleteLater();
     });
     connect(ui->remove,&QPushButton::clicked,this,[=](){
        this->deleteLater();

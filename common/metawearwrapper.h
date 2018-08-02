@@ -63,7 +63,7 @@ private:
 
   void subscribeMetawearHandlers();
   void updateEpoch(qint64 epoch);
-  void configureController();
+
 public:
   explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
                            QObject *parent = nullptr);
@@ -74,7 +74,8 @@ public:
   bool m_isMetawareReady;
 
   void tryConnect();
-
+  void tryDisconnect();
+  void invalidateServices();
 
   void setAccelerationSamplerate(float,float);
   void setAmbientLightSamplerate(float);
