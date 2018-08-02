@@ -49,9 +49,9 @@ private:
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
 
-  QFile m_magFile;
-  QFile m_accFile;
-  QFile m_gyroFile;
+  QFile* m_magFile;
+  QFile* m_accFile;
+  QFile* m_gyroFile;
 
   bool m_isReadyToCapture;
 
