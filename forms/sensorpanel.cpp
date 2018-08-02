@@ -47,7 +47,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         this->m_wrapper->resetControllerAndTryAgain();
 
         if(m_reconnectTimer.interval() > 20000){
-            this->m_wrapper->deleteLater();
+            this->deleteLater();
             QMessageBox messageBox;
             messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
             messageBox.setFixedSize(500,200);
@@ -73,9 +73,10 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         m_reconnectTimer.start();
     });
     connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
-        if(m_reconnectTimer.interval() == 0)
-            m_reconnectTimer.setInterval(5000);
-        m_reconnectTimer.start();
+        this->deleteLater();
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
+        messageBox.setFixedSize(500,200);
     });
     connect(ui->remove,&QPushButton::clicked,this,[=](){
        this->deleteLater();
@@ -169,9 +170,6 @@ void SensorPanel::registerPlotHandlers()
     zgraphAcc->setName("Z Acc");
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
 
-    QCPGraph *zgraphgyro = ui->plot->addGraph();
-    zgraphgyro ->setName("Z Acc");
-    zgraphgyro ->setPen(QPen(QColor(255,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
         this->m_plotLock.lock();
@@ -181,11 +179,6 @@ void SensorPanel::registerPlotHandlers()
         this->m_plotLock.unlock();
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::gyro,this,[=](int64_t epoch, float x, float y, float z) {
-        this->m_plotLock.lock();
-        zgraphgyro->addData(epoch - m_plotoffset, static_cast<double>(z));
-        this->m_plotLock.unlock();
-    });
 }
 
 void SensorPanel::registerDataHandlers()

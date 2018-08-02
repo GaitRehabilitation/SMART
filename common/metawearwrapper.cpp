@@ -399,7 +399,7 @@ void MetawearWrapper::subscribeMetawearHandlers() {
 
 
                 // subscribe to acceleration handler
-                auto acc_signal = mbl_mw_acc_get_high_freq_acceleration_data_signal(wrapper->m_metaWearBoard);
+                auto acc_signal = mbl_mw_acc_get_packed_acceleration_data_signal(wrapper->m_metaWearBoard);
                 mbl_mw_datasignal_subscribe(acc_signal, wrapper,[](void *context, const MblMwData *data) -> void {
                     MetawearWrapper *wrapper = (MetawearWrapper *)context;
                     auto acceleration = (MblMwCartesianFloat *)data->value;
@@ -407,7 +407,7 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                     wrapper->updateEpoch(data->epoch);
                 });
                 // subscribe to gyro handler
-                auto gyroSignal = mbl_mw_gyro_bmi160_get_rotation_data_signal(wrapper->m_metaWearBoard);
+                auto gyroSignal = mbl_mw_gyro_bmi160_get_packed_rotation_data_signal(wrapper->m_metaWearBoard);
                 mbl_mw_datasignal_subscribe(gyroSignal, wrapper,[](void *context, const MblMwData *data) -> void {
                     MetawearWrapper *wrapper = (MetawearWrapper *)context;
                     auto rotRate = (MblMwCartesianFloat *)data->value;
@@ -433,7 +433,7 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                     emit wrapper->magnetometer(data->epoch, bfield->x,bfield->y, bfield->z);
                     wrapper->updateEpoch(data->epoch);
                 });
-
+                mbl_mw_settings_set_connection_parameters(board, 7.5f, 7.5f, 0, 6000);
                 emit wrapper->onMetawareInitialized();
             } else {
                 qWarning() << "Error initializing board:" << status;
