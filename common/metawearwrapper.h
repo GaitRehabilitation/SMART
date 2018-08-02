@@ -21,6 +21,7 @@
 #include <QLowEnergyController>
 #include <QObject>
 #include <functional>
+#include <QPointer>
 
 #include "metawear/platform/btle_connection.h"
 #include "metawear/sensor/accelerometer.h"
@@ -52,7 +53,7 @@ private:
   MblMwFnIntVoidPtrArray m_notificationHandler;
   MblMwMetaWearBoard *m_metaWearBoard;
 
-  QLowEnergyController *m_controller;  
+  QPointer<QLowEnergyController> m_controller;
   QMap<QString, QLowEnergyService *> m_services;
   QBluetoothDeviceInfo m_currentDevice;
 
@@ -69,13 +70,9 @@ public:
                            QObject *parent = nullptr);
   virtual ~MetawearWrapper();
 
-
+  void resetControllerAndTryAgain();
   int m_readyCharacteristicCount;
   bool m_isMetawareReady;
-
-  void tryConnect();
-  void tryDisconnect();
-  void invalidateServices();
 
   void setAccelerationSamplerate(float,float);
   void setAmbientLightSamplerate(float);
