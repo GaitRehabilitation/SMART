@@ -49,6 +49,10 @@ private:
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
 
+  QFile* m_magFile;
+  QFile* m_accFile;
+  QFile* m_gyroFile;
+
   bool m_isReadyToCapture;
 
   void registerPlotHandlers();
@@ -67,6 +71,8 @@ public:
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
   void clearPlots();
+
+
 signals:
   void connected();
   void disconnect();
