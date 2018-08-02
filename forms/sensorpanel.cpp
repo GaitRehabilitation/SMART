@@ -91,8 +91,8 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_50Hz);
         this->m_wrapper->setGyroCapture(true);
         this->m_wrapper->setAccelerationCapture(true);
-        m_settingUpdateTimer.start();
-        this->m_wrapper->readBatteryStatus();
+        //m_settingUpdateTimer.start();
+        //this->m_wrapper->readBatteryStatus();
         m_isReadyToCapture = true;
     });
 
