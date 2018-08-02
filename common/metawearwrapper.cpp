@@ -408,7 +408,6 @@ void MetawearWrapper::subscribeMetawearHandlers() {
 
                 qDebug() << "Board initialized";
 
-                emit wrapper->onMetawareInitialized();
 
                 auto dev_info = mbl_mw_metawearboard_get_device_information(board);
                 qDebug() << "firmware = " << dev_info->firmware_revision;
@@ -458,6 +457,7 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                     wrapper->updateEpoch(data->epoch);
                 });
 
+                emit wrapper->onMetawareInitialized();
             } else {
                 qWarning() << "Error initializing board:" << status;
                 emit wrapper->onMetawareFailedToInitialized(status);

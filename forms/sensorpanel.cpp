@@ -87,12 +87,14 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     this->registerDataHandlers();
 
     connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
-        this->m_wrapper->setAccelerationSamplerate(4.f,50.f);
-        this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_50Hz);
-        this->m_wrapper->setGyroCapture(true);
+        this->m_wrapper->setAccelerationSamplerate(4.f,25.f);
         this->m_wrapper->setAccelerationCapture(true);
-        //m_settingUpdateTimer.start();
-        //this->m_wrapper->readBatteryStatus();
+
+        this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
+        this->m_wrapper->setGyroCapture(true);
+
+        m_settingUpdateTimer.start();
+        this->m_wrapper->readBatteryStatus();
         m_isReadyToCapture = true;
     });
 
@@ -158,26 +160,34 @@ void SensorPanel::registerDataHandlers()
             [=](int64_t epoch, float x, float y, float z) {
         if(m_temporaryDir && m_temporaryDir->isValid()){
            bool exist = m_accFile->exists();
-            if(m_accFile->open(QIODevice::WriteOnly | QIODevice::Append)){
-                QTextStream outStream(m_accFile);
-                if(!exist){
-                    outStream << "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
-                }
-                outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
+           if(!m_accFile->isOpen()){
+               m_accFile->open(QIODevice::WriteOnly | QIODevice::Append);
+               if(!m_accFile->isOpen())
+                   return;
+           }
+            QTextStream outStream(m_accFile);
+            if(!exist){
+                outStream << "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
             }
+            outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
+
         }
     });
 
     connect(this->m_wrapper,&MetawearWrapper::magnetometer,this,[=](int64_t epoch, float x, float y, float z){
         if(m_temporaryDir && m_temporaryDir->isValid()){
             bool exist = m_magFile->exists();
-            if(m_magFile->open(QIODevice::WriteOnly | QIODevice::Append)){
+            if(!m_magFile->isOpen()){
+                m_magFile->open(QIODevice::WriteOnly | QIODevice::Append);
+                if(!m_magFile->isOpen())
+                    return;
+            }
                 QTextStream outStream(m_magFile);
                 if(!exist){
                     outStream << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
                 }
                 outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
-            }
+
         }
     });
 
@@ -185,13 +195,16 @@ void SensorPanel::registerDataHandlers()
         if(m_temporaryDir && m_temporaryDir->isValid()){
 
             bool exist = m_gyroFile->exists();
-            if(m_gyroFile->open(QIODevice::WriteOnly | QIODevice::Append)){
-                QTextStream outStream(m_gyroFile);
-                if(!exist){
-                    outStream << "epoch(ms),gyro_x(fdps),gyro_y(fdps),gyro_z(fdps)" << '\n';
-                }
-                outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
+            if(!m_gyroFile->isOpen()){
+                m_gyroFile->open(QIODevice::WriteOnly | QIODevice::Append);
+                if(!m_magFile->isOpen())
+                    return;
             }
+            QTextStream outStream(m_gyroFile);
+            if(!exist){
+                outStream << "epoch(ms),gyro_x(fdps),gyro_y(fdps),gyro_z(fdps)" << '\n';
+            }
+            outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
         }
     });
 
@@ -218,7 +231,7 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
 
         m_magFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")),this);
         m_accFile= new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")),this);
-        m_gyroFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")),this);
+        m_gyroFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"gyro")),this);
     }
 }
 
