@@ -44,22 +44,9 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     m_reconnectTimer.setSingleShot(true);
 
     connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
-        this->m_wrapper->tryConnect();
-    });
+        this->m_wrapper->resetControllerAndTryAgain();
 
-    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::metawearInitilized);
-    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,&SensorPanel::disconnect);
-    connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
-
-    connect(this->m_wrapper,&MetawearWrapper::connected,this,[=](){
-        m_reconnectTimer.setInterval(0);
-    });
-    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
-        if(m_reconnectTimer.interval() == 0)
-            m_reconnectTimer.setInterval(200);
-        this->m_wrapper->invalidateServices();
-        qDebug() << "trying to reconnect to " << device.address().toString() << " with timeout " << m_reconnectTimer.interval();
-        if(m_reconnectTimer.interval() > 10000){
+        if(m_reconnectTimer.interval() > 20000){
             this->m_wrapper->deleteLater();
             QMessageBox messageBox;
             messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
@@ -67,13 +54,28 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
             return;
         }
         m_reconnectTimer.setInterval(m_reconnectTimer.interval() * 2);
+        qDebug() << "trying to reconnect to " << device.address().toString() << " with timeout " << m_reconnectTimer.interval();
+
+        m_reconnectTimer.start();
+    });
+
+    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::metawearInitilized);
+    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,&SensorPanel::disconnect);
+    connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
+
+    connect(this->m_wrapper,&MetawearWrapper::connected,this,[=](){
+        m_reconnectTimer.stop();
+        m_reconnectTimer.setInterval(0);
+    });
+    connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){
+        if(m_reconnectTimer.interval() == 0)
+            m_reconnectTimer.setInterval(5000);
         m_reconnectTimer.start();
     });
     connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
-         this->deleteLater();
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
-        messageBox.setFixedSize(500,200);
+        if(m_reconnectTimer.interval() == 0)
+            m_reconnectTimer.setInterval(5000);
+        m_reconnectTimer.start();
     });
     connect(ui->remove,&QPushButton::clicked,this,[=](){
        this->deleteLater();
@@ -113,6 +115,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
         this->m_wrapper->setGyroCapture(true);
+
 
         m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
@@ -165,12 +168,22 @@ void SensorPanel::registerPlotHandlers()
     QCPGraph *zgraphAcc = ui->plot->addGraph();
     zgraphAcc->setName("Z Acc");
     zgraphAcc->setPen(QPen(QColor(0,0,255)));
+
+    QCPGraph *zgraphgyro = ui->plot->addGraph();
+    zgraphgyro ->setName("Z Acc");
+    zgraphgyro ->setPen(QPen(QColor(255,0,255)));
     connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
             [=](int64_t epoch, float x, float y, float z) {
         this->m_plotLock.lock();
         xgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(x));
         ygraphAcc->addData(epoch - m_plotoffset, static_cast<double>(y));
         zgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(z));
+        this->m_plotLock.unlock();
+    });
+
+    connect(this->m_wrapper,&MetawearWrapper::gyro,this,[=](int64_t epoch, float x, float y, float z) {
+        this->m_plotLock.lock();
+        zgraphgyro->addData(epoch - m_plotoffset, static_cast<double>(z));
         this->m_plotLock.unlock();
     });
 }
@@ -203,11 +216,11 @@ void SensorPanel::registerDataHandlers()
                 if(!m_magFile->isOpen())
                     return;
             }
-                QTextStream outStream(m_magFile);
-                if(!exist){
-                    outStream << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
-                }
-                outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
+            QTextStream outStream(m_magFile);
+            if(!exist){
+                outStream << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
+            }
+            outStream << epoch << ','<< x << ','<< y << ','<< z << '\n';
 
         }
     });
@@ -250,6 +263,7 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
         ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
 
+
         m_magFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")),this);
         m_accFile= new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")),this);
         m_gyroFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"gyro")),this);
@@ -264,6 +278,13 @@ void SensorPanel::stopCapture()
     m_magFile->close();
     m_accFile->close();
     m_gyroFile->close();
+
+
+    m_magFile->deleteLater();
+    m_accFile->deleteLater();
+    m_gyroFile->deleteLater();
+
+
 }
 
 void SensorPanel::clearPlots()

@@ -54,15 +54,10 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
     wrapper->m_readGattHandler = handler;
 
 
-    QBluetoothUuid service_uuid = QBluetoothUuid(
-                convertQuint128((uint8_t *)&characteristic->service_uuid_low,
-                                (uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid =
-            QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
-                                           (uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low,(uint8_t *)&characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,(uint8_t *)&characteristic->uuid_high));
 
-    QLowEnergyService *service =
-            wrapper->m_services.value(service_uuid.toString());
+    QLowEnergyService *service = wrapper->m_services.value(service_uuid.toString());
     if (service == nullptr) {
         qWarning() << "Invliad service Uuid(read gatt)" << service_uuid.toString();
         return;
@@ -76,17 +71,10 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
     service->readCharacteristic(c);
 }
 
-void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller,
-                                         MblMwGattCharWriteType writeType,
-                                         const MblMwGattChar *characteristic,
-                                         const uint8_t *value, uint8_t length) {
+void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller, MblMwGattCharWriteType writeType, const MblMwGattChar *characteristic, const uint8_t *value, uint8_t length) {
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
-    QBluetoothUuid service_uuid = QBluetoothUuid(
-                convertQuint128((uint8_t *)&characteristic->service_uuid_low,
-                                (uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid =
-            QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
-                                           (uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid( convertQuint128((uint8_t *)&characteristic->service_uuid_low, (uint8_t *)&characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low, (uint8_t *)&characteristic->uuid_high));
 
     QLowEnergyService *service =
             wrapper->m_services.value(service_uuid.toString());
@@ -109,50 +97,36 @@ void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller,
 }
 
 
-void MetawearWrapper::enable_char_notify_qt(void *context, const void *caller,
-                                            const MblMwGattChar *characteristic,
-                                            MblMwFnIntVoidPtrArray handler,
-                                            MblMwFnVoidVoidPtrInt ready) {
+void MetawearWrapper::enable_char_notify_qt(void *context, const void *caller, const MblMwGattChar *characteristic, MblMwFnIntVoidPtrArray handler, MblMwFnVoidVoidPtrInt ready) {
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
     wrapper->m_notificationHandler = handler;
 
-    QBluetoothUuid service_uuid = QBluetoothUuid(
-                convertQuint128((uint8_t *)&characteristic->service_uuid_low,
-                                (uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid =
-            QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,
-                                           (uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low, (uint8_t *)&characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low, (uint8_t *)&characteristic->uuid_high));
 
-    QLowEnergyService *service =
-            wrapper->m_services.value(service_uuid.toString());
+    QLowEnergyService *service = wrapper->m_services.value(service_uuid.toString());
     if (service == nullptr) {
-        qWarning() << "failed to parse service uuid(char notify):"
-                   << service_uuid.toString();
+        qWarning() << "failed to parse service uuid(char notify): " << service_uuid.toString();
         return;
     }
     QLowEnergyCharacteristic c = service->characteristic(characteristic_uuid);
     if (!c.isValid()) {
-        qWarning() << "Invalid characteristic Uuid(char notify)"
-                   << characteristic_uuid.toString();
+        qWarning() << "Invalid characteristic Uuid(char notify): " << characteristic_uuid.toString();
     }
 
-    QLowEnergyDescriptor notification =
-            c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+    QLowEnergyDescriptor notification = c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
     if (!notification.isValid())
         return;
 
     service->writeDescriptor(notification, QByteArray::fromHex("0100"));
     QObject *temp = new QObject();
-    service->connect(service, &QLowEnergyService::descriptorWritten, temp,
-                     [caller, ready, temp](const QLowEnergyDescriptor &descriptor,
-                     const QByteArray &newValue) {
+    service->connect(service, &QLowEnergyService::descriptorWritten, temp, [caller, ready, temp](const QLowEnergyDescriptor &descriptor, const QByteArray &newValue) {
         ready(caller, MBL_MW_STATUS_OK);
         temp->deleteLater();
     });
 }
 
-void MetawearWrapper::on_disconnect_qt(void *context, const void *caller,
-                                       MblMwFnVoidVoidPtrInt handler) {
+void MetawearWrapper::on_disconnect_qt(void *context, const void *caller, MblMwFnVoidVoidPtrInt handler) {
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
     wrapper->m_disconnectedHandler = handler;
 }
@@ -184,8 +158,17 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
     btleConnection.on_disconnect = on_disconnect_qt;
     this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
 
-    m_controller = QLowEnergyController::createCentral(m_currentDevice,this);
+    resetControllerAndTryAgain();
+}
 
+
+
+void MetawearWrapper::resetControllerAndTryAgain()
+{
+    if(this->m_controller){
+        this->m_controller->deleteLater();
+    }
+    m_controller = QLowEnergyController::createCentral(m_currentDevice,this);
 
     // Service Discovery
     connect(this->m_controller, &QLowEnergyController::serviceDiscovered, this,[=](QBluetoothUuid newService){
@@ -237,9 +220,7 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
     connect(this->m_controller, &QLowEnergyController::discoveryFinished, this,[=](){
         foreach (QString key, this->m_services.keys()) {
             QLowEnergyService *lowEnergyService = this->m_services.value(key);
-            lowEnergyService->connect(
-                        lowEnergyService, &QLowEnergyService::stateChanged,
-                        [this, lowEnergyService](QLowEnergyService::ServiceState state) {
+            lowEnergyService->connect( lowEnergyService, &QLowEnergyService::stateChanged, [this, lowEnergyService](QLowEnergyService::ServiceState state) {
                 if (state == QLowEnergyService::ServiceDiscovered) {
                     this->m_readyCharacteristicCount++;
                     if (this->m_readyCharacteristicCount == this->m_services.count()) {
@@ -287,18 +268,6 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
         emit onControllerError(e);
     });
 
-    tryConnect();
-
-}
-
-
-MetawearWrapper::~MetawearWrapper() {
-    mbl_mw_metawearboard_free(m_metaWearBoard);
-}
-
-
-void MetawearWrapper::tryConnect()
-{
     if (m_controller->state() == QLowEnergyController::UnconnectedState) {
         qDebug() << "Starting connection";
         m_controller->connectToDevice();
@@ -308,26 +277,10 @@ void MetawearWrapper::tryConnect()
     }
 }
 
-void MetawearWrapper::tryDisconnect()
-{
-    this->m_controller->disconnectFromDevice();
+MetawearWrapper::~MetawearWrapper() {
+    mbl_mw_metawearboard_free(m_metaWearBoard);
 }
 
-void MetawearWrapper::invalidateServices()
-{
-    foreach (QString key, this->m_services.keys()) {
-        QLowEnergyService *lowEnergyService = this->m_services.value(key);
-        foreach(auto c, lowEnergyService->characteristics()){
-            if(c.isValid() && lowEnergyService){
-                lowEnergyService->writeDescriptor(c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration), QByteArray::fromHex("0000"));
-            }
-            else{
-                lowEnergyService->deleteLater();
-            }
-        }
-    }
-    this->m_services.clear();
-}
 
 
 
@@ -339,6 +292,7 @@ void MetawearWrapper::updateEpoch(qint64 epoch)
         emit lastEpoch(m_laststEpoch);
     }
 }
+
 
 void MetawearWrapper::readBatteryStatus() {
     auto battery_signal =
@@ -368,7 +322,6 @@ void MetawearWrapper::setGyroSamplerate(MblMwGyroBmi160Range range, MblMwGyroBmi
 
 void MetawearWrapper::setMagnetometerRate(float value) {
     mbl_mw_mag_bmm150_enable_b_field_sampling(m_metaWearBoard);
-    mbl_mw_mag_bmm150_start(m_metaWearBoard);
 }
 
 void MetawearWrapper::setAccelerationCapture(bool enable) {
@@ -444,14 +397,24 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                     emit wrapper->voltage(state->voltage);
                 });
 
+
                 // subscribe to acceleration handler
-                auto acc_signal = mbl_mw_acc_get_acceleration_data_signal(wrapper->m_metaWearBoard);
+                auto acc_signal = mbl_mw_acc_get_high_freq_acceleration_data_signal(wrapper->m_metaWearBoard);
                 mbl_mw_datasignal_subscribe(acc_signal, wrapper,[](void *context, const MblMwData *data) -> void {
                     MetawearWrapper *wrapper = (MetawearWrapper *)context;
                     auto acceleration = (MblMwCartesianFloat *)data->value;
                     emit wrapper->acceleration(data->epoch, acceleration->x,acceleration->y,acceleration->z);
                     wrapper->updateEpoch(data->epoch);
                 });
+                // subscribe to gyro handler
+                auto gyroSignal = mbl_mw_gyro_bmi160_get_rotation_data_signal(wrapper->m_metaWearBoard);
+                mbl_mw_datasignal_subscribe(gyroSignal, wrapper,[](void *context, const MblMwData *data) -> void {
+                    MetawearWrapper *wrapper = (MetawearWrapper *)context;
+                    auto rotRate = (MblMwCartesianFloat *)data->value;
+                    emit wrapper->gyro(data->epoch, rotRate->x, rotRate->y,rotRate->z);
+                    wrapper->updateEpoch(data->epoch);
+                });
+
 
                 // subscribe to ambient handler
                 auto ambientLightSignal = mbl_mw_als_ltr329_get_illuminance_data_signal(wrapper->m_metaWearBoard);
@@ -461,14 +424,7 @@ void MetawearWrapper::subscribeMetawearHandlers() {
                     wrapper->updateEpoch(data->epoch);
                 });
 
-                // subscribe to gyro handler
-                auto gyroSignal = mbl_mw_gyro_bmi160_get_rotation_data_signal(wrapper->m_metaWearBoard);
-                mbl_mw_datasignal_subscribe(gyroSignal, wrapper,[](void *context, const MblMwData *data) -> void {
-                    MetawearWrapper *wrapper = (MetawearWrapper *)context;
-                    auto rotRate = (MblMwCartesianFloat *)data->value;
-                    emit wrapper->gyro(data->epoch, rotRate->x, rotRate->y,rotRate->z);
-                    wrapper->updateEpoch(data->epoch);
-                });
+
 
                 auto magnetometerSignal =mbl_mw_mag_bmm150_get_b_field_data_signal(wrapper->m_metaWearBoard);
                 mbl_mw_datasignal_subscribe(magnetometerSignal, wrapper,[](void *context, const MblMwData *data) -> void {
