@@ -36,14 +36,26 @@
 #include <QObject>
 #include <QThread>
 
-quint128 convertQuint128(uint8_t *low, uint8_t *high) {
+quint128 convertQuint128(uint64_t low, uint64_t high) {
     quint128 result;
-    for (int i = 0; i < 8; i++) {
-        result.data[i] = high[7 - i];
-    }
-    for (int i = 0; i < 8; i++) {
-        result.data[i + 8] = low[7 - i];
-    }
+    result.data[0] = uint8_t((high >> 56) & 0xFF);
+    result.data[1] = uint8_t((high >> 48) & 0xFF);
+    result.data[2] = uint8_t((high >> 40) & 0xFF);
+    result.data[3] = uint8_t((high >> 32) & 0xFF);
+    result.data[4] = uint8_t((high >> 24) & 0xFF);
+    result.data[5] = uint8_t((high >> 16) & 0xFF);
+    result.data[6] = uint8_t((high >> 8) & 0xFF);
+    result.data[7] = uint8_t(high & 0xFF);
+
+    result.data[8] =  uint8_t((low >> 56) & 0xFF);
+    result.data[9] =  uint8_t((low >> 48) & 0xFF);
+    result.data[10] = uint8_t((low >> 40) & 0xFF);
+    result.data[11] = uint8_t((low >> 32) & 0xFF);
+    result.data[12] = uint8_t((low >> 24) & 0xFF);
+    result.data[13] = uint8_t((low >> 16) & 0xFF);
+    result.data[14] = uint8_t((low >> 8) & 0xFF);
+    result.data[15] = uint8_t(low & 0xFF);
+
     return result;
 }
 
@@ -53,9 +65,8 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
     wrapper->m_readGattHandler = handler;
 
-
-    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low,(uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low,(uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128(characteristic->service_uuid_low, characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128(characteristic->uuid_low, characteristic->uuid_high));
 
     QLowEnergyService *service = wrapper->m_services.value(service_uuid.toString());
     if (service == nullptr) {
@@ -73,8 +84,8 @@ void MetawearWrapper::read_gatt_char_qt(void *context, const void *caller,
 
 void MetawearWrapper::write_gatt_char_qt(void *context, const void *caller, MblMwGattCharWriteType writeType, const MblMwGattChar *characteristic, const uint8_t *value, uint8_t length) {
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
-    QBluetoothUuid service_uuid = QBluetoothUuid( convertQuint128((uint8_t *)&characteristic->service_uuid_low, (uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low, (uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid( convertQuint128(characteristic->service_uuid_low, characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128(characteristic->uuid_low, characteristic->uuid_high));
 
     QLowEnergyService *service =
             wrapper->m_services.value(service_uuid.toString());
@@ -101,8 +112,8 @@ void MetawearWrapper::enable_char_notify_qt(void *context, const void *caller, c
     MetawearWrapper *wrapper = (MetawearWrapper *)context;
     wrapper->m_notificationHandler = handler;
 
-    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->service_uuid_low, (uint8_t *)&characteristic->service_uuid_high));
-    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128((uint8_t *)&characteristic->uuid_low, (uint8_t *)&characteristic->uuid_high));
+    QBluetoothUuid service_uuid = QBluetoothUuid(convertQuint128(characteristic->service_uuid_low, characteristic->service_uuid_high));
+    QBluetoothUuid characteristic_uuid = QBluetoothUuid(convertQuint128(characteristic->uuid_low, characteristic->uuid_high));
 
     QLowEnergyService *service = wrapper->m_services.value(service_uuid.toString());
     if (service == nullptr) {
