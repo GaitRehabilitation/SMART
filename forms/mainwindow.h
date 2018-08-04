@@ -34,6 +34,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 private:
     Ui::MainWindow *ui;
+    int m_deviceIndex;
     double m_triggerTime;
     QTemporaryDir* m_temporaryData;
     QTimer m_triggerSingleShot;
