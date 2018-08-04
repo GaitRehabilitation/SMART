@@ -29,7 +29,7 @@
 #include <common/metawearwrapper.h>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_deviceSelectDialog(new DeviceSelectDialog(this)),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(){
+    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_deviceSelectDialog(new DeviceSelectDialog(this)),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
     ui->setupUi(this);
 
     connect(m_deviceSelectDialog,&DeviceSelectDialog::onBluetoothDeviceAccepted, this,&MainWindow::registerDevice);
@@ -61,7 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 SensorPanel* MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
-    SensorPanel* panel = new SensorPanel(info,this);
+    m_deviceIndex++;
+
+  QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
+  QBluetoothHostInfo host = hosts[(m_deviceIndex % hosts.length())];
+
+    SensorPanel* panel = new SensorPanel(host,info,this);
     connect(panel->getMetwareWrapper(),&MetawearWrapper::lastEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){

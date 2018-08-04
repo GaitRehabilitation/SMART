@@ -135,7 +135,7 @@ void MetawearWrapper::on_disconnect_qt(void *context, const void *caller, MblMwF
 // Class
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
+MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &host,const QBluetoothDeviceInfo &target,
                                  QObject *parent)
     : QObject(parent),
       m_services(QMap<QString, QLowEnergyService *>()),
@@ -148,7 +148,8 @@ MetawearWrapper::MetawearWrapper(const QBluetoothDeviceInfo &device,
       m_readGattHandler(nullptr),
       m_isSensorEnabled(0),
       m_laststEpoch(0),
-      m_currentDevice(device){
+      m_hostDevice(host),
+      m_targetDevice(target){
 
     MblMwBtleConnection btleConnection;
     btleConnection.context = this;
@@ -168,7 +169,7 @@ void MetawearWrapper::resetControllerAndTryAgain()
     if(this->m_controller){
         this->m_controller->deleteLater();
     }
-    m_controller = QLowEnergyController::createCentral(m_currentDevice,this);
+    m_controller = new QLowEnergyController(m_targetDevice.address(),m_hostDevice.address(),this);
 
     // Service Discovery
     connect(this->m_controller, &QLowEnergyController::serviceDiscovered, this,[=](QBluetoothUuid newService){

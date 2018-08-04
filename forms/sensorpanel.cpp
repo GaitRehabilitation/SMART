@@ -30,12 +30,12 @@
 #include <QtWidgets/QMainWindow>
 #include <common/metawearwrapper.h>
 
-SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
+SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
       m_settingUpdateTimer(this),
-      m_currentDevice(device),
+      m_currentDevice(target),
       m_plotUpdatetimer(),
-      m_wrapper(new MetawearWrapper(device, this)),
+      m_wrapper(new MetawearWrapper(local,target, this)),
       m_plotoffset(0),
       m_temporaryDir(nullptr),
       m_reconnectTimer(),
@@ -49,12 +49,12 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
         if(m_reconnectTimer.interval() > 20000){
             this->deleteLater();
             QMessageBox messageBox;
-            messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
+            messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(m_currentDevice.address().toString()) );
             messageBox.setFixedSize(500,200);
             return;
         }
         m_reconnectTimer.setInterval(m_reconnectTimer.interval() * 2);
-        qDebug() << "trying to reconnect to " << device.address().toString() << " with timeout " << m_reconnectTimer.interval();
+        qDebug() << "trying to reconnect to " << m_currentDevice.address().toString() << " with timeout " << m_reconnectTimer.interval();
 
         m_reconnectTimer.start();
     });
@@ -75,7 +75,7 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
     connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
         this->deleteLater();
         QMessageBox messageBox;
-        messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(device.address().toString()) );
+        messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(m_currentDevice.address().toString()) );
         messageBox.setFixedSize(500,200);
     });
     connect(ui->remove,&QPushButton::clicked,this,[=](){
@@ -112,17 +112,18 @@ SensorPanel::SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent)
 
     connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
         this->m_wrapper->setAccelerationSamplerate(4.f,25.f);
-
         this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
 
+        this->m_wrapper->setGyroCapture(true);
+        this->m_wrapper->setAccelerationCapture(true);
 
         m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
         m_isReadyToCapture = true;
     });
 
-    ui->deviceAddress->setText(device.address().toString());
-    ui->sensorName->setText(device.address().toString());
+    ui->deviceAddress->setText(m_currentDevice.address().toString());
+    ui->sensorName->setText(m_currentDevice.address().toString());
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -253,9 +254,6 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
     if(m_isReadyToCapture){
         ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
-        this->m_wrapper->setGyroCapture(true);
-        this->m_wrapper->setAccelerationCapture(true);
-
 
         m_magFile = new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")),this);
         m_accFile= new QFile(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")),this);

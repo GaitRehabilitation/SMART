@@ -22,6 +22,7 @@
 #include <QObject>
 #include <functional>
 #include <QPointer>
+#include <QBluetoothHostInfo>
 
 #include "metawear/platform/btle_connection.h"
 #include "metawear/sensor/accelerometer.h"
@@ -55,7 +56,8 @@ private:
 
   QPointer<QLowEnergyController> m_controller;
   QMap<QString, QLowEnergyService *> m_services;
-  QBluetoothDeviceInfo m_currentDevice;
+  QBluetoothDeviceInfo m_targetDevice;
+  QBluetoothHostInfo m_hostDevice;
 
   qint64 m_laststEpoch;
 
@@ -66,7 +68,7 @@ private:
   void updateEpoch(qint64 epoch);
 
 public:
-  explicit MetawearWrapper(const QBluetoothDeviceInfo &device,
+  explicit MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target,
                            QObject *parent = nullptr);
   virtual ~MetawearWrapper();
 

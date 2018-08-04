@@ -43,8 +43,8 @@ DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
 
     // An entry is added for every device connected
     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this,[=](const QBluetoothDeviceInfo& info){
-        if(info.name() != "MetaWear")
-            return;
+        //if(info.name() != "MetaWear")
+         //   return;
         if(m_deviceBlackList.contains(info.address().toString()))
             return;
 

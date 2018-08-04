@@ -18,6 +18,7 @@
 #define SENSORPANEL_H
 
 #include <QBluetoothDeviceInfo>
+#include <QBluetoothHostInfo>
 #include <QLowEnergyController>
 #include <QMutex>
 #include <QTemporaryDir>
@@ -61,7 +62,7 @@ private:
   void configureWrapper(QBluetoothDeviceInfo device);
 
 public:
-  explicit SensorPanel(const QBluetoothDeviceInfo &device, QWidget *parent = nullptr);
+  explicit SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target, QWidget *parent = nullptr);
   virtual ~SensorPanel();
 
   bool isReadyToCapture();
