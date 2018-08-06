@@ -180,7 +180,13 @@ void MetawearWrapper::resetControllerAndTryAgain()
     if(this->m_controller){
         this->m_controller->deleteLater();
     }
-    m_controller = new QLowEnergyController(m_targetDevice.address(),m_hostDevice.address(),this);
+
+    if(m_hostDevice.address().toString() == ""){
+        m_controller = new QLowEnergyController(m_targetDevice.address(),this);
+    }else{
+        m_controller = new QLowEnergyController(m_targetDevice.address(),m_hostDevice.address(),this);
+
+    }
 
     // Service Discovery
     connect(this->m_controller, &QLowEnergyController::serviceDiscovered, this,[=](QBluetoothUuid newService){

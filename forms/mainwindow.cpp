@@ -63,8 +63,11 @@ MainWindow::MainWindow(QWidget *parent)
 SensorPanel* MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
     m_deviceIndex++;
 
-  QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
-  QBluetoothHostInfo host = hosts[(m_deviceIndex % hosts.length())];
+    QBluetoothHostInfo host;
+    if(QBluetoothLocalDevice::allDevices().length() > 0 ){
+        QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
+        host = hosts[(m_deviceIndex % hosts.length())];
+    }
 
     SensorPanel* panel = new SensorPanel(host,info,this);
     connect(panel->getMetwareWrapper(),&MetawearWrapper::lastEpoch,this,[=](qint64 epoch){
