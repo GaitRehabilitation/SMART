@@ -39,18 +39,15 @@ private:
     QTemporaryDir* m_temporaryData;
     QTimer m_triggerSingleShot;
     QTimer m_updateTriggerTimer;
-    DeviceSelectDialog* m_deviceSelectDialog;
 public:
   MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
 
-  void updateConnectedDevices();
+  void connectedDevices(QList<QBluetoothDeviceInfo>&);
   SensorPanel *registerDevice(const QBluetoothDeviceInfo &info);
   void startCapture();
   void stopCapture();
 
-signals:
-  void onConnectedDevices(const QList<QBluetoothDeviceInfo>&);
 };
 
 #endif // MAINWINDOW_H

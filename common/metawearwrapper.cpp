@@ -181,8 +181,10 @@ void MetawearWrapper::resetControllerAndTryAgain()
         this->m_controller->deleteLater();
     }
 
-    if(m_hostDevice.address().toString() == ""){
-        m_controller = new QLowEnergyController(m_targetDevice.address(),this);
+	QString v = m_targetDevice.address().toString();
+
+    if(m_hostDevice.address().isNull()){
+        m_controller = QLowEnergyController::createCentral(m_targetDevice,this);
     }else{
         m_controller = new QLowEnergyController(m_targetDevice.address(),m_hostDevice.address(),this);
 
@@ -288,7 +290,7 @@ void MetawearWrapper::resetControllerAndTryAgain()
 
     if (m_controller->state() == QLowEnergyController::UnconnectedState) {
         qDebug() << "Starting connection";
-        m_controller->connectToDevice();
+		m_controller->connectToDevice();
     } else {
         qDebug() << "Controller already connected. Search services..";
         this->m_controller->discoverServices();
