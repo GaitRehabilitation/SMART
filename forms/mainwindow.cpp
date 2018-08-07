@@ -29,15 +29,21 @@
 #include <common/metawearwrapper.h>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_deviceSelectDialog(new DeviceSelectDialog(this)),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
+    : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
     ui->setupUi(this);
 
-    connect(m_deviceSelectDialog,&DeviceSelectDialog::onBluetoothDeviceAccepted, this,&MainWindow::registerDevice);
-    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
+//    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
 
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
-        updateConnectedDevices();
-        m_deviceSelectDialog->show();
+		DeviceSelectDialog dialog;
+		connect(&dialog, &DeviceSelectDialog::onBluetoothDeviceAccepted, this, &MainWindow::registerDevice);
+
+		QList<QBluetoothDeviceInfo> devices;
+		connectedDevices(devices);
+		dialog.updateDeviceBlackList(devices);
+
+		dialog.exec();
+        //m_deviceSelectDialog->show();
     });
     connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
     connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
@@ -139,13 +145,11 @@ void MainWindow::stopCapture()
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::updateConnectedDevices()
-{
-    QList<QBluetoothDeviceInfo> devices;
-    QObjectList children =  ui->sensorContainer->children();
-    for(int i = 0; i < ui->sensorContainer->count(); ++i){
-        SensorPanel* panel =  dynamic_cast<SensorPanel*>(ui->sensorContainer->itemAt(i)->widget());
-        devices.append(panel->getDeviceInfo());
-    }
-    emit onConnectedDevices(devices);
+
+void MainWindow::connectedDevices(QList<QBluetoothDeviceInfo>& devices) {
+	QObjectList children = ui->sensorContainer->children();
+	for (int i = 0; i < ui->sensorContainer->count(); ++i) {
+		SensorPanel* panel = dynamic_cast<SensorPanel*>(ui->sensorContainer->itemAt(i)->widget());
+		devices.append(panel->getDeviceInfo());
+	}
 }
