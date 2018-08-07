@@ -55,9 +55,9 @@ private:
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
 
-  std::ofstream* m_magFile;
-  std::ofstream* m_accFile;
-  std::ofstream* m_gyroFile;
+  std::ofstream m_magFile;
+  std::ofstream m_accFile;
+  std::ofstream m_gyroFile;
 
   bool m_isReadyToCapture;
 
