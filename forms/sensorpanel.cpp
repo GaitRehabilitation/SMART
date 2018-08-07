@@ -223,8 +223,8 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
         ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
 
-        m_magFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")).toStdString(), std::ios::out | std::ios::app );
-        m_magFile << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
+        //m_magFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")).toStdString(), std::ios::out | std::ios::app );
+        //m_magFile << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
 
         m_accFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")).toStdString(), std::ios::out | std::ios::app );
         m_accFile<< "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
