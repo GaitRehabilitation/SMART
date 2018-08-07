@@ -25,6 +25,10 @@
 #include <QWidget>
 #include <qtimer.h>
 
+#include <iostream>
+#include <fstream>
+
+
 class MetawearWrapper;
 class MblMwMetaWearBoard;
 class QTimer;
@@ -51,9 +55,9 @@ private:
   QTemporaryDir* m_temporaryDir;
   QMutex m_plotLock;
 
-  QFile* m_magFile;
-  QFile* m_accFile;
-  QFile* m_gyroFile;
+  std::ofstream* m_magFile;
+  std::ofstream* m_accFile;
+  std::ofstream* m_gyroFile;
 
   bool m_isReadyToCapture;
 
