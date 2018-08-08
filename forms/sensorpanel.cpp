@@ -35,7 +35,7 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
       m_settingUpdateTimer(this),
       m_currentDevice(target),
       m_plotUpdatetimer(),
-      m_wrapper(new MetawearWrapper(local,target, this)),
+      //m_wrapper(new MetawearWrapper(local,target, this)),
       m_plotoffset(0),
       m_temporaryDir(nullptr),
       m_reconnectTimer(),
@@ -44,7 +44,7 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
     m_reconnectTimer.setSingleShot(true);
 
     connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
-        this->m_wrapper->resetControllerAndTryAgain();
+       // this->m_wrapper->resetControllerAndTryAgain();
 
         if(m_reconnectTimer.interval() > 20000){
             this->deleteLater();
@@ -59,7 +59,7 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
         m_reconnectTimer.start();
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized,this,&SensorPanel::metawearInitilized);
+    connect(this->m_wrapper,&MetawearWrapper::metawareInitialized,this,&SensorPanel::metawearInitilized);
     connect(this->m_wrapper,&MetawearWrapper::disconnected,this,&SensorPanel::disconnect);
     connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
 
@@ -72,12 +72,12 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
             m_reconnectTimer.setInterval(5000);
         m_reconnectTimer.start();
     });
-    connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
+    /*connect(this->m_wrapper,&MetawearWrapper::onControllerError,this,[=](QLowEnergyController::Error e){
         this->deleteLater();
         QMessageBox messageBox;
         messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(m_currentDevice.address().toString()) );
         messageBox.setFixedSize(500,200);
-    });
+    });*/
     connect(ui->remove,&QPushButton::clicked,this,[=](){
        this->deleteLater();
     });
@@ -110,12 +110,15 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    connect(this->m_wrapper,&MetawearWrapper::onMetawareInitialized, this,[=](){
-        this->m_wrapper->setAccelerationSamplerate(4.f,25.f);
-        this->m_wrapper->setGyroSamplerate(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
+    connect(this->m_wrapper,&MetawearWrapperBase::metawareFailedToInitialized, this,[=](){
+        this->m_wrapper->configureAccelerometer(4.f,25.f);
+        this->m_wrapper->configureGyroscope(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
+    });
 
-        this->m_wrapper->setGyroCapture(true);
-        this->m_wrapper->setAccelerationCapture(true);
+    connect(this->m_wrapper, &MetawearWrapperBase::postMetawearInitialized,this,[=](){
+
+        this->m_wrapper->startGyroscopeCapture();
+        this->m_wrapper->startAccelerationCapture();
 
         m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
@@ -196,7 +199,7 @@ void SensorPanel::registerDataHandlers()
         }
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::gyro,this,[=](int64_t epoch, float x, float y, float z){
+    connect(this->m_wrapper,&MetawearWrapper::gyroscope,this,[=](int64_t epoch, float x, float y, float z){
         if(m_temporaryDir && m_temporaryDir->isValid()){
             m_gyroFile << epoch << ','<< x << ','<< y << ','<< z << '\n';
         }
@@ -258,7 +261,7 @@ void SensorPanel::clearPlots()
 
 
 
-MetawearWrapper* SensorPanel::getMetwareWrapper() {
+MetawearWrapperBase* SensorPanel::getMetwareWrapper() {
     return this->m_wrapper;
 }
 

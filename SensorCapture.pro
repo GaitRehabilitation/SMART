@@ -6,18 +6,50 @@ QT += bluetooth
 QT += printsupport
 CONFIG += c++11
 
-INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
-unix {
+macx {
+
+    INCLUDEPATH += platform/osx
+
+    SOURCES += \
+    platform/osx/common/metawearwrapper.cpp
+
+    HEADERS += \
+    platform/osx/common/metawearwrapper.h
+
+}
+
+unix:!macx {
     LIBS += -Llibz -lz
+
+    INCLUDEPATH += platform/linux
+
+    SOURCES += \
+    platform/linux/common/metawearwrapper.cpp
+
+    HEADERS += \
+    platform/linux/common/metawearwrapper.h
+
+
 }
 win32 {
     DEFINES += QUAZIP_STATIC
+    INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
 
     WINRT_MANIFEST.publisher = "GaitRehabilitation"
     WINRT_MANIFEST.description = "A utility capture for for MbientLab's MetaMotion sensors"
     WINRT_MANIFEST.publisherid = "CN=Gait Rehabilitation, O=Chapman Unversity, L=Orange, S=California, C=US"
     WINRT_MANIFEST.version = "0.0.0.1"
+
+    INCLUDEPATH += platform/windows
+
+    SOURCES += \
+    platform/windows/common/metawearwrapper.cpp
+
+    HEADERS += \
+    platform/windows/common/metawearwrapper.h
 }
+
+
 
 FORMS += forms/mainwindow.ui \
     forms/deviceselectdialog.ui \
@@ -44,8 +76,8 @@ SOURCES += \
     forms/mainwindow.cpp \
     forms/deviceselectdialog.cpp \
     forms/sensorpanel.cpp \
-    common/metawearwrapper.cpp \
-    common/util.cpp
+    common/util.cpp \
+    common/metawearwrapperbase.cpp
 
 RESOURCES += qml.qrc
 
@@ -65,6 +97,6 @@ HEADERS += \
     forms/mainwindow.h \
     forms/deviceselectdialog.h \
     forms/sensorpanel.h \
-    common/metawearwrapper.h \
-    common/util.h
+    common/util.h \
+    common/metawearwrapperbase.h
 
