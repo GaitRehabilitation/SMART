@@ -49,9 +49,10 @@ win32 {
     platform/windows/common/metawearwrapper.h
 
     # configure for C++17 features when using winRT library
-    CONFIG += c++17
+    QMAKE_CXXFLAGS += /std:c++17
     QMAKE_CXXFLAGS += /await
 }
+
 
 
 

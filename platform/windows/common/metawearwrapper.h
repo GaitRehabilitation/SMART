@@ -18,16 +18,12 @@
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
 private:
-    QPointer<QLowEnergyController> m_controller;
-    QMap<QString, QLowEnergyService *> m_services;
 
-    int m_readyCharacteristicCount;
+	
+	void connectToMetawear() {
+		//auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 
-    MblMwFnIntVoidPtrArray m_readGattHandler;
-    MblMwFnVoidVoidPtrInt m_disconnectedHandler;
-    MblMwFnIntVoidPtrArray m_notificationHandler;
-
-	concurrency::task<void> connectToMetawear();
+	}
 
 protected:
 
