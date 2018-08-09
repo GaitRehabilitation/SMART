@@ -9,7 +9,11 @@
 #include <QtCore/QPointer>
 #include <QtBluetooth/QBluetoothHostInfo>
 #include "common/metawearwrapperbase.h"
+#include <iostream>
 
+#include <wrl/wrappers/corewrappers.h>
+#include <wrl/event.h>
+#include <experimental/resumable>
 
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
@@ -22,6 +26,8 @@ private:
     MblMwFnIntVoidPtrArray m_readGattHandler;
     MblMwFnVoidVoidPtrInt m_disconnectedHandler;
     MblMwFnIntVoidPtrArray m_notificationHandler;
+
+	concurrency::task<void> connectToMetawear();
 
 protected:
 

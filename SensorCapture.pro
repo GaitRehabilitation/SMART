@@ -4,7 +4,6 @@ QT += quick
 QT += widgets
 QT += bluetooth
 QT += printsupport
-CONFIG += c++11
 
 macx {
 
@@ -16,6 +15,7 @@ macx {
     HEADERS += \
     platform/osx/common/metawearwrapper.h
 
+    CONFIG += c++11
 }
 
 unix:!macx {
@@ -29,7 +29,7 @@ unix:!macx {
     HEADERS += \
     platform/linux/common/metawearwrapper.h
 
-
+    CONFIG += c++11
 }
 win32 {
     DEFINES += QUAZIP_STATIC
@@ -47,6 +47,10 @@ win32 {
 
     HEADERS += \
     platform/windows/common/metawearwrapper.h
+
+    # configure for C++17 features when using winRT library
+    CONFIG += c++17
+    QMAKE_CXXFLAGS += /await
 }
 
 

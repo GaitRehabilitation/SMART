@@ -5,6 +5,11 @@
 #include <3rdparty/mbientlab/src/metawear/core/status.h>
 #include "common/metawearwrapper.h"
 
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Devices.Bluetooth.h>
+#include <winrt/Windows.Devices.Bluetooth.Advertisement.h>
+
+
 quint128 MetawearWrapper::convertTo128(uint64_t low,uint64_t high){
     quint128 result{};
     result.data[0] = uint8_t((high >> 56) & 0xFF);
@@ -120,134 +125,8 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 }
 
 MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
-    MetawearWrapperBase::MetawearWrapperBase() ,
-    m_readyCharacteristicCount(0),
-    m_readGattHandler(nullptr),
-    m_disconnectedHandler(nullptr),
-    m_notificationHandler(nullptr) {
-    m_controller = new QLowEnergyController(target.address(), local.address(), this);
-
-    MblMwBtleConnection btleConnection;
-    btleConnection.context = this;
-    btleConnection.write_gatt_char = write_gatt_char;
-    btleConnection.read_gatt_char = read_gatt_char;
-    btleConnection.enable_notifications = enable_char_notify;
-    btleConnection.on_disconnect = on_disconnect;
-    this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
-
-
-    // Service Discovery
-    connect(this->m_controller, &QLowEnergyController::serviceDiscovered, this, [=](QBluetoothUuid newService) {
-        QString uuid = newService.toString();
-        QLowEnergyService *lowEnergyService = this->m_controller->createServiceObject(newService, this);
-        m_services.insert(uuid, lowEnergyService);
-
-        connect(lowEnergyService, &QLowEnergyService::characteristicRead, this,
-                [=](QLowEnergyCharacteristic characteristic, QByteArray payload) {
-                    if (this->m_readGattHandler != nullptr) {
-                        this->m_readGattHandler(this->m_metaWearBoard, (uint8_t *) payload.data(),
-                                                static_cast<uint8_t>(payload.length()));
-                    }
-                });
-        connect(lowEnergyService, &QLowEnergyService::characteristicChanged, this,
-                [=](QLowEnergyCharacteristic characteristic, QByteArray payload) {
-                    if (this->m_notificationHandler != nullptr) {
-                        this->m_notificationHandler(this->m_metaWearBoard, (uint8_t *) payload.data(),
-                                                    static_cast<uint8_t>(payload.length()));
-                    }
-                });
-
-        connect(lowEnergyService, QOverload<QLowEnergyService::ServiceError>::of(&QLowEnergyService::error), this,
-                [=](QLowEnergyService::ServiceError e) {
-                    switch (e) {
-                        case QLowEnergyService::ServiceError::UnknownError:
-                            qWarning() << "Characteristic UnknownError";
-                            break;
-                        case QLowEnergyService::ServiceError::OperationError:
-                            qWarning() << "Characteristic OperationError";
-                            break;
-                        case QLowEnergyService::ServiceError::CharacteristicReadError:
-                            qWarning() << "Characteristic CharacteristicReadError";
-                            break;
-                        case QLowEnergyService::ServiceError::CharacteristicWriteError:
-                            qWarning() << "Characteristic CharacteristicWriteError";
-                            break;
-                        case QLowEnergyService::ServiceError::DescriptorReadError:
-                            qWarning() << "Characteristic DescriptorReadError";
-                            break;
-                        case QLowEnergyService::ServiceError::DescriptorWriteError:
-                            qWarning() << "Characteristic DescriptorWriteError";
-                            break;
-                        case QLowEnergyService::ServiceError::NoError:
-                            break;
-                    }
-                });
-
-        qDebug() << "Service Name: " << lowEnergyService->serviceName();
-        qDebug() << "Service UUID: " << lowEnergyService->serviceUuid().toString();
-    });
-
-
-    connect(this->m_controller, &QLowEnergyController::discoveryFinished, this, [=]() {
-                foreach (QString key, this->m_services.keys()) {
-                QLowEnergyService *lowEnergyService = this->m_services.value(key);
-                connect(lowEnergyService, &QLowEnergyService::stateChanged,
-                        [this, lowEnergyService](QLowEnergyService::ServiceState state) {
-                            if (state == QLowEnergyService::ServiceDiscovered) {
-                                this->m_readyCharacteristicCount++;
-                                if (this->m_readyCharacteristicCount == this->m_services.count()) {
-                                    configureHandlers();
-                                }
-                            }
-                        });
-                lowEnergyService->discoverDetails();
-            }
-    });
-
-    // controller connection/disconnect
-    connect(this->m_controller, &QLowEnergyController::connected, this, [=]() {
-        qDebug() << "Controller conected. Search services..";
-        this->m_controller->discoverServices();
-        emit connected();
-    });
-    connect(this->m_controller, &QLowEnergyController::disconnected, this, [=]() {
-        qDebug() << "LowEnergy controller disconnected";
-        emit disconnected();
-    });
-
-    // controller error
-    connect(this->m_controller, QOverload<QLowEnergyController::Error>::of(&QLowEnergyController::error), this,
-            [=](QLowEnergyController::Error e) {
-                switch (e) {
-                    case QLowEnergyController::Error::UnknownError:
-                        qWarning() << "Controller UnknownError";
-                        break;
-                    case QLowEnergyController::Error::UnknownRemoteDeviceError:
-                        qWarning() << "Controller UnknownRemoteDeviceError";
-                        break;
-                    case QLowEnergyController::Error::NetworkError:
-                        qWarning() << "Controller NetworkError";
-                        break;
-                    case QLowEnergyController::Error::InvalidBluetoothAdapterError:
-                        qWarning() << "Controller InvalidBluetoothAdapterError";
-                        break;
-                    case QLowEnergyController::Error::ConnectionError:
-                        qWarning() << "Controller ConnectionError";
-                        break;
-                    case QLowEnergyController::Error::AdvertisingError:
-                        qWarning() << "Controller AdvertisingError";
-                        break;
-                    case QLowEnergyController::NoError:
-                        break;
-                }
-                emit controllerError(e);
-            });
-
-    if (m_controller->state() == QLowEnergyController::UnconnectedState) {
-        qDebug() << "Starting connection";
-        m_controller->connectToDevice();
-    } else {
-        qDebug() << "Controller already connected. Search services..";
-        this->m_controller->discoverServices();
-    }
+	MetawearWrapperBase::MetawearWrapperBase() {
+	//	auto leDevice = co_await Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
+	
+	auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 }
