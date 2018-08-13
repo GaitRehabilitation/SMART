@@ -9,21 +9,19 @@
 #include <QtCore/QPointer>
 #include <QtBluetooth/QBluetoothHostInfo>
 #include "common/metawearwrapperbase.h"
-#include <iostream>
 
-#include <wrl/wrappers/corewrappers.h>
-#include <wrl/event.h>
-#include <experimental/resumable>
 
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
 private:
+    QPointer<QLowEnergyController> m_controller;
+    QMap<QString, QLowEnergyService *> m_services;
 
-	
-	void connectToMetawear() {
-		//auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
+    int m_readyCharacteristicCount;
 
-	}
+    MblMwFnIntVoidPtrArray m_readGattHandler;
+    MblMwFnVoidVoidPtrInt m_disconnectedHandler;
+    MblMwFnIntVoidPtrArray m_notificationHandler;
 
 protected:
 
