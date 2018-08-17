@@ -1,2 +1,2 @@
 include(./mbientlab.cmake)
-include(./quazip.cmake)
+add_subdirectory(./quazip)

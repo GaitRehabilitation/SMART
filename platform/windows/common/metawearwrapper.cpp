@@ -11,6 +11,13 @@
 
 #include <ppltasks.h>
 
+using namespace concurrency;
+using namespace winrt::Windows::Devices::Bluetooth;
+using namespace winrt::Windows::Devices::Bluetooth::Advertisement;
+using namespace winrt::Windows::Devices::Bluetooth::GenericAttributeProfile;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Security::Cryptography;
+
 
 //auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 
@@ -60,6 +67,11 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
 	MetawearWrapperBase::MetawearWrapperBase() {
 	//	auto leDevice = co_await Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
+	create_task([]() {
+		return BluetoothLEDevice::FromBluetoothAddressAsync(0, BluetoothAddressType::Public)
+	}).then([](BluetoothLEDevice^ leDevice) {
+
+	});
 	
 	
 }

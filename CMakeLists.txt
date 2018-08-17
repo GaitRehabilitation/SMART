@@ -25,12 +25,14 @@ if(WIN32)
 endif()
 
 include_directories(./)
+find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth REQUIRED)
 
-set (SOURCE
+set (SOURCES
   qcustomplot.cpp
   forms/deviceselectdialog.cpp
   forms/mainwindow.cpp
   forms/sensorpanel.cpp
+  
   common/main.cpp
   common/metawearwrapperbase.cpp
   common/util.cpp
@@ -39,10 +41,12 @@ set (SOURCE
 set(HEADERS
   qcustomplot.h
   forms/deviceselectdialog.h
-  forms/mainwindow.h
   forms/sensorpanel.h
-  forms/metawearwrapperbase.h
-  forms/util.h
+  forms/mainwindow.h
+
+  common/metawearwrapperbase.h
+  common/util.h
+
 )
 
 
@@ -78,15 +82,14 @@ if (MSVC)
   set(PLATFORM_HEADERS
       platform/windows/common/metawearwrapper.h
   )
-
-  add_definitions(-ZW)
+ add_compile_options("/std:c++17")
+ include_directories(zlib)
+  message(${Qt5Widgets_INCLUDE_DIRS}/QtZlib)
 endif (MSVC)
 
-# Find the QtWidgets library
-
-find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport REQUIRED)
 
 add_subdirectory(./3rdparty)
+include_directories(./3rdparty/quazip/quazip)
 
 # Generate code from ui files
 qt5_wrap_ui(UI_HEADERS ${UIS})
@@ -95,10 +98,25 @@ qt5_wrap_ui(UI_HEADERS ${UIS})
 qt5_add_resources(QRCS ${RESOURCES})
 
 # Tell CMake to create the helloworld executable
-add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCE} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} )
+add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} )
 
+
+if (MSVC)
+ target_compile_definitions(SMART PUBLIC /ZW)
+ add_custom_command(
+    TARGET SMART POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:Qt5::Widgets>
+		$<TARGET_FILE:Qt5::Core>
+		$<TARGET_FILE:Qt5::Gui>
+		$<TARGET_FILE:Qt5::Quick>
+		$<TARGET_FILE:Qt5::Bluetooth>
+		$<TARGET_FILE:Qt5::PrintSupport>
+        $<TARGET_FILE_DIR:SMART>
+)
+endif(MSVC)
 
 # Add the Qt5 Widgets for linking
-target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::Widgets Qt5::PrintSupport)
-target_link_libraries(SMART extern_quazip)
+target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::Bluetooth Qt5::PrintSupport )
+target_link_libraries(SMART ${QUAZIP_LIB_TARGET_NAME})
 target_link_libraries(SMART extern_metawear)
