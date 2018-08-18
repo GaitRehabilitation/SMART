@@ -10,13 +10,39 @@
 #include <QtBluetooth/QBluetoothHostInfo>
 #include "common/metawearwrapperbase.h"
 
+#include <ppltasks.h>
+#include <unordered_map>
+#include <Windows.Foundation.h>
+#include <Windows.Devices.Bluetooth.h>
+#include <Windows.Devices.Bluetooth.Advertisement.h>
+
+using namespace concurrency;
+using namespace Windows::Devices::Bluetooth;
+using namespace Windows::Devices::Bluetooth::Advertisement;
+using namespace Windows::Devices::Bluetooth::GenericAttributeProfile;
+using namespace Windows::Security::Cryptography;
+
 
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
 private:
     QPointer<QLowEnergyController> m_controller;
-    QMap<QString, QLowEnergyService *> m_services;
 
+    struct Hasher {
+        size_t operator() (Platform::Guid key) const {
+            return key.GetHashCode();
+        }
+    };
+    struct EqualFn {
+        bool operator() (Platform::Guid t1, Platform::Guid t2) const {
+            return t1.Equals(t2);
+        }
+    };
+
+    std::unordered_map<Platform::Guid, GattDeviceService^, Hasher, EqualFn> m_services;
+    std::unordered_map<Platform::Guid, GattCharacteristic^, Hasher, EqualFn> m_characterstics;
+
+	BluetoothLEDevice^ m_device;
     int m_readyCharacteristicCount;
 
     MblMwFnIntVoidPtrArray m_readGattHandler;

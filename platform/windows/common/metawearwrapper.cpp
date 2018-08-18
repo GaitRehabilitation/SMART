@@ -5,18 +5,10 @@
 #include <3rdparty/mbientlab/src/metawear/core/status.h>
 #include "common/metawearwrapper.h"
 
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Devices.Bluetooth.h>
-#include <winrt/Windows.Devices.Bluetooth.Advertisement.h>
+#include "common/util.h"
+#include <vector>
 
-#include <ppltasks.h>
-
-using namespace concurrency;
-using namespace winrt::Windows::Devices::Bluetooth;
-using namespace winrt::Windows::Devices::Bluetooth::Advertisement;
-using namespace winrt::Windows::Devices::Bluetooth::GenericAttributeProfile;
-using namespace winrt::Windows::Foundation;
-using namespace winrt::Windows::Security::Cryptography;
+using namespace Windows::Foundation;
 
 
 //auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
@@ -66,12 +58,59 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 
 MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
 	MetawearWrapperBase::MetawearWrapperBase() {
-	//	auto leDevice = co_await Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
-	create_task([]() {
-		return BluetoothLEDevice::FromBluetoothAddressAsync(0, BluetoothAddressType::Public)
-	}).then([](BluetoothLEDevice^ leDevice) {
 
-	});
+   // Windows::Devices::Bluetooth::GenericAttributeProfile::Guid g;
+
+    task_completion_event<void> discover_device_event;
+    task<void> event_set(discover_device_event);
 	
-	
+    //	auto leDevice = co_await Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
+    create_task(BluetoothLEDevice::FromBluetoothAddressAsync(target.address().toUInt64(), BluetoothAddressType::Public)).then([=](BluetoothLEDevice^ leDevice) {
+        if (leDevice == nullptr) {
+            qWarning() << "Failed to discover device";
+        } else {
+            leDevice->ConnectionStatusChanged += ref new TypedEventHandler<BluetoothLEDevice^, Platform::Object^>([=](BluetoothLEDevice^ sender, Platform::Object^ args) {
+                switch(sender->ConnectionStatus){
+                    case BluetoothConnectionStatus::Disconnected:
+
+                        break;
+                }
+            });
+            this->m_device = leDevice;
+            discover_device_event.set();
+        }
+    });
+
+    event_set.then([=](){
+        return create_task(this->m_device->GetGattServicesAsync(BluetoothCacheMode::Uncached));
+    }).then([=](GattDeviceServicesResult^ result){
+        if(result->Status == GattCommunicationStatus::Success){
+            std::vector<task<GattCharacteristicsResult^>> find_gattchar_tasks;
+            for(uint x = 0; x < result->Services->Size; ++x){
+                auto service = result->Services->GetAt(x);
+                m_services.emplace(service->Uuid, service);
+                find_gattchar_tasks.push_back(create_task(service->GetCharacteristicsAsync(BluetoothCacheMode::Uncached)));
+            }
+            return when_all(std::begin(find_gattchar_tasks),std::end(find_gattchar_tasks));
+        }
+    }).then([=](std::vector<GattCharacteristicsResult^> results){
+        for(auto it: results){
+            if(it->Status == GattCommunicationStatus::Success){
+                for(uint x = 0; x < it->Characteristics->Size; ++x){
+                    auto chr = it->Characteristics->GetAt(x);
+                    m_characterstics.emplace(chr->Uuid,chr);
+                }
+            }else{
+                qWarning() << "Failed to discover gatt charactersitic (status = " << static_cast<int>(it->Status) << ")";
+            }
+        }
+
+        MblMwBtleConnection btleConnection;
+        btleConnection.context = this;
+        btleConnection.write_gatt_char = write_gatt_char;
+        btleConnection.read_gatt_char = read_gatt_char;
+        btleConnection.enable_notifications = enable_char_notify;
+        btleConnection.on_disconnect = on_disconnect;
+        this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
+    });
 }

@@ -16,9 +16,6 @@ set(CMAKE_AUTOMOC ON)
 #            "-DCMAKE_PREFIX_PATH=\"path/to/Qt5/lib/cmake\" or with set(CMAKE_PREFIX_PATH path/to/Qt5/lib/cmake)")
 #endif(NOT CMAKE_PREFIX_PATH AND NOT Qt5Widgets_DIR)
 
-# Add a compiler flag
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17 -pthread")
-
 # Make this a GUI application on Windows
 if(WIN32)
   set(CMAKE_WIN32_EXECUTABLE ON)
@@ -62,6 +59,10 @@ set ( RESOURCES
 
 
 if (UNIX)
+
+  # Add a compiler flag
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17 -pthread")
+
   include_directories(platform/linux)
   set (PLATFORM_SOURCE
           platform/linux/common/metawearwrapper.cpp
@@ -82,6 +83,8 @@ if (MSVC)
   set(PLATFORM_HEADERS
       platform/windows/common/metawearwrapper.h
   )
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZW")
+
  add_compile_options("/std:c++17")
  include_directories(zlib)
   message(${Qt5Widgets_INCLUDE_DIRS}/QtZlib)
@@ -102,7 +105,6 @@ add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOUR
 
 
 if (MSVC)
- target_compile_definitions(SMART PUBLIC /ZW)
  add_custom_command(
     TARGET SMART POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

@@ -35,7 +35,7 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
       m_settingUpdateTimer(this),
       m_currentDevice(target),
       m_plotUpdatetimer(),
-      //m_wrapper(new MetawearWrapper(local,target, this)),
+      m_wrapper(new MetawearWrapper(local,target)),
       m_plotoffset(0),
       m_temporaryDir(nullptr),
       m_reconnectTimer(),

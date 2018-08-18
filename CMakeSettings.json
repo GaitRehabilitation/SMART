@@ -31,7 +31,7 @@
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\msvc2017_64\\lib\\cmake",
-      "buildCommandArgs": "-v",
+      "buildCommandArgs": "-v ",
       "ctestCommandArgs": ""
     },
     {
