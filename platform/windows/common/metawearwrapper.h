@@ -49,9 +49,13 @@ private:
     MblMwFnVoidVoidPtrInt m_disconnectedHandler;
     MblMwFnIntVoidPtrArray m_notificationHandler;
 
+    GattCharacteristic^  findCharacterstic( uint64_t low, uint64_t high);
+
+
 protected:
 
-    static quint128 convertTo128(uint64_t low, uint64_t high);
+
+   // static GUID convertTo128(uint64_t low, uint64_t high);
 
     static void read_gatt_char(void *context, const void *caller, const MblMwGattChar *characteristic,
                                MblMwFnIntVoidPtrArray handler);
@@ -63,6 +67,8 @@ protected:
                                    MblMwFnIntVoidPtrArray handler, MblMwFnVoidVoidPtrInt ready);
 
     static void on_disconnect(void *context, const void *caller, MblMwFnVoidVoidPtrInt handler);
+
+
 
 public:
     MetawearWrapper(const QBluetoothHostInfo &local, const QBluetoothDeviceInfo &target);
