@@ -33,8 +33,8 @@ before_build:
   - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
-  - windeployqt ./release/SMART.exe
   - cd ..
+  - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
 
 after_build:
   - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip 
