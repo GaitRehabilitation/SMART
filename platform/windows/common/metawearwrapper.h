@@ -53,10 +53,12 @@ private:
 
     GattCharacteristic^  findCharacterstic( uint64_t low, uint64_t high);
 
+	task_completion_event<void> m_discover_device_event;
+	task<void> m_event_set;
 
 protected:
 
-
+	void cleanup();
    // static GUID convertTo128(uint64_t low, uint64_t high);
 
     static void read_gatt_char(void *context, const void *caller, const MblMwGattChar *characteristic,
@@ -74,8 +76,9 @@ protected:
 
 public:
     MetawearWrapper(const QBluetoothHostInfo &local, const QBluetoothDeviceInfo &target);
-
+	~MetawearWrapper();
 signals:
+	void onSensorConfigured();
 
     void controllerError(QLowEnergyController::Error);
 
