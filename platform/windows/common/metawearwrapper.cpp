@@ -8,62 +8,16 @@
 #include "common/util.h"
 #include <vector>
 #include <collection.h>
-using namespace Windows::Foundation;
-
 #include <sstream>
 #include <iomanip>
 #include <winsock.h>
 #define MAX_LEN_UUID_STR 37
 //auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 
+using namespace Windows::Foundation;
 
-//GUID MetawearWrapper::convertTo128(uint64_t low,uint64_t high){
-//    quint128 result{};
-//    result.data[0] = uint8_t((high >> 56) & 0xFF);
-//    result.data[1] = uint8_t((high >> 48) & 0xFF);
-//    result.data[2] = uint8_t((high >> 40) & 0xFF);
-//    result.data[3] = uint8_t((high >> 32) & 0xFF);
-//    result.data[4] = uint8_t((high >> 24) & 0xFF);
-//    result.data[5] = uint8_t((high >> 16) & 0xFF);
-//    result.data[6] = uint8_t((high >> 8) & 0xFF);
-//    result.data[7] = uint8_t(high & 0xFF);
-//
-//    result.data[8] =  uint8_t((low >> 56) & 0xFF);
-//    result.data[9] =  uint8_t((low >> 48) & 0xFF);
-//    result.data[10] = uint8_t((low >> 40) & 0xFF);
-//    result.data[11] = uint8_t((low >> 32) & 0xFF);
-//    result.data[12] = uint8_t((low >> 24) & 0xFF);
-//    result.data[13] = uint8_t((low >> 16) & 0xFF);
-//    result.data[14] = uint8_t((low >> 8) & 0xFF);
-//    result.data[15] = uint8_t(low & 0xFF);
-//
-//    return GUID();
-//}
 
 GattCharacteristic^  MetawearWrapper::findCharacterstic( uint64_t low, uint64_t high){
-
-    /*uint128_t value {};
-    value.data[0] = uint8_t((high >> 56) & 0xFF);
-    value.data[1] = uint8_t((high >> 48) & 0xFF);
-    value.data[2] = uint8_t((high >> 40) & 0xFF);
-    value.data[3] = uint8_t((high >> 32) & 0xFF);
-
-    value.data[4] = uint8_t((high >> 24) & 0xFF);
-    value.data[5] = uint8_t((high >> 16) & 0xFF);
-
-    value.data[6] = uint8_t((high >> 8) & 0xFF);
-    value.data[7] = uint8_t(high & 0xFF);
-
-    value.data[8] =  uint8_t((low >> 56) & 0xFF);
-    value.data[9] =  uint8_t((low >> 48) & 0xFF);
-
-    value.data[10] = uint8_t((low >> 40) & 0xFF);
-    value.data[11] = uint8_t((low >> 32) & 0xFF);
-    value.data[12] = uint8_t((low >> 24) & 0xFF);
-    value.data[13] = uint8_t((low >> 16) & 0xFF);
-
-    value.data[14] = uint8_t((low >> 8) & 0xFF);
-    value.data[15] = uint8_t(low & 0xFF);*/
 
 
     unsigned int data0 = uint8_t((high >> 56) & 0xFF)  | uint8_t((high >> 48) & 0xFF) << 8 | uint8_t((high >> 40) & 0xFF) << 16 | uint8_t((high >> 32) & 0xFF) << 24;
