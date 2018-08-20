@@ -10,7 +10,7 @@ environment:
   - QT: 5.11.1  
     build: 64
     qt_target: msvc2017_64
-	cmake_command_args: "Visual Studio 14 2017 Win64" -DCMAKE_INSTALL_PREFIX=C:\\Qt\\5.11.1\\msvc2017_64\\lib\\cmake
+    cmake_command_args: "Visual Studio 14 2017 Win64" -DCMAKE_INSTALL_PREFIX=C:\\Qt\\5.11.1\\msvc2017_64\\lib\\cmake
 #  - qt: 5.11.1
 #    build: 64
 #    qt_target: winrt_armv7_msvc2017
