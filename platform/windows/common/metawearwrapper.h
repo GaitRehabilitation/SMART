@@ -15,6 +15,9 @@
 #include <Windows.Foundation.h>
 #include <Windows.Devices.Bluetooth.h>
 #include <Windows.Devices.Bluetooth.Advertisement.h>
+#include <wrl/wrappers/corewrappers.h>
+
+static Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
 
 using namespace concurrency;
 using namespace Windows::Devices::Bluetooth;

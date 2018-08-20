@@ -158,11 +158,19 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
 
    // Windows::Devices::Bluetooth::GenericAttributeProfile::Guid g;
 
+	std::string mac_copy(target.address().toString().toStdString());
+	mac_copy.erase(2, 1);
+	mac_copy.erase(4, 1);
+	mac_copy.erase(6, 1);
+	mac_copy.erase(8, 1);
+	mac_copy.erase(10, 1);
+
+	size_t temp;
+	uint64_t mac_ulong = std::stoull(mac_copy.c_str(), &temp, 16);
+
     task_completion_event<void> discover_device_event;
     task<void> event_set(discover_device_event);
-	
-    //	auto leDevice = co_await Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
-    create_task(BluetoothLEDevice::FromBluetoothAddressAsync(target.address().toUInt64(), BluetoothAddressType::Public)).then([=](BluetoothLEDevice^ leDevice) {
+	create_task(BluetoothLEDevice::FromBluetoothAddressAsync(mac_ulong, BluetoothAddressType::Public)).then([=](BluetoothLEDevice^ leDevice) {
         if (leDevice == nullptr) {
             qWarning() << "Failed to discover device";
 
