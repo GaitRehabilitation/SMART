@@ -36,4 +36,5 @@ uint64_t Util::stringToMac(std::string const & address)
 		uint64_t(a[5]);
 }
 
+
 Util::Util() {}

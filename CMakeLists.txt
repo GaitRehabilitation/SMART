@@ -116,6 +116,8 @@ if (MSVC)
 		$<TARGET_FILE:Qt5::PrintSupport>
         $<TARGET_FILE_DIR:SMART>
 )
+
+ target_link_libraries(SMART wsock32 ws2_32)
 endif(MSVC)
 
 # Add the Qt5 Widgets for linking

@@ -10,7 +10,9 @@
 #include <collection.h>
 using namespace Windows::Foundation;
 
-
+#include <sstream>
+#include <iomanip>
+#include <winsock.h>
 #define MAX_LEN_UUID_STR 37
 //auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 
@@ -73,7 +75,9 @@ GattCharacteristic^  MetawearWrapper::findCharacterstic( uint64_t low, uint64_t 
     unsigned short data5  = uint8_t((low >> 8) & 0xFF)  | uint8_t(low & 0xFF) << 8;
 
     char uuid_str[MAX_LEN_UUID_STR + 3];
-    snprintf(uuid_str, MAX_LEN_UUID_STR + 3, "{%.8x-%.4x-%.4x-%.4x-%.8x%.4x}",data0, data1, data2, data3, data4, data5);
+    snprintf(uuid_str, MAX_LEN_UUID_STR + 3, "{%.8x-%.4x-%.4x-%.4x-%.8x%.4x}",
+		ntohl(data0), ntohs(data1), ntohs(data2), 
+		ntohs(data3), ntohl(data4), ntohs(data5));
 
     std::wstring  ws(&uuid_str[0],&uuid_str[MAX_LEN_UUID_STR+2]);
 
@@ -83,6 +87,7 @@ GattCharacteristic^  MetawearWrapper::findCharacterstic( uint64_t low, uint64_t 
         auto  it = m_characterstics.find(uuid);
         return it == m_characterstics.end() ? nullptr : it->second;
     }
+	qWarning() << "Failed to find characterstic";
     return nullptr;
 
 }
@@ -156,7 +161,19 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
 	MetawearWrapperBase::MetawearWrapperBase() {
 
-   // Windows::Devices::Bluetooth::GenericAttributeProfile::Guid g;
+	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+
+
+	CoInitializeSecurity(
+		nullptr, // TODO: "O:BAG:BAD:(A;;0x7;;;PS)(A;;0x3;;;SY)(A;;0x7;;;BA)(A;;0x3;;;AC)(A;;0x3;;;LS)(A;;0x3;;;NS)"
+		-1,
+		nullptr,
+		nullptr,
+		RPC_C_AUTHN_LEVEL_DEFAULT,
+		RPC_C_IMP_LEVEL_IDENTIFY,
+		NULL,
+		EOAC_NONE,
+		nullptr);
 
 	std::string mac_copy(target.address().toString().toStdString());
 	mac_copy.erase(2, 1);
@@ -170,7 +187,7 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
 
     task_completion_event<void> discover_device_event;
     task<void> event_set(discover_device_event);
-	create_task(BluetoothLEDevice::FromBluetoothAddressAsync(mac_ulong, BluetoothAddressType::Public)).then([=](BluetoothLEDevice^ leDevice) {
+	create_task(BluetoothLEDevice::FromBluetoothAddressAsync(mac_ulong)).then([=](BluetoothLEDevice^ leDevice) {
         if (leDevice == nullptr) {
             qWarning() << "Failed to discover device";
 
@@ -188,6 +205,7 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
     });
 
     event_set.then([=](){
+		qDebug() << "Started Gatt service Async";
         return create_task(this->m_device->GetGattServicesAsync(BluetoothCacheMode::Uncached));
     }).then([=](GattDeviceServicesResult^ result){
         if(result->Status == GattCommunicationStatus::Success){
@@ -218,5 +236,6 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
         btleConnection.enable_notifications = enable_char_notify;
         btleConnection.on_disconnect = on_disconnect;
         this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
+		this->configureHandlers();
     });
 }
