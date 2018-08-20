@@ -23,6 +23,7 @@ using namespace Windows::Devices::Bluetooth::Advertisement;
 using namespace Windows::Devices::Bluetooth::GenericAttributeProfile;
 using namespace Windows::Security::Cryptography;
 
+static 	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
 
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
