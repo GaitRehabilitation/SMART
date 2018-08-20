@@ -28,11 +28,12 @@ install:
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
-  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
-  - cmake .
-build_script:
   - mkdir build
-  - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART 
+  - cd build
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
+build_script:
+  - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
+  - cd ..
 
 after_build:
   - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip 
