@@ -29,7 +29,7 @@
 #include <fstream>
 
 
-class MetawearWrapper;
+class MetawearWrapperBase;
 class MblMwMetaWearBoard;
 class QTimer;
 class DataBundle;
@@ -43,7 +43,7 @@ class SensorPanel : public QWidget {
 private:
     Ui::SensorPanel *ui;
 
-  MetawearWrapper *m_wrapper;
+  MetawearWrapperBase *m_wrapper;
   QBluetoothDeviceInfo m_currentDevice;
 
   qint64 m_plotoffset;
@@ -70,7 +70,7 @@ public:
   virtual ~SensorPanel();
 
   bool isReadyToCapture();
-  MetawearWrapper* getMetwareWrapper();
+  MetawearWrapperBase* getMetwareWrapper();
   QBluetoothDeviceInfo getDeviceInfo();
   void setName(QString);
   void setOffset(qint64 offset);

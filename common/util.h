@@ -18,10 +18,12 @@
 #define UTIL_H
 
 
+#include <string>
+
 class Util
 {
-
-
+public:
+	uint64_t stringToMac(std::string const& address);
 private:
     Util();
 };

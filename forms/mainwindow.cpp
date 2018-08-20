@@ -26,7 +26,7 @@
 #include <QListWidget>
 #include <QMessageBox>
 #include "JlCompress.h"
-#include <common/metawearwrapper.h>
+#include <common/metawearwrapperbase.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
@@ -76,7 +76,7 @@ SensorPanel* MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
     }
 
     SensorPanel* panel = new SensorPanel(host,info,this);
-    connect(panel->getMetwareWrapper(),&MetawearWrapper::lastEpoch,this,[=](qint64 epoch){
+    connect(panel->getMetwareWrapper(),&MetawearWrapperBase::latestEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){
                 SensorPanel* p = static_cast<SensorPanel*>(this->ui->sensorContainer->itemAt(x)->widget());
