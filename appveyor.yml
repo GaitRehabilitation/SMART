@@ -10,7 +10,6 @@ environment:
   - QT: 5.11.1  
     build: 64
     qt_target: msvc2017_64
-    cmake_command_args: "Visual Studio 14 2017 Win64" -DCMAKE_INSTALL_PREFIX=C:\\Qt\\5.11.1\\msvc2017_64\\lib\\cmake
 #  - qt: 5.11.1
 #    build: 64
 #    qt_target: winrt_armv7_msvc2017
@@ -29,14 +28,14 @@ install:
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
-  - cmake -G %cmake_command_args%
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
   
-build:
-  - project: INSTALL.vcxproj 
+build_script:
+  - cmake --build %APPVEYOR_BUILD_FOLDER%\build --target SMART --
 
 after_build:
   - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip 
-    %APPVEYOR_BUILD_FOLDER%\release\
+    %APPVEYOR_BUILD_FOLDER%\build\
     -xr!*.cpp
     -xr!*.obj
     -xr!*.h
