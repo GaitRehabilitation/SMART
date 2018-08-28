@@ -33,7 +33,8 @@ set (SOURCES
   common/main.cpp
   common/metawearwrapperbase.cpp
   common/util.cpp
-)
+  common/BluetoothAdress.cpp
+  common/BaseDiscoveryAgent.cpp)
 
 set(HEADERS
   qcustomplot.h
@@ -43,8 +44,8 @@ set(HEADERS
 
   common/metawearwrapperbase.h
   common/util.h
-
-)
+  common/BaseDiscoveryAgent.h
+  common/BluetoothAdress.h)
 
 
 set ( UIS
@@ -78,10 +79,12 @@ if (MSVC)
 
   set (PLATFORM_SOURCE
       platform/windows/common/metawearwrapper.cpp
+      platform/windows/common/DiscoveryAgent.cpp
   )
 
   set(PLATFORM_HEADERS
       platform/windows/common/metawearwrapper.h
+          platform/windows/common/DiscoveryAgent.h
   )
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZW")
 

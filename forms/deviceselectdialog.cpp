@@ -85,7 +85,7 @@ void DeviceSelectDialog::accept() {
 
 void DeviceSelectDialog::addDevice(const QBluetoothDeviceInfo &info) {
 
-    if(info.name() != "MetaWear")
+    if(info.name() != "MetaWear" || info.name() != "MetaBoot")
         return;
     if(m_deviceBlackList.contains(info.address().toString()))
         return;
