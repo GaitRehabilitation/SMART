@@ -141,15 +141,17 @@ MetawearWrapper::MetawearWrapper(const BluetoothAddress &target):
 		else {
 			leDevice->ConnectionStatusChanged += ref new TypedEventHandler<BluetoothLEDevice^, Platform::Object^>([=](BluetoothLEDevice^ sender, Platform::Object^ args) {
 				switch (sender->ConnectionStatus) {
-				case BluetoothConnectionStatus::Disconnected:
-					qWarning() << "Failed to connect to device";
-					this->cleanup();
-
-					break;
-				}
+                    case BluetoothConnectionStatus::Disconnected:
+                        qWarning() << "Failed to connect to device";
+                        this->cleanup();
+                        break;
+				    case BluetoothConnectionStatus::Connected:
+                        qDebug() << "Device Connected";
+                            this->m_device = leDevice;
+                            this->startDiscovery();
+                        break;
+                }
 			});
-			this->m_device = leDevice;
-			this->startDiscovery();
 		}
 	});
 
@@ -171,8 +173,7 @@ void MetawearWrapper::startDiscovery(){
     create_task(this->m_device->GetGattServicesAsync(BluetoothCacheMode::Uncached)).then(
             [=](GattDeviceServicesResult^result) {
                 if (result->Status == GattCommunicationStatus::Success) {
-                    std::vector<task < GattCharacteristicsResult ^ >>
-                    find_gattchar_tasks;
+                    std::vector<task < GattCharacteristicsResult ^ >> find_gattchar_tasks;
                     for (uint x = 0; x < result->Services->Size; ++x) {
                         auto service = result->Services->GetAt(x);
                         m_services.emplace(service->Uuid, service);

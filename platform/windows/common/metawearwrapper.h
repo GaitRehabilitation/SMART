@@ -74,9 +74,9 @@ public:
 signals:
 	void onSensorConfigured();
 
-    void controllerError(QLowEnergyController::Error);
+  //  void controllerError(QLowEnergyController::Error);
 
-    void characteristicError(QLowEnergyService::ServiceError);
+   // void characteristicError(QLowEnergyService::ServiceError);
 
 };
 

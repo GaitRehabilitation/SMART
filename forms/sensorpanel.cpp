@@ -134,14 +134,14 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     ui->plot->axisRect()->setupFullAxesBox();
     ui->plot->yAxis->setRange(-2, 2);
 
-    connect(this->m_wrapper, &MetawearWrapper::batteryPercentage,
-            [=](qint8 amount) { this->ui->battery->setValue(amount); });
+    connect(this->m_wrapper, &MetawearWrapper::batteryPercentage,this,
+            [=](qint8 amount) { this->ui->battery->setValue(amount); },Qt::QueuedConnection);
 
 
     // read the battery status every minute
     m_settingUpdateTimer.setInterval(60000);
-    connect(&m_settingUpdateTimer, &QTimer::timeout,
-            [=]() { this->m_wrapper->readBatteryStatus(); });
+    connect(&m_settingUpdateTimer, &QTimer::timeout,this,
+            [=]() { this->m_wrapper->readBatteryStatus(); },Qt::QueuedConnection);
 
     connect(&m_plotUpdatetimer,&QTimer::timeout,this,[=](){
         if(this->m_plotLock.tryLock(100)){
@@ -155,7 +155,7 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
             this->m_plotLock.unlock();
             this->ui->plot->replot();
         }
-    });
+    },Qt::QueuedConnection);
     m_plotUpdatetimer.setInterval(50);
     m_plotUpdatetimer.start();
 }
@@ -179,7 +179,7 @@ void SensorPanel::registerPlotHandlers()
         ygraphAcc->addData(epoch - m_plotoffset, static_cast<double>(y));
         zgraphAcc->addData(epoch - m_plotoffset, static_cast<double>(z));
         this->m_plotLock.unlock();
-    });
+    },Qt::QueuedConnection);
 
 }
 

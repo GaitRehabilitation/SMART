@@ -17,16 +17,11 @@
 #include "deviceselectdialog.h"
 #include "ui_deviceselectdialog.h"
 #include <QListView>
-#include <qbluetoothlocaldevice.h>
-#include <qbluetoothservicediscoveryagent.h>
-#include <qbluetoothserviceinfo.h>
-#include <qbluetoothuuid.h>
 #include "common/DiscoveryAgent.h"
 
 DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::DeviceSelectDialog),
       m_deviceInfo(),
-      localDevice(new QBluetoothLocalDevice),
       m_deviceBlackList(),
       m_discoveryAgent(new DiscoveryAgent()){
     ui->setupUi(this);

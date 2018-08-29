@@ -17,14 +17,11 @@
 #ifndef DEVICESELECTDIALOG_H
 #define DEVICESELECTDIALOG_H
 
-#include <QBluetoothDeviceInfo>
-#include <QBluetoothLocalDevice>
 #include <QDialog>
 #include <QMap>
 #include <QWizardPage>
 #include "common/BluetoothAddress.h"
 
-class QBluetoothLocalDevice;
 class QListWidgetItem;
 class DiscoveryAgent;
 namespace Ui {
@@ -36,7 +33,6 @@ class DeviceSelectDialog : public QDialog {
 private:
   Ui::DeviceSelectDialog *ui;
   DiscoveryAgent* m_discoveryAgent;
-  QBluetoothLocalDevice *localDevice;
   QMap<QString, BluetoothAddress> m_deviceInfo;
   QList<QString> m_deviceBlackList;
 

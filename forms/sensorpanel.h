@@ -17,9 +17,6 @@
 #ifndef SENSORPANEL_H
 #define SENSORPANEL_H
 
-#include <QBluetoothDeviceInfo>
-#include <QBluetoothHostInfo>
-#include <QLowEnergyController>
 #include <QMutex>
 #include <QTemporaryDir>
 #include <QWidget>
@@ -80,7 +77,7 @@ public:
 signals:
   void connected();
   void disconnect();
-  void bluetoothError(QLowEnergyController::Error e);
+  //void bluetoothError(QLowEnergyController::Error e);
 
   void metawearInitilized();
 };

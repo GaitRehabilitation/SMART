@@ -22,7 +22,7 @@ if(WIN32)
 endif()
 
 include_directories(./)
-find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport REQUIRED)
 
 set (SOURCES
   qcustomplot.cpp
@@ -114,7 +114,6 @@ if (MSVC)
 		$<TARGET_FILE:Qt5::Core>
 		$<TARGET_FILE:Qt5::Gui>
 		$<TARGET_FILE:Qt5::Quick>
-		$<TARGET_FILE:Qt5::Bluetooth>
 		$<TARGET_FILE:Qt5::PrintSupport>
         $<TARGET_FILE_DIR:SMART>
 )
@@ -123,6 +122,6 @@ if (MSVC)
 endif(MSVC)
 
 # Add the Qt5 Widgets for linking
-target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::Bluetooth Qt5::PrintSupport )
+target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport )
 target_link_libraries(SMART ${QUAZIP_LIB_TARGET_NAME})
 target_link_libraries(SMART extern_metawear)

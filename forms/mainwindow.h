@@ -17,8 +17,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QBluetoothDeviceInfo>
-#include <QBluetoothHostInfo>
+
 #include <QMainWindow>
 #include <QTemporaryDir>
 #include <QTimer>
