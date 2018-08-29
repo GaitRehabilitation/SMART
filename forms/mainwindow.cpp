@@ -38,9 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
 		DeviceSelectDialog dialog;
 		connect(&dialog, &DeviceSelectDialog::onBluetoothDeviceAccepted, this, &MainWindow::registerDevice);
 
-		QList<QBluetoothDeviceInfo> devices;
-		connectedDevices(devices);
-		dialog.updateDeviceBlackList(devices);
+		//QList<QBluetoothDeviceInfo> devices;
+		//connectedDevices(devices);
+		//dialog.updateDeviceBlackList(devices);
 
 		dialog.exec();
         //m_deviceSelectDialog->show();
@@ -66,16 +66,17 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-SensorPanel* MainWindow::registerDevice(const QBluetoothDeviceInfo &info) {
+SensorPanel* MainWindow::registerDevice(const BluetoothAddress &info) {
     m_deviceIndex++;
 
-    QBluetoothHostInfo host;
-    if(QBluetoothLocalDevice::allDevices().length() > 0 ){
-        QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
-        host = hosts[(m_deviceIndex % hosts.length())];
-    }
+// ignored for the moment
+//    QBluetoothHostInfo host;
+//    if(QBluetoothLocalDevice::allDevices().length() > 0 ){
+//        QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
+//        host = hosts[(m_deviceIndex % hosts.length())];
+//    }
 
-    SensorPanel* panel = new SensorPanel(host,info,this);
+    SensorPanel* panel = new SensorPanel(info,this);
     connect(panel->getMetwareWrapper(),&MetawearWrapperBase::latestEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){
@@ -146,7 +147,7 @@ void MainWindow::stopCapture()
 MainWindow::~MainWindow() { delete ui; }
 
 
-void MainWindow::connectedDevices(QList<QBluetoothDeviceInfo>& devices) {
+void MainWindow::connectedDevices(QList<BluetoothAddress>& devices) {
 	QObjectList children = ui->sensorContainer->children();
 	for (int i = 0; i < ui->sensorContainer->count(); ++i) {
 		SensorPanel* panel = dynamic_cast<SensorPanel*>(ui->sensorContainer->itemAt(i)->widget());

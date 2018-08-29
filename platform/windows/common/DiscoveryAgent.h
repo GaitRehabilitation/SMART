@@ -17,15 +17,15 @@ using namespace Platform;
 using namespace Windows::Devices;
 
 class DiscoveryAgent : public BaseDiscoveryAgent{
+Q_OBJECT
 private:
     Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher^ m_bleAdvertisementWatcher;
-
+    
 public:
     DiscoveryAgent();
     ~DiscoveryAgent();
-
     void start();
-
+    void stop();
 };
 
 #endif //SMART_DISCOVERYAGENT_H

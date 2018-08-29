@@ -7,15 +7,17 @@
 
 #include <QString>
 
-class BluetoothAdress{
+class BluetoothAddress{
 private:
     QString m_mac;
     QString m_title;
 public:
-    BluetoothAdress(const QString& mac, const QString& title);
-    BluetoothAdress(const BluetoothAdress& address);
+    BluetoothAddress();
+    BluetoothAddress(const QString& mac, const QString& title);
+    BluetoothAddress(const BluetoothAddress& address);
+    BluetoothAddress(unsigned long long address, const QString& title);
 
-    ~BluetoothAdress();
+    ~BluetoothAddress();
 
     const QString& getTitle() const;
     const QString& getMac() const;

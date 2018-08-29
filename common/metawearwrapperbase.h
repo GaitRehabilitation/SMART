@@ -14,6 +14,10 @@
 * limitations under the License.
 */
 
+
+#ifndef METAWEARWRAPPERBASE_H
+#define METAWEARWRAPPERBASE_H
+
 #include <QObject>
 
 #include <metawear/core/cpp/metawearboard_def.h>
@@ -22,9 +26,6 @@
 #include "metawear/sensor/gyro_bmi160.h"
 #include "metawear/sensor/magnetometer_bmm150.h"
 #include "metawear/core/datasignal.h"
-
-#ifndef METAWEARWRAPPERBASE_H
-#define METAWEARWRAPPERBASE_H
 
 
 class MetawearWrapperBase : public QObject {

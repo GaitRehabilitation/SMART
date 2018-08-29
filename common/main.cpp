@@ -19,9 +19,28 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+
+#if(_WIN64)
+#include <wrl/wrappers/corewrappers.h>
+static Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+#endif
+
 int main(int argc, char *argv[]) {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 //  QLoggingCategory::setFilterRules(QStringLiteral("qt.bluetooth* = true"));
+
+#if(_WIN64)
+  CoInitializeSecurity(
+          nullptr, // TODO: "O:BAG:BAD:(A;;0x7;;;PS)(A;;0x3;;;SY)(A;;0x7;;;BA)(A;;0x3;;;AC)(A;;0x3;;;LS)(A;;0x3;;;NS)"
+          -1,
+          nullptr,
+          nullptr,
+          RPC_C_AUTHN_LEVEL_DEFAULT,
+          RPC_C_IMP_LEVEL_IDENTIFY,
+          NULL,
+          EOAC_NONE,
+          nullptr);
+#endif
 
   QApplication app(argc, argv);
   MainWindow window;

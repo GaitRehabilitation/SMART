@@ -3,35 +3,47 @@
 //
 
 #include "common/DiscoveryAgent.h"
+#include "common/util.h"
+#include <QDebug>
+#include <sstream>
+#include <iomanip>
 
+DiscoveryAgent::DiscoveryAgent() : BaseDiscoveryAgent() {
+	m_bleAdvertisementWatcher = ref new Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher();
+	m_bleAdvertisementWatcher->ScanningMode = Bluetooth::Advertisement::BluetoothLEScanningMode::Active;
+	m_bleAdvertisementWatcher->Received += ref new Windows::Foundation::TypedEventHandler<Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher ^, Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs ^>([=](Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher^ watcher,Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs^ eventArgs) {
 
-DiscoveryAgent::DiscoveryAgent() : BaseDiscoveryAgent(){
-    Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+		std::wostringstream ret;
+		ret << std::hex << std::setfill(L'0')
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (5 * 8)) & 0xff) << ":"
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (4 * 8)) & 0xff) << ":"
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (3 * 8)) & 0xff) << ":"
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (2 * 8)) & 0xff) << ":"
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (1 * 8)) & 0xff) << ":"
+			<< std::setw(2) << ((eventArgs->BluetoothAddress >> (0 * 8)) & 0xff);
 
-    CoInitializeSecurity(
-            nullptr, // TODO: "O:BAG:BAD:(A;;0x7;;;PS)(A;;0x3;;;SY)(A;;0x7;;;BA)(A;;0x3;;;AC)(A;;0x3;;;LS)(A;;0x3;;;NS)"
-            -1,
-            nullptr,
-            nullptr,
-            RPC_C_AUTHN_LEVEL_DEFAULT,
-            RPC_C_IMP_LEVEL_IDENTIFY,
-            NULL,
-            EOAC_NONE,
-            nullptr);
+		std::wstring localname(eventArgs->Advertisement->LocalName->Begin());
 
-    m_bleAdvertisementWatcher = ref new Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher();
-    m_bleAdvertisementWatcher->ScanningMode = Bluetooth::Advertisement::BluetoothLEScanningMode::Active;
-    m_bleAdvertisementWatcher->Received += ref new Windows::Foundation::TypedEventHandler<Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher ^, Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs ^>(
-        [=](Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher ^watcher, Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs^ eventArgs){
-
-    }
-}
-
-void DiscoveryAgent::start() {
-
+        QString mac =  QString::fromWCharArray(ret.str().c_str());
+        QString name = QString::fromWCharArray(localname.c_str());
+        BluetoothAddress address(mac,name );
+        qDebug() << "mac:" << mac << " name: " << name;
+        emit deviceDiscovered(address);
+	});
 }
 
 DiscoveryAgent::~DiscoveryAgent() {
 
 }
+void DiscoveryAgent::start() {
+    qDebug() << "started advertisement";
+    m_bleAdvertisementWatcher->Start();
+}
+
+void DiscoveryAgent::stop() {
+    qDebug() << "stop advertisement";
+    m_bleAdvertisementWatcher->Stop();
+
+}
+
 

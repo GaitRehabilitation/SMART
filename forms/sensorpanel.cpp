@@ -30,12 +30,12 @@
 #include <QtWidgets/QMainWindow>
 #include <common/metawearwrapper.h>
 
-SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target, QWidget *parent)
+SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
       m_settingUpdateTimer(this),
       m_currentDevice(target),
       m_plotUpdatetimer(),
-      m_wrapper(new MetawearWrapper(local,target)),
+      m_wrapper(new MetawearWrapper(target)),
       m_plotoffset(0),
       m_temporaryDir(nullptr),
       m_reconnectTimer(),
@@ -49,12 +49,12 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
         if(m_reconnectTimer.interval() > 20000){
             this->deleteLater();
             QMessageBox messageBox;
-            messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(m_currentDevice.address().toString()) );
+            messageBox.critical(0,"Error",QString("Failed to connect to device: %0").arg(m_currentDevice.getMac()) );
             messageBox.setFixedSize(500,200);
             return;
         }
         m_reconnectTimer.setInterval(m_reconnectTimer.interval() * 2);
-        qDebug() << "trying to reconnect to " << m_currentDevice.address().toString() << " with timeout " << m_reconnectTimer.interval();
+        qDebug() << "trying to reconnect to " << m_currentDevice.getMac() << " with timeout " << m_reconnectTimer.interval();
 
         m_reconnectTimer.start();
     });
@@ -125,8 +125,8 @@ SensorPanel::SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceI
         m_isReadyToCapture = true;
     });
 
-    ui->deviceAddress->setText(m_currentDevice.address().toString());
-    ui->sensorName->setText(m_currentDevice.address().toString());
+    ui->deviceAddress->setText(m_currentDevice.getMac());
+    ui->sensorName->setText(m_currentDevice.getMac());
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -214,7 +214,7 @@ void SensorPanel::setOffset(qint64 offset) {
     m_plotoffset = offset;
 }
 
-qint64 SensorPanel::getOffset()
+qint64 SensorPanel::getOffset() const
 {
     return m_plotoffset;
 }
@@ -265,7 +265,7 @@ MetawearWrapperBase* SensorPanel::getMetwareWrapper() {
     return this->m_wrapper;
 }
 
-QBluetoothDeviceInfo SensorPanel::getDeviceInfo()
+const BluetoothAddress& SensorPanel::getDeviceInfo() const
 {
     return m_currentDevice;
 }

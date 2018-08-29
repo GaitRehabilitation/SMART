@@ -6,19 +6,23 @@
 #define SMART_BASEDISCOVERYAGENT_H
 
 #include <QtCore/QObject>
-#include "BluetoothAdress.h"
+#include "BluetoothAddress.h"
 
 class BaseDiscoveryAgent : public QObject{
     Q_OBJECT
 private:
-
 public:
-    BaseDiscoveryAgent();
-    ~BaseDiscoveryAgent();
+    BaseDiscoveryAgent(){
+
+    }
+    ~BaseDiscoveryAgent(){
+
+    }
 
     virtual void start() = 0;
+    virtual void stop()  = 0;
 signals:
-    void deviceDiscovered(const BluetoothAdress& address);
+    void deviceDiscovered(BluetoothAddress address);
     void finished();
 
 };

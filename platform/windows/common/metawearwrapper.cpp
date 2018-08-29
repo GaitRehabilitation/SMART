@@ -120,26 +120,13 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 
 
 
-MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
-	MetawearWrapperBase::MetawearWrapperBase(), m_discover_device_event() ,m_event_set(m_discover_device_event){
+MetawearWrapper::MetawearWrapper(const BluetoothAddress &target):
+	MetawearWrapperBase::MetawearWrapperBase(){
 
-	connect(this, &MetawearWrapper::onSensorConfigured, &MetawearWrapper::configureHandlers);
-
-	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+	connect(this, &MetawearWrapper::onSensorConfigured,this, &MetawearWrapper::configureHandlers,Qt::QueuedConnection);
 
 
-	CoInitializeSecurity(
-		nullptr, // TODO: "O:BAG:BAD:(A;;0x7;;;PS)(A;;0x3;;;SY)(A;;0x7;;;BA)(A;;0x3;;;AC)(A;;0x3;;;LS)(A;;0x3;;;NS)"
-		-1,
-		nullptr,
-		nullptr,
-		RPC_C_AUTHN_LEVEL_DEFAULT,
-		RPC_C_IMP_LEVEL_IDENTIFY,
-		NULL,
-		EOAC_NONE,
-		nullptr);
-
-	std::string mac_copy(target.address().toString().toStdString());
+	std::string mac_copy(target.getMac().toStdString());
 	mac_copy.erase(2, 1);
 	mac_copy.erase(4, 1);
 	mac_copy.erase(6, 1);
@@ -153,7 +140,6 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
 	create_task(BluetoothLEDevice::FromBluetoothAddressAsync(mac_ulong)).then([=](BluetoothLEDevice^ leDevice) {
 		if (leDevice == nullptr) {
 			qWarning() << "Failed to discover device";
-
 		}
 		else {
 			leDevice->ConnectionStatusChanged += ref new TypedEventHandler<BluetoothLEDevice^, Platform::Object^>([=](BluetoothLEDevice^ sender, Platform::Object^ args) {
@@ -166,14 +152,25 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
 				}
 			});
 			this->m_device = leDevice;
-			m_discover_device_event.set();
+			this->startDiscovery();
 		}
 	});
 
-	m_event_set.then([=]() {
-		qDebug() << "Started Gatt service Async";
-		return create_task(this->m_device->GetGattServicesAsync(BluetoothCacheMode::Uncached));
-	}).then([=](GattDeviceServicesResult^ result) {
+	 /* .then([](task<void> previous) {
+		try {
+			previous.wait();
+		} catch (const exception& e) {
+			qWarning() << QString(e->Message->Data());
+		} catch (Exception^ e) {
+			qWarning() << QString(e->Message->Data());
+		}
+	});*/
+
+}
+
+void MetawearWrapper::startDiscovery(){
+	qDebug() << "Started Discovery";
+	create_task(this->m_device->GetGattServicesAsync(BluetoothCacheMode::Uncached)).then([=](GattDeviceServicesResult^ result) {
 		if (result->Status == GattCommunicationStatus::Success) {
 			std::vector<task<GattCharacteristicsResult^>> find_gattchar_tasks;
 			for (uint x = 0; x < result->Services->Size; ++x) {
@@ -206,19 +203,9 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
 		btleConnection.enable_notifications = enable_char_notify;
 		btleConnection.on_disconnect = on_disconnect;
 		this->m_metaWearBoard = mbl_mw_metawearboard_create(&btleConnection);
-		QMetaObject::invokeMethod(this, "configureHandlers", Qt::QueuedConnection);
 		emit this->onSensorConfigured();
 		//this->configureHandlers();
-	}); /* .then([](task<void> previous) {
-		try {
-			previous.wait();
-		} catch (const exception& e) {
-			qWarning() << QString(e->Message->Data());
-		} catch (Exception^ e) {
-			qWarning() << QString(e->Message->Data());
-		}
-	});*/
-
+	}).wait();
 }
 
 MetawearWrapper::~MetawearWrapper() {

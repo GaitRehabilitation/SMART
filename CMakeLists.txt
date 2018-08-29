@@ -33,8 +33,7 @@ set (SOURCES
   common/main.cpp
   common/metawearwrapperbase.cpp
   common/util.cpp
-  common/BluetoothAdress.cpp
-  common/BaseDiscoveryAgent.cpp)
+  common/BluetoothAddress.cpp)
 
 set(HEADERS
   qcustomplot.h
@@ -45,7 +44,7 @@ set(HEADERS
   common/metawearwrapperbase.h
   common/util.h
   common/BaseDiscoveryAgent.h
-  common/BluetoothAdress.h)
+  common/BluetoothAddress.h)
 
 
 set ( UIS
