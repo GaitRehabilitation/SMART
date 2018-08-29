@@ -16,14 +16,15 @@
 
 #ifndef UTIL_H
 #define UTIL_H
-
-
 #include <string>
+#include <QtCore/QString>
+
 
 class Util
 {
 public:
 	uint64_t stringToMac(std::string const& address);
+	QString formatLongtoMac(unsigned long long BluetoothAddress);
 private:
     Util();
 };

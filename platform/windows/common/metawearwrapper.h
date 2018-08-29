@@ -16,14 +16,13 @@
 #include <Windows.Devices.Bluetooth.h>
 #include <Windows.Devices.Bluetooth.Advertisement.h>
 #include <wrl/wrappers/corewrappers.h>
+#include "common/BluetoothAddress.h"
 
 using namespace concurrency;
 using namespace Windows::Devices::Bluetooth;
 using namespace Windows::Devices::Bluetooth::Advertisement;
 using namespace Windows::Devices::Bluetooth::GenericAttributeProfile;
 using namespace Windows::Security::Cryptography;
-
-static 	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
 
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
@@ -43,9 +42,7 @@ private:
 
     std::unordered_map<Platform::Guid, GattDeviceService^, Hasher, EqualFn> m_services;
     std::unordered_map<Platform::Guid, GattCharacteristic^, Hasher, EqualFn> m_characterstics;
-
-	BluetoothLEDevice^ m_device;
-    int m_readyCharacteristicCount;
+    BluetoothLEDevice^ m_device;
 
     MblMwFnIntVoidPtrArray m_readGattHandler;
     MblMwFnVoidVoidPtrInt m_disconnectedHandler;
@@ -53,8 +50,7 @@ private:
 
     GattCharacteristic^  findCharacterstic( uint64_t low, uint64_t high);
 
-	task_completion_event<void> m_discover_device_event;
-	task<void> m_event_set;
+	void startDiscovery();
 
 protected:
 
@@ -72,17 +68,15 @@ protected:
 
     static void on_disconnect(void *context, const void *caller, MblMwFnVoidVoidPtrInt handler);
 
-
-
 public:
-    MetawearWrapper(const QBluetoothHostInfo &local, const QBluetoothDeviceInfo &target);
+    MetawearWrapper( const BluetoothAddress &target);
 	~MetawearWrapper();
 signals:
 	void onSensorConfigured();
 
-    void controllerError(QLowEnergyController::Error);
+  //  void controllerError(QLowEnergyController::Error);
 
-    void characteristicError(QLowEnergyService::ServiceError);
+   // void characteristicError(QLowEnergyService::ServiceError);
 
 };
 

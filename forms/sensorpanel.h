@@ -17,23 +17,18 @@
 #ifndef SENSORPANEL_H
 #define SENSORPANEL_H
 
-#include <QBluetoothDeviceInfo>
-#include <QBluetoothHostInfo>
-#include <QLowEnergyController>
 #include <QMutex>
 #include <QTemporaryDir>
 #include <QWidget>
 #include <qtimer.h>
-
 #include <iostream>
 #include <fstream>
-
+#include "common/BluetoothAddress.h"
 
 class MetawearWrapperBase;
 class MblMwMetaWearBoard;
 class QTimer;
 class DataBundle;
-
 namespace Ui {
 class SensorPanel;
 }
@@ -44,7 +39,7 @@ private:
     Ui::SensorPanel *ui;
 
   MetawearWrapperBase *m_wrapper;
-  QBluetoothDeviceInfo m_currentDevice;
+  BluetoothAddress m_currentDevice;
 
   qint64 m_plotoffset;
 
@@ -63,18 +58,18 @@ private:
 
   void registerPlotHandlers();
   void registerDataHandlers();
-  void configureWrapper(QBluetoothDeviceInfo device);
+  void configureWrapper(BluetoothAddress device);
 
 public:
-  explicit SensorPanel(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target, QWidget *parent = nullptr);
+  explicit SensorPanel(const BluetoothAddress &target, QWidget *parent = nullptr);
   virtual ~SensorPanel();
 
   bool isReadyToCapture();
   MetawearWrapperBase* getMetwareWrapper();
-  QBluetoothDeviceInfo getDeviceInfo();
+  const BluetoothAddress& getDeviceInfo() const;
   void setName(QString);
   void setOffset(qint64 offset);
-  qint64 getOffset();
+  qint64 getOffset() const;
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
   void clearPlots();
@@ -82,7 +77,7 @@ public:
 signals:
   void connected();
   void disconnect();
-  void bluetoothError(QLowEnergyController::Error e);
+  //void bluetoothError(QLowEnergyController::Error e);
 
   void metawearInitilized();
 };

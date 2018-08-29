@@ -17,11 +17,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QBluetoothDeviceInfo>
-#include <QBluetoothHostInfo>
+
 #include <QMainWindow>
 #include <QTemporaryDir>
 #include <QTimer>
+#include "common/BluetoothAddress.h"
 
 namespace Ui {
     class MainWindow;
@@ -43,8 +43,8 @@ public:
   MainWindow(QWidget *parent = nullptr);
   virtual ~MainWindow();
 
-  void connectedDevices(QList<QBluetoothDeviceInfo>&);
-  SensorPanel *registerDevice(const QBluetoothDeviceInfo &info);
+  void connectedDevices(QList<BluetoothAddress>&);
+  SensorPanel *registerDevice(const BluetoothAddress &info);
   void startCapture();
   void stopCapture();
 
