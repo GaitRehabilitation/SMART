@@ -270,7 +270,9 @@ const BluetoothAddress& SensorPanel::getDeviceInfo() const
     return m_currentDevice;
 }
 
-SensorPanel::~SensorPanel() { delete ui; }
+SensorPanel::~SensorPanel() {
+    delete m_wrapper;
+    delete ui; }
 
 bool SensorPanel::isReadyToCapture()
 {
