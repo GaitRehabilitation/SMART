@@ -26,8 +26,7 @@ DiscoveryAgent::DiscoveryAgent() : BaseDiscoveryAgent() {
 
         QString mac =  QString::fromWCharArray(ret.str().c_str());
         QString name = QString::fromWCharArray(localname.c_str());
-        BluetoothAddress address(mac,name );
-//        qDebug() << "mac:" << mac << " name: " << name;
+        BluetoothAddress address(mac,name);
         emit deviceDiscovered(address);
 	});
 }

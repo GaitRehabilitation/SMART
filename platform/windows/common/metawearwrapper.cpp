@@ -12,6 +12,8 @@
 #include <iomanip>
 #include <winsock.h>
 #include <QMetaObject>
+#include <QDebug>
+
 #define MAX_LEN_UUID_STR 37
 //auto leDevice = co_await  winrt::Windows::Devices::Bluetooth::BluetoothDevice::FromBluetoothAddressAsync(0);
 
@@ -19,8 +21,6 @@ using namespace Windows::Foundation;
 
 
 GattCharacteristic^  MetawearWrapper::findCharacterstic(uint64_t low, uint64_t high){
-
-
     unsigned int data0 = uint8_t((high >> 56) & 0xFF)  | uint8_t((high >> 48) & 0xFF) << 8 | uint8_t((high >> 40) & 0xFF) << 16 | uint8_t((high >> 32) & 0xFF) << 24;
     unsigned short data1 = uint8_t((high >> 24) & 0xFF)  | uint8_t((high >> 16) & 0xFF) << 8;
     unsigned short data2  = uint8_t((high >> 8) & 0xFF)  | uint8_t(high & 0xFF) << 8;
@@ -49,6 +49,8 @@ GattCharacteristic^  MetawearWrapper::findCharacterstic(uint64_t low, uint64_t h
     return nullptr;
 
 }
+
+
 
 void MetawearWrapper::read_gatt_char(void *context, const void *caller, const MblMwGattChar *characteristic,
                                        MblMwFnIntVoidPtrArray handler) {
@@ -119,47 +121,39 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
 }
 
 
-
 MetawearWrapper::MetawearWrapper(const BluetoothAddress &target):
-	MetawearWrapperBase::MetawearWrapperBase(){
+	MetawearWrapperBase::MetawearWrapperBase(target){
+}
 
-	std::string mac_copy(target.getMac().toStdString());
-	mac_copy.erase(2, 1);
-	mac_copy.erase(4, 1);
-	mac_copy.erase(6, 1);
-	mac_copy.erase(8, 1);
-	mac_copy.erase(10, 1);
+void MetawearWrapper::connectToDevice(){
+    if(this->m_device == nullptr) {
+        create_task(BluetoothLEDevice::FromBluetoothAddressAsync(this->m_target.toUint64())).then(
+                [=](BluetoothLEDevice^leDevice) {
+                    if (leDevice == nullptr) {
+                        qWarning() << "Failed to discover device";
+                    } else {
+                        leDevice->ConnectionStatusChanged += ref new TypedEventHandler<BluetoothLEDevice ^ , Platform::Object^>(
+                                [=](BluetoothLEDevice^sender, Platform::Object^args) {
+                                    switch (sender->ConnectionStatus) {
+                                        case BluetoothConnectionStatus::Disconnected:
+                                            qWarning() << "Failed to connect to device";
+                                            emit disconnected();
+                                            break;
+                                    }
+                                });
+                        this->m_device = leDevice;
+                        this->startDiscovery();
+                    }
+                });
+    }
+    else{
+        qDebug() << "Device already connected";
+    }
+}
 
-	size_t temp;
-	uint64_t mac_ulong = std::stoull(mac_copy.c_str(), &temp, 16);
 
-
-	create_task(BluetoothLEDevice::FromBluetoothAddressAsync(mac_ulong)).then([=](BluetoothLEDevice^ leDevice) {
-		if (leDevice == nullptr) {
-			qWarning() << "Failed to discover device";
-		}
-		else {
-			leDevice->ConnectionStatusChanged += ref new TypedEventHandler<BluetoothLEDevice^, Platform::Object^>([=](BluetoothLEDevice^ sender, Platform::Object^ args) {
-				switch (sender->ConnectionStatus) {
-                    case BluetoothConnectionStatus::Disconnected:
-                        qWarning() << "Failed to connect to device";
-                      //  this->cleanup();
-                        break;
-                }
-			});
-			this->m_device = leDevice;
-			this->startDiscovery();
-		}
-	});/* .then([](task<void> previous) {
-		try {
-			previous.wait();
-		} catch (const exception& e) {
-			qWarning() << QString(e->Message->Data());
-		} catch (Exception^ e) {
-			qWarning() << QString(e->Message->Data());
-		}
-	});*/
-
+bool MetawearWrapper::isConnected() const{
+    return this->m_device != nullptr;
 }
 
 void MetawearWrapper::startDiscovery() {
@@ -172,13 +166,12 @@ void MetawearWrapper::startDiscovery() {
                         for (uint x = 0; x < result->Services->Size; ++x) {
                             auto service = result->Services->GetAt(x);
                             m_services.emplace(service->Uuid, service);
-                            find_gattchar_tasks.push_back(
-                                    create_task(service->GetCharacteristicsAsync(BluetoothCacheMode::Uncached)));
+                            find_gattchar_tasks.push_back(create_task(service->GetCharacteristicsAsync(BluetoothCacheMode::Uncached)));
                         }
                         return when_all(std::begin(find_gattchar_tasks), std::end(find_gattchar_tasks));
                     }
-                    qWarning() << "Failed fo discover Gatt service";
-                    throw ref new Platform::Exception(-1, "Failed fo discover Gatt service");
+                    qWarning() << "Failed to discover Gatt service";
+                    throw ref new Platform::Exception(-1, "Failed to discover Gatt service");
                 }).then([=](std::vector<GattCharacteristicsResult ^ > results) {
             for (auto it : results) {
                 if (it->Status == GattCommunicationStatus::Success) {
@@ -205,29 +198,24 @@ void MetawearWrapper::startDiscovery() {
     }
     catch (Platform::Exception^e) {
         qWarning() << QString::fromWCharArray(e->Message->Data());
-        this->cleanup();
+
+        for (auto it : m_characterstics)
+            delete it.second;
+        for (auto it : m_services)
+            delete it.second;
+
+        m_characterstics.clear();
+        m_services.clear();
+        if (m_device != nullptr) {
+            delete m_device;
+            m_device = nullptr;
+        }
+        emit disconnected();
     }
 }
 
 MetawearWrapper::~MetawearWrapper() {
-	cleanup();
-}
 
-void MetawearWrapper::cleanup()
-{
-    qDebug() << "Cleanup";
-
-	for (auto it : m_characterstics)
-		delete it.second;
-	for (auto it : m_services)
-		delete it.second;
-
-	m_characterstics.clear();
-	m_services.clear();
-	if (m_device != nullptr) {
-		delete m_device;
-		m_device = nullptr;
-	}
 }
 
 

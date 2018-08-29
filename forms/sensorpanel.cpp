@@ -42,6 +42,7 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
       m_isReadyToCapture(false){
     ui->setupUi(this);
     m_reconnectTimer.setSingleShot(true);
+    m_wrapper->connectToDevice();
 
     connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
        // this->m_wrapper->resetControllerAndTryAgain();
@@ -55,8 +56,10 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
         }
         m_reconnectTimer.setInterval(m_reconnectTimer.interval() * 2);
         qDebug() << "trying to reconnect to " << m_currentDevice.getMac() << " with timeout " << m_reconnectTimer.interval();
-
-        m_reconnectTimer.start();
+        if(!m_wrapper->isConnected()) {
+            m_wrapper->connectToDevice();
+            m_reconnectTimer.start();
+        }
     });
 
     connect(this->m_wrapper,&MetawearWrapper::metawareInitialized,this,&SensorPanel::metawearInitilized);
@@ -64,7 +67,7 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     connect(this->m_wrapper,&MetawearWrapper::connected,this,&SensorPanel::connected);
 
     connect(this->m_wrapper,&MetawearWrapper::connected,this,[=](){
-        m_reconnectTimer.stop();
+		m_reconnectTimer.stop();
         m_reconnectTimer.setInterval(0);
     });
     connect(this->m_wrapper,&MetawearWrapper::disconnected,this,[=](){

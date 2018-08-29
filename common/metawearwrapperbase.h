@@ -26,6 +26,7 @@
 #include "metawear/sensor/gyro_bmi160.h"
 #include "metawear/sensor/magnetometer_bmm150.h"
 #include "metawear/core/datasignal.h"
+#include "common/BluetoothAddress.h"
 
 
 class MetawearWrapperBase : public QObject {
@@ -36,16 +37,17 @@ private:
     QString m_model;
     qint64 m_latestEpoch;
 
-    QString m_host;
-    QString m_target;
-
 protected:
     MblMwMetaWearBoard *m_metaWearBoard;
-
+    BluetoothAddress m_target;
     void configureHandlers();
 
 public:
-    MetawearWrapperBase();
+    MetawearWrapperBase(const BluetoothAddress& address);
+
+    virtual void connectToDevice() = 0;
+
+    virtual bool isConnected() const = 0;
 
     void configureAccelerometer(float, float);
 
@@ -75,17 +77,14 @@ public:
 
     void updateEpoch(qint64 epoch);
 
-    QString getModel();
+    const QString& getModel() const;
 
     qint64 getLatestEpoch();
 
-    QString getFirmwareVersion();
+    const QString& getFirmwareVersion() const;
 
-    bool isMetawearReady();
 
-    QString getHost() const;
-
-    QString getTarget() const;
+    const BluetoothAddress& getTarget() const;
 
 signals:
 

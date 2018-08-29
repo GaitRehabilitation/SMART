@@ -5,9 +5,7 @@
 #ifndef SMART_QTMETAWEARWRAPPER_H
 #define SMART_QTMETAWEARWRAPPER_H
 
-#include <QtBluetooth/QLowEnergyController>
 #include <QtCore/QPointer>
-#include <QtBluetooth/QBluetoothHostInfo>
 #include "common/metawearwrapperbase.h"
 
 #include <ppltasks.h>
@@ -27,8 +25,6 @@ using namespace Windows::Security::Cryptography;
 class MetawearWrapper : public MetawearWrapperBase {
 Q_OBJECT
 private:
-    QPointer<QLowEnergyController> m_controller;
-
     struct Hasher {
         size_t operator() (Platform::Guid key) const {
             return key.GetHashCode();
@@ -39,23 +35,14 @@ private:
             return t1.Equals(t2);
         }
     };
-
     std::unordered_map<Platform::Guid, GattDeviceService^, Hasher, EqualFn> m_services;
     std::unordered_map<Platform::Guid, GattCharacteristic^, Hasher, EqualFn> m_characterstics;
     BluetoothLEDevice^ m_device;
 
-    MblMwFnIntVoidPtrArray m_readGattHandler;
-    MblMwFnVoidVoidPtrInt m_disconnectedHandler;
-    MblMwFnIntVoidPtrArray m_notificationHandler;
-
     GattCharacteristic^  findCharacterstic( uint64_t low, uint64_t high);
-
 	void startDiscovery();
-
 protected:
 
-	void cleanup();
-   // static GUID convertTo128(uint64_t low, uint64_t high);
 
     static void read_gatt_char(void *context, const void *caller, const MblMwGattChar *characteristic,
                                MblMwFnIntVoidPtrArray handler);
@@ -70,13 +57,9 @@ protected:
 
 public:
     MetawearWrapper( const BluetoothAddress &target);
+    void connectToDevice();
+    bool isConnected() const;
 	~MetawearWrapper();
-signals:
-	void onSensorConfigured();
-
-  //  void controllerError(QLowEnergyController::Error);
-
-   // void characteristicError(QLowEnergyService::ServiceError);
 
 };
 

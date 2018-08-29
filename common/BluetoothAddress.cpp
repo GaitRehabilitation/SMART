@@ -26,3 +26,17 @@ const QString& BluetoothAddress::getMac() const{
     return m_mac;
 }
 
+
+
+uint64_t BluetoothAddress::toUint64() const{
+    std::string mac_copy(m_mac.toStdString());
+    mac_copy.erase(2, 1);
+    mac_copy.erase(4, 1);
+    mac_copy.erase(6, 1);
+    mac_copy.erase(8, 1);
+    mac_copy.erase(10, 1);
+
+    size_t temp;
+    return std::stoull(mac_copy, &temp, 16);
+}
+

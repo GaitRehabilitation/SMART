@@ -33,12 +33,13 @@
 #include <QDebug>
 
 
-MetawearWrapperBase::MetawearWrapperBase():
+MetawearWrapperBase::MetawearWrapperBase(const BluetoothAddress& address):
     m_metaWearBoard(nullptr),
     m_firmwareVersion(""),
     m_model(""),
     m_isMetawearReady(false),
-    m_latestEpoch(0)
+    m_latestEpoch(0),
+    m_target(address)
 {
 }
 
@@ -128,11 +129,9 @@ void MetawearWrapperBase::configureHandlers() {
                                             mbl_mw_memory_free((void *) dev_info);
                                             qDebug() << "model = " << wrapper->m_model;
 
-                                            if (!wrapper->m_isMetawearReady) {
-                                                emit wrapper->metawareInitialized();
-                                                emit wrapper->postMetawearInitialized();
-                                            }
-                                            wrapper->m_isMetawearReady = true;
+                                            emit wrapper->metawareInitialized();
+                                            emit wrapper->postMetawearInitialized();
+                                            emit wrapper->connected();
                                             qDebug() << "Board initialized";
                                         } else {
                                             emit wrapper->metawareFailedToInitialized(status);
@@ -179,15 +178,12 @@ void MetawearWrapperBase::updateEpoch(qint64 epoch)
     }
 }
 
-bool MetawearWrapperBase::isMetawearReady(){
-    return m_isMetawearReady;
-}
 
-QString MetawearWrapperBase::getFirmwareVersion(){
+const QString& MetawearWrapperBase::getFirmwareVersion() const{
     return m_firmwareVersion;
 }
 
-QString MetawearWrapperBase::getModel(){
+const QString& MetawearWrapperBase::getModel() const{
     return m_model;
 }
 
@@ -196,10 +192,7 @@ qint64 MetawearWrapperBase::getLatestEpoch()
     return m_latestEpoch;
 }
 
-QString MetawearWrapperBase::getHost() const {
-    return m_host;
-}
 
-QString MetawearWrapperBase::getTarget() const {
+const BluetoothAddress& MetawearWrapperBase::getTarget() const {
     return m_target;
 }

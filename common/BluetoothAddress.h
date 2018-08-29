@@ -21,6 +21,7 @@ public:
 
     const QString& getTitle() const;
     const QString& getMac() const;
+    uint64_t toUint64() const;
 
 };
 
