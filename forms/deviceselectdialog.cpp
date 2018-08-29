@@ -37,6 +37,7 @@ DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
     });
     connect(ui->clear, &QPushButton::clicked,this,[=](){
         ui->deviceList->clear();
+        m_discoveryAgent->stop();
     });
    // connect(m_discoveryAgent,&QBluetoothDeviceDiscoveryAgent::finished, this, [=](){ui->scan->setEnabled(true); });
 
@@ -77,6 +78,11 @@ DeviceSelectDialog::~DeviceSelectDialog() { delete ui; }
 void DeviceSelectDialog::accept() {
     if (ui->deviceList->count() == 0)
         return;
+
+
+    m_discoveryAgent->stop();
+    ui->scan->setEnabled(true);
+
     QListWidgetItem *currentItem = ui->deviceList->currentItem();
     QString text = currentItem->text();
     emit onBluetoothDeviceAccepted(m_deviceInfo.value(text));
