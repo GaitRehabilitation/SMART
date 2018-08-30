@@ -129,7 +129,7 @@ void MainWindow::stopCapture()
         stream << this->ui->description->toPlainText();
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Data"),"",tr("All Files (*)"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Data"),"",tr("All Files (*)"), nullptr, QFileDialog::DontUseNativeDialog);
     if (fileName.isEmpty())
         return;
     else {
