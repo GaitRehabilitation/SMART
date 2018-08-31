@@ -25,7 +25,7 @@
 class QListWidgetItem;
 class DiscoveryAgent;
 namespace Ui {
-class DeviceSelectDialog;
+    class DeviceSelectDialog;
 }
 
 class DeviceSelectDialog : public QDialog {
@@ -38,11 +38,11 @@ private:
 
 public:
   explicit DeviceSelectDialog(QWidget *parent = nullptr);
-  ~DeviceSelectDialog();
+  ~DeviceSelectDialog() override;
 
   void addDevice(const BluetoothAddress&);
   void updateDeviceBlackList(const QList<BluetoothAddress>&);
-  void accept();
+  void accept() override;
 
 signals:
   void onBluetoothDeviceAccepted(const BluetoothAddress &info);

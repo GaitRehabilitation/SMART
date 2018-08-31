@@ -1,5 +1,5 @@
 /**
-* Copyright %yyyy% GaitRehabilitation
+* Copyright 2018 GaitRehabilitation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@
 #include "metawear/core/datasignal.h"
 #include "common/BluetoothAddress.h"
 
-
+/**
+ * a wrapper object around the core implementation of Metawear
+ */
 class MetawearWrapperBase : public QObject {
 Q_OBJECT
 private:
@@ -43,10 +45,21 @@ protected:
     void configureHandlers();
 
 public:
-    MetawearWrapperBase(const BluetoothAddress& address);
+    /**
+     * initilize metawear wrapper
+     * @param address the address of the device to connect to
+     */
+    explicit MetawearWrapperBase(const BluetoothAddress& address);
 
+    /**
+     * connect to the metawear device
+     */
     virtual void connectToDevice() = 0;
 
+    /**
+     * 
+     * @return
+     */
     virtual bool isConnected() const = 0;
 
     void configureAccelerometer(float, float);
