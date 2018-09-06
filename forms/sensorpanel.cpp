@@ -113,7 +113,7 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    connect(this->m_wrapper,&MetawearWrapperBase::metawareFailedToInitialized, this,[=](){
+    connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized, this,[=](){
         this->m_wrapper->configureAccelerometer(4.f,25.f);
         this->m_wrapper->configureGyroscope(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
     });
