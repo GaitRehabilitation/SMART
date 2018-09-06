@@ -141,6 +141,8 @@ void MetawearWrapperBase::configureHandlers() {
 
 
     connect(this, &MetawearWrapperBase::metawareInitialized, [=]() {
+        mbl_mw_settings_set_connection_parameters(m_metaWearBoard, 7.5f, 7.5f, 0, 6000);
+
         auto battery_signal = mbl_mw_settings_get_battery_state_data_signal(m_metaWearBoard);
         mbl_mw_datasignal_subscribe(battery_signal, this, [](void *context, const MblMwData *data) -> void {
             MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
