@@ -4,6 +4,11 @@
 
 #include <3rdparty/mbientlab/src/metawear/core/status.h>
 #include "common/metawearwrapper.h"
+#include "metawearwrapper.h"
+
+#include <QtBluetooth/QLowEnergyController>
+#include <QtBluetooth/QLowEnergyService>
+#include <QtBluetooth/QBluetoothUuid>
 
 quint128 MetawearWrapper::convertTo128(uint64_t low,uint64_t high){
     quint128 result{};
@@ -35,9 +40,9 @@ void MetawearWrapper::read_gatt_char(void *context, const void *caller, const Mb
     wrapper->m_readGattHandler = handler;
 
     QBluetoothUuid service_uuid = QBluetoothUuid(
-            convertTo128(characteristic->service_uuid_low, characteristic->service_uuid_high));
+            MetawearWrapper::convertTo128(characteristic->service_uuid_low, characteristic->service_uuid_high));
     QBluetoothUuid characteristic_uuid = QBluetoothUuid(
-            convertTo128(characteristic->uuid_low, characteristic->uuid_high));
+            MetawearWrapper::convertTo128(characteristic->uuid_low, characteristic->uuid_high));
 
     QLowEnergyService *service = wrapper->m_services.value(service_uuid.toString());
     if (service == nullptr) {
@@ -119,13 +124,17 @@ void MetawearWrapper::on_disconnect(void *context, const void *caller, MblMwFnVo
     wrapper->m_disconnectedHandler = handler;
 }
 
-MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoothDeviceInfo &target):
-    MetawearWrapperBase::MetawearWrapperBase() ,
+bool MetawearWrapper::isConnected() const {
+    return !m_controller;
+}
+
+MetawearWrapper::MetawearWrapper(const BluetoothAddress &target):
+    MetawearWrapperBase::MetawearWrapperBase(target) ,
     m_readyCharacteristicCount(0),
     m_readGattHandler(nullptr),
     m_disconnectedHandler(nullptr),
     m_notificationHandler(nullptr) {
-    m_controller = new QLowEnergyController(target.address(), local.address(), this);
+    m_controller = new QLowEnergyController(QBluetoothAddress(target.toUint64()), this);
 
     MblMwBtleConnection btleConnection;
     btleConnection.context = this;
@@ -239,10 +248,17 @@ MetawearWrapper::MetawearWrapper(const QBluetoothHostInfo &local,const QBluetoot
                         break;
                     case QLowEnergyController::NoError:
                         break;
+                    case QLowEnergyController::RemoteHostClosedError:break;
                 }
-                emit controllerError(e);
             });
 
+}
+
+MetawearWrapper::~MetawearWrapper() {
+
+}
+
+void MetawearWrapper::connectToDevice() {
     if (m_controller->state() == QLowEnergyController::UnconnectedState) {
         qDebug() << "Starting connection";
         m_controller->connectToDevice();

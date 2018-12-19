@@ -5,10 +5,12 @@
 #ifndef SMART_QTMETAWEARWRAPPER_H
 #define SMART_QTMETAWEARWRAPPER_H
 
+
+#include "common/metawearwrapperbase.h"
+
 #include <QtBluetooth/QLowEnergyController>
 #include <QtCore/QPointer>
 #include <QtBluetooth/QBluetoothHostInfo>
-#include "common/metawearwrapperbase.h"
 
 
 class MetawearWrapper : public MetawearWrapperBase {
@@ -39,13 +41,11 @@ protected:
     static void on_disconnect(void *context, const void *caller, MblMwFnVoidVoidPtrInt handler);
 
 public:
-    MetawearWrapper(const QBluetoothHostInfo &local, const QBluetoothDeviceInfo &target);
+    explicit MetawearWrapper( const BluetoothAddress &target);
+    void connectToDevice() override;
+    bool isConnected() const override;
+    ~MetawearWrapper() override;
 
-signals:
-
-    void controllerError(QLowEnergyController::Error);
-
-    void characteristicError(QLowEnergyService::ServiceError);
 
 };
 

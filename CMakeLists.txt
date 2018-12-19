@@ -22,7 +22,7 @@ if(WIN32)
 endif()
 
 include_directories(./)
-find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth REQUIRED)
 
 set (SOURCES
   qcustomplot.cpp
@@ -66,11 +66,14 @@ if (UNIX)
   include_directories(platform/linux)
   set (PLATFORM_SOURCE
           platform/linux/common/metawearwrapper.cpp
+          platform/linux/common/DiscoveryAgent.cpp
   )
 
   set(PLATFORM_HEADERS
           platform/linux/common/metawearwrapper.h
+          platform/linux/common/DiscoveryAgent.h
   )
+
 endif (UNIX)
 
 if (MSVC)
@@ -122,6 +125,11 @@ if (MSVC)
 endif(MSVC)
 
 # Add the Qt5 Widgets for linking
-target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport )
+target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport)
+
+if (UNIX)
+    target_link_libraries(SMART Qt5::Bluetooth)
+endif (UNIX)
+
 target_link_libraries(SMART ${QUAZIP_LIB_TARGET_NAME})
 target_link_libraries(SMART extern_metawear)

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rdparty/Warble" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rdparty/mbientlab" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rdparty/qmsgpack" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rdparty/quazip" vcs="Git" />
