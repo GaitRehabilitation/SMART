@@ -7,16 +7,16 @@ branches:
 
 environment:
   matrix:
-  - QT: 5.11.1  
+  - QT: 5.11.2  
     build: 64
     qt_target: msvc2017_64
 #  - qt: 5.11.1
 #    build: 64
 #    qt_target: winrt_armv7_msvc2017
-  - qt: 5.11.1
+  - qt: 5.11.2
     build: 32
     qt_target: winrt_x86_msvc2017
-  - qt: 5.11.1
+  - qt: 5.11.2
     build: 64
     qt_target: winrt_x64_msvc2017
            
@@ -24,13 +24,12 @@ environment:
 install:
   - set QTDIR=C:\Qt\%qt%\%qt_target%
   - set PATH=%PATH%;%QTDIR%\bin
-  - '%QTDIR%\bin\qtenv2.bat'
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake\\Qt5 -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.1\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd ..
