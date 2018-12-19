@@ -24,7 +24,7 @@ environment:
 install:
   - set QTDIR=C:\Qt\%qt%\%qt_target%
   - set PATH=%PATH%;%QTDIR%\bin
-  
+  - '%QTDIR%\bin\qtenv2.bat'
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
