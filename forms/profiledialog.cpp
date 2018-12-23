@@ -48,11 +48,13 @@ ProfileDialog::ProfileDialog(QWidget *parent): ui(new Ui::ProfileDialog) {
     connect(ui->loadProfileButton,&QPushButton::clicked,this,[=](){
         qDebug() << "load profile:" << profilePath(ui->listOfProfiles->currentText());
         QFile file(profilePath(ui->listOfProfiles->currentText()));
-        file.open(QIODevice::ReadOnly);
-        QByteArray data = file.readAll();
-        file.close();
-        QVariantList payload = MsgPack::unpack(data).toList();
-        this->setConfig(payload);
+        if(file.exists()) {
+            file.open(QIODevice::ReadOnly);
+            QByteArray data = file.readAll();
+            file.close();
+            QVariantList payload = MsgPack::unpack(data).toList();
+            this->setConfig(payload);
+        }
     });
 
     connect(ui->saveProfileButton,&QPushButton::clicked,this,[=](){
@@ -95,13 +97,16 @@ QString ProfileDialog::profilePath(const QString& profile){
 
 
 void ProfileDialog::setConfig(QVariantList payload){
+    for(int x = 0; x < this->ui->deviceListContainer->count();x++){
+        MbientConfigPanel* p = static_cast<MbientConfigPanel*>(ui->deviceListContainer->itemAt(x)->widget());
+        p->deleteLater();
+    }
     for(int i = 0; i < payload.count(); ++i){
         MbientConfigPanel* panel = new MbientConfigPanel(this);
         ui->deviceListContainer->addWidget(panel);
         panel->setConfig(payload.at(i).toMap());
 
     }
-
 }
 
 QVariantList ProfileDialog::getConfig() {

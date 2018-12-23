@@ -10,6 +10,8 @@
 #include <metawear/sensor/gyro_bmi160.h>
 #include <metawear/sensor/accelerometer.h>
 
+#include <forms/deviceselectdialog.h>
+
 MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigPanel){
     ui->setupUi(this);
 
@@ -18,6 +20,14 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
     ui->quaternionContainer->setEnabled(false);
     ui->linearAccelerationContainer->setEnabled(false);
     ui->eularAngleContainer->setEnabled(false);
+
+    connect(ui->deviceFind,&QPushButton::clicked,this,[=](){
+        DeviceSelectDialog dialog(this);
+        connect(&dialog,&DeviceSelectDialog::onBluetoothDeviceAccepted,this[=](const BluetoothAddress &info){
+
+        });
+
+    });
 
     connect(ui->removeDevice,&QPushButton::clicked,this,[=](){
         this->deleteLater();
