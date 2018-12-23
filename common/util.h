@@ -23,8 +23,9 @@
 class Util
 {
 public:
-	uint64_t stringToMac(std::string const& address);
-	QString formatLongtoMac(unsigned long long BluetoothAddress);
+	static uint64_t stringToMac(std::string const& address);
+//	static QString formatLongtoMac(unsigned long long BluetoothAddress);
+
 private:
     Util();
 };

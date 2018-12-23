@@ -30,7 +30,7 @@ class MblMwMetaWearBoard;
 class QTimer;
 class DataBundle;
 namespace Ui {
-class SensorPanel;
+    class SensorPanel;
 }
 
 class SensorPanel : public QWidget {

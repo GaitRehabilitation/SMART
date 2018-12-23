@@ -18,6 +18,7 @@
 
 #include "forms/deviceselectdialog.h"
 #include "forms/mainwindow.h"
+#include "forms/profiledialog.h"
 
 #include "forms/sensorpanel.h"
 #include <QFileDialog>
@@ -27,6 +28,7 @@
 #include <QMessageBox>
 #include "JlCompress.h"
 #include <common/metawearwrapperbase.h>
+#include <forms/profiledialog.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
@@ -35,15 +37,13 @@ MainWindow::MainWindow(QWidget *parent)
 //    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
 
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
-		DeviceSelectDialog dialog;
-		connect(&dialog, &DeviceSelectDialog::onBluetoothDeviceAccepted, this, &MainWindow::registerDevice);
+		ProfileDialog profileDialog;
+		profileDialog.exec();
 
-		//QList<QBluetoothDeviceInfo> devices;
-		//connectedDevices(devices);
-		//dialog.updateDeviceBlackList(devices);
-
-		dialog.exec();
-        //m_deviceSelectDialog->show();
+//        DeviceSelectDialog dialog;
+//		connect(&dialog, &DeviceSelectDialog::onBluetoothDeviceAccepted, this, &MainWindow::registerDevice);
+//
+//		dialog.exec();
     });
     connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
     connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);

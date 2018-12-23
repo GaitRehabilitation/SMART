@@ -173,13 +173,13 @@
      <normaloff>:/icons/plus-solid.svg</normaloff>:/icons/plus-solid.svg</iconset>
    </property>
    <property name="text">
-    <string>Add Device</string>
+    <string>Manage Devices</string>
    </property>
    <property name="iconText">
-    <string>Add Device</string>
+    <string>Manage Devices</string>
    </property>
    <property name="toolTip">
-    <string>Add Device</string>
+    <string>Manages Active Devices</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>

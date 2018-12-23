@@ -29,6 +29,8 @@ set (SOURCES
   forms/deviceselectdialog.cpp
   forms/mainwindow.cpp
   forms/sensorpanel.cpp
+  forms/profiledialog.cpp
+  forms/mbientconfigpanel.cpp
   
   common/main.cpp
   common/metawearwrapperbase.cpp
@@ -40,6 +42,8 @@ set(HEADERS
   forms/deviceselectdialog.h
   forms/sensorpanel.h
   forms/mainwindow.h
+  forms/profiledialog.h
+  forms/mbientconfigpanel.h
 
   common/metawearwrapperbase.h
   common/util.h
@@ -51,6 +55,8 @@ set ( UIS
     forms/mainwindow.ui
     forms/sensorpanel.ui
     forms/deviceselectdialog.ui
+    forms/mbientconfigpanel.ui
+    forms/profiledialog.ui
 )
 
 set ( RESOURCES
@@ -131,5 +137,8 @@ if (UNIX)
     target_link_libraries(SMART Qt5::Bluetooth)
 endif (UNIX)
 
+include_directories(./3rdparty/qmsgpack/src)
+
 target_link_libraries(SMART ${QUAZIP_LIB_TARGET_NAME})
 target_link_libraries(SMART extern_metawear)
+target_link_libraries(SMART qmsgpack)
