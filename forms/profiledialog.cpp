@@ -34,6 +34,7 @@ ProfileDialog::ProfileDialog(QWidget *parent): ui(new Ui::ProfileDialog) {
         ui->listOfProfiles->setCurrentText(QString(value).remove(QRegExp("[^a-zA-Z\\d\\s]")));
     });
 
+
     // search and load up profiles
     QDirIterator it( QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/profiles", QStringList() << "*.dat", QDir::Files, QDirIterator::Subdirectories);
     qDebug() << "--- Found Profiles ---";
@@ -53,7 +54,7 @@ ProfileDialog::ProfileDialog(QWidget *parent): ui(new Ui::ProfileDialog) {
             QByteArray data = file.readAll();
             file.close();
             QVariantList payload = MsgPack::unpack(data).toList();
-            this->setConfig(payload);
+            this->deserialize(payload);
         }
     });
 
@@ -81,7 +82,7 @@ ProfileDialog::ProfileDialog(QWidget *parent): ui(new Ui::ProfileDialog) {
             ui->listOfProfiles->addItem(target);
 
 
-        QByteArray data = MsgPack::pack(getConfig());
+        QByteArray data = MsgPack::pack(serialize());
         qDebug() << "saved profile:" << profilePath(target);
         QFile file(profilePath(target));
         file.open(QIODevice::WriteOnly);
@@ -96,7 +97,7 @@ QString ProfileDialog::profilePath(const QString& profile){
 }
 
 
-void ProfileDialog::setConfig(QVariantList payload){
+void ProfileDialog::deserialize(QVariantList payload){
     for(int x = 0; x < this->ui->deviceListContainer->count();x++){
         MbientConfigPanel* p = static_cast<MbientConfigPanel*>(ui->deviceListContainer->itemAt(x)->widget());
         p->deleteLater();
@@ -104,16 +105,25 @@ void ProfileDialog::setConfig(QVariantList payload){
     for(int i = 0; i < payload.count(); ++i){
         MbientConfigPanel* panel = new MbientConfigPanel(this);
         ui->deviceListContainer->addWidget(panel);
-        panel->setConfig(payload.at(i).toMap());
+        panel->deserialize(payload.at(i).toMap());
 
     }
 }
 
-QVariantList ProfileDialog::getConfig() {
+QVariantList ProfileDialog::serialize() {
     QVariantList result;
     for(int x = 0; x < this->ui->deviceListContainer->count();x++){
         MbientConfigPanel* p = static_cast<MbientConfigPanel*>(ui->deviceListContainer->itemAt(x)->widget());
-        result.append(p->getConfig());
+        result.append(p->serialize());
     }
     return result;
+}
+
+void ProfileDialog::accept() {
+    emit onProfileSelected(serialize());
+    this->close();
+}
+
+void ProfileDialog::reject() {
+    this->close();
 }

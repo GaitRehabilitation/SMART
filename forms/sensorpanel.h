@@ -23,6 +23,7 @@
 #include <qtimer.h>
 #include <iostream>
 #include <fstream>
+#include <platform/linux/common/metawearwrapper.h>
 #include "common/BluetoothAddress.h"
 
 class MetawearWrapperBase;
@@ -58,8 +59,6 @@ private:
 
   void registerPlotHandlers();
   void registerDataHandlers();
-  void configureWrapper(BluetoothAddress device);
-
 public:
   explicit SensorPanel(const BluetoothAddress &target, QWidget *parent = nullptr);
   virtual ~SensorPanel();
@@ -73,6 +72,7 @@ public:
   void startCapture(QTemporaryDir* dir);
   void stopCapture();
   void clearPlots();
+  void connectDevice();
 
 signals:
   void connected();

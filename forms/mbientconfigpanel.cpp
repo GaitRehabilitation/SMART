@@ -6,11 +6,18 @@
 #include "ui_mbientconfigpanel.h"
 
 #include "QCheckBox"
+#include "mbientconfigpanel.h"
+
 
 #include <metawear/sensor/gyro_bmi160.h>
 #include <metawear/sensor/accelerometer.h>
 
 #include <forms/deviceselectdialog.h>
+
+const float MbientConfigPanel::ACC_ODR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
+const float MbientConfigPanel::ACC_FSR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
+const float MbientConfigPanel::FUSION_RANGE[] = {8.0f,12.5f,50.0f,100.0f};
+
 
 MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigPanel){
     ui->setupUi(this);
@@ -23,10 +30,9 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
 
     connect(ui->deviceFind,&QPushButton::clicked,this,[=](){
         DeviceSelectDialog dialog(this);
-        connect(&dialog,&DeviceSelectDialog::onBluetoothDeviceAccepted,this[=](const BluetoothAddress &info){
-
+        connect(&dialog,&DeviceSelectDialog::onBluetoothDeviceAccepted,this,[=](const BluetoothAddress &info){
+            ui->deviceMac->setText(info.getMac());
         });
-
     });
 
     connect(ui->removeDevice,&QPushButton::clicked,this,[=](){
@@ -71,7 +77,7 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
     connect(ui->slideGyroRange,&QSlider::valueChanged,this,[=](int value){
         QString result = QString("%1 °/s");
 
-        switch((MblMwGyroBmi160Range)(5 - value)){
+        switch(toGyroRangeFromIndex(value)){
             case MBL_MW_GYRO_BMI160_RANGE_2000dps:
                 ui->labelGyroRange->setText(result.arg("2000"));
                 break;
@@ -94,7 +100,7 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
     connect(ui->slideGyroSample,&QSlider::valueChanged,this,[=](int value){
         QString result = QString("%1 Hz");
 
-        switch((MblMwGyroBmi160Odr)(6 + value)){
+        switch(toGyroSampleFromIndex(value)){
             case MBL_MW_GYRO_BMI160_ODR_25Hz:
                 ui->labelGyroSample->setText(result.arg("25"));
                 break;
@@ -155,43 +161,43 @@ bool MbientConfigPanel::isSensorFusionEnabled(){
     return ui->toggleEularAngles->isChecked() || ui->toggleLinearAcc->isChecked() || ui->toggleQuaternion->isChecked();
 }
 
-QVariantMap MbientConfigPanel::getConfig(){
+QVariantMap MbientConfigPanel::serialize(){
     QVariantMap map;
 
-    map.insert("mac",ui->deviceMac->text());
-    map.insert("name",ui->deviceName->text());
+    map.insert(MAC,ui->deviceMac->text());
+    map.insert(NAME,ui->deviceName->text());
     if(isSensorFusionEnabled()){
         if(ui->toggleEularAngles->isChecked()){
             QVariantMap entries;
-            entries.insert("sample_rate",ui->slideEularSample->value());
-            map.insert("fusion_eular_angles",entries);
+            entries.insert(SAMPLE_RATE,ui->slideEularSample->value());
+            map.insert(FUSION_EULAR_ANGLES,entries);
         }
         if(ui->toggleLinearAcc->isChecked())
         {
             QVariantMap entries;
-            entries.insert("sample_rate",ui->slideLinearAccSample->value());
-            map.insert("fusion_linear_acc",entries);
+            entries.insert(SAMPLE_RATE,ui->slideLinearAccSample->value());
+            map.insert(FUSION_LINEAR_ACC,entries);
 
         }
         if(ui->toggleQuaternion->isChecked()){
 
             QVariantMap entries;
-            entries.insert("sample_rate",ui->slideQuaternionSample->value());
-            map.insert("fusion_quaternion",entries);
+            entries.insert(SAMPLE_RATE,ui->slideQuaternionSample->value());
+            map.insert(FUSION_QUATERNION,entries);
         }
     } else{
         if(ui->toggleGyro->isChecked()){
             QVariantMap entries;
-            entries.insert("sample_range",ui->slideGyroRange->value());
-            entries.insert("sample_rate",ui->slideGyroSample->value());
-            map.insert("gyro",entries);
+            entries.insert(SAMPLE_RANGE,ui->slideGyroRange->value());
+            entries.insert(SAMPLE_RATE,ui->slideGyroSample->value());
+            map.insert(GYRO,entries);
         }
 
         if(ui->toggleAcc->isChecked()){
             QVariantMap entries;
-            entries.insert("sample_range",ui->slideAccRange->value());
-            entries.insert("sample_rate",ui->slideAccSample->value());
-            map.insert("acc",entries);
+            entries.insert(SAMPLE_RANGE,ui->slideAccRange->value());
+            entries.insert(SAMPLE_RATE,ui->slideAccSample->value());
+            map.insert(ACC,entries);
         }
     }
     return map;
@@ -199,30 +205,59 @@ QVariantMap MbientConfigPanel::getConfig(){
 
 
 
-void MbientConfigPanel::setConfig(QVariantMap value)
+void MbientConfigPanel::deserialize(QVariantMap value)
 {
-    if(value.contains("fusion_eular_angles")){
-        QVariantMap s = value["fusion_eular_angles"].toMap();
-        ui->slideEularSample->setValue(s["sample_rate"].toFloat());
+    if(value.contains(FUSION_EULAR_ANGLES)){
+        QVariantMap s = value[FUSION_EULAR_ANGLES].toMap();
+        ui->slideEularSample->setValue(s[SAMPLE_RATE].toInt());
     }
-    if(value.contains("fusion_linear_acc")){
-        QVariantMap s = value["fusion_linear_acc"].toMap();
-        ui->slideLinearAccSample->setValue(s["sample_rate"].toFloat());
+    if(value.contains(FUSION_LINEAR_ACC)){
+        QVariantMap s = value[FUSION_LINEAR_ACC].toMap();
+        ui->slideLinearAccSample->setValue(s[SAMPLE_RATE].toInt());
     }
-    if(value.contains("fusion_quaternion")){
-        QVariantMap s = value["fusion_quaternion"].toMap();
-        ui->slideQuaternionSample->setValue(s["sample_rate"].toFloat());
+    if(value.contains(FUSION_QUATERNION)){
+        QVariantMap s = value[FUSION_QUATERNION].toMap();
+        ui->slideQuaternionSample->setValue(s[SAMPLE_RATE].toInt());
     }
-    if(value.contains("gyro")){
-        QVariantMap s = value["gyro"].toMap();
-        ui->slideGyroRange->setValue(s["sample_range"].toFloat());
-        ui->slideGyroSample->setValue(s["sample_rate"].toFloat());
+    if(value.contains(GYRO)){
+        QVariantMap s = value[GYRO].toMap();
+        ui->slideGyroRange->setValue(s[SAMPLE_RANGE].toInt());
+        ui->slideGyroSample->setValue(s[SAMPLE_RATE].toInt());
     }
-    if(value.contains("acc")){
-        QVariantMap s = value["acc"].toMap();
-        ui->slideAccRange->setValue(s["sample_range"].toFloat());
-        ui->slideAccSample->setValue(s["sample_rate"].toFloat());
+    if(value.contains(ACC)){
+        QVariantMap s = value[ACC].toMap();
+        ui->slideAccRange->setValue(s[SAMPLE_RANGE].toInt());
+        ui->slideAccSample->setValue(s[SAMPLE_RATE].toInt());
     }
-    ui->deviceMac->setText(value["mac"].toString());
-    ui->deviceName->setText(value["name"].toString());
+    ui->deviceMac->setText(value[MAC].toString());
+    ui->deviceName->setText(value[NAME].toString());
+}
+
+
+MblMwGyroBmi160Range MbientConfigPanel::toGyroRangeFromIndex(int index){
+    return (MblMwGyroBmi160Range)(5 - index);
+}
+MblMwGyroBmi160Odr MbientConfigPanel::toGyroSampleFromIndex(int index){
+    return (MblMwGyroBmi160Odr)(6 + index);
+}
+
+float MbientConfigPanel::toAccRangeIndex(int index) {
+    if(index < 0 || index > 3){
+        return 0;
+    }
+    return MbientConfigPanel::ACC_ODR_RANGE[index];
+}
+
+float MbientConfigPanel::toAccSampleIndex(int index) {
+    if(index < 0 || index > 3){
+        return 0;
+    }
+    return MbientConfigPanel::ACC_FSR_RANGE[index];
+}
+
+float MbientConfigPanel::toFusionSampleRangeIndex(int index) {
+    if(index < 0 || index > 3){
+        return 0;
+    }
+    return FUSION_RANGE[index];
 }
