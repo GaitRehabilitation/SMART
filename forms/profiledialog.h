@@ -17,10 +17,14 @@ private:
     Ui::ProfileDialog *ui;
     QString profilePath(const QString& profile);
 
+    void accept() override;
+    void reject() override;
 public:
     ProfileDialog(QWidget *parent = nullptr);
-    QVariantList getConfig();
-    void setConfig(QVariantList payload);
+    QVariantList serialize();
+    void deserialize(QVariantList payload);
+signals:
+    void onProfileSelected(const QVariantList &payload);
 };
 
 

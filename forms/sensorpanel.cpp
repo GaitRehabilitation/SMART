@@ -32,17 +32,16 @@
 
 SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      m_settingUpdateTimer(this),
       m_currentDevice(target),
+      m_temporaryDir(nullptr),
       m_plotUpdatetimer(),
       m_wrapper(new MetawearWrapper(target)),
+      m_settingUpdateTimer(this),
       m_plotoffset(0),
-      m_temporaryDir(nullptr),
       m_reconnectTimer(),
       m_isReadyToCapture(false){
     ui->setupUi(this);
     m_reconnectTimer.setSingleShot(true);
-    m_wrapper->connectToDevice();
 
     connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
        // this->m_wrapper->resetControllerAndTryAgain();
@@ -113,15 +112,17 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized, this,[=](){
-        this->m_wrapper->configureAccelerometer(4.f,25.f);
-        this->m_wrapper->configureGyroscope(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
-    });
+    // TODO: move init to profiles
+//    connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized, this,[=](){
+//        this->m_wrapper->configureAccelerometer(4.f,25.f);
+//        this->m_wrapper->configureGyroscope(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
+//    });
 
     connect(this->m_wrapper, &MetawearWrapperBase::postMetawearInitialized,this,[=](){
 
-        this->m_wrapper->startGyroscopeCapture();
-        this->m_wrapper->startAccelerationCapture();
+        // TODO: move init to profiles
+        //this->m_wrapper->startGyroscopeCapture();
+        //this->m_wrapper->startAccelerationCapture();
 
         m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
@@ -163,6 +164,10 @@ SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
     m_plotUpdatetimer.start();
 }
 
+void SensorPanel::connectDevice() {
+    m_wrapper->connectToDevice();
+}
+
 void SensorPanel::registerPlotHandlers()
 {
     QCPGraph *xgraphAcc = ui->plot->addGraph();
@@ -198,7 +203,6 @@ void SensorPanel::registerDataHandlers()
     connect(this->m_wrapper,&MetawearWrapper::magnetometer,this,[=](int64_t epoch, float x, float y, float z){
         if(m_temporaryDir && m_temporaryDir->isValid()){
             m_magFile << epoch << ','<< x << ','<< y << ','<< z << '\n';
-
         }
     });
 

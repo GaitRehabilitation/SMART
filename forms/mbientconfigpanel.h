@@ -7,10 +7,22 @@
 
 #include <QWidget>
 #include <QVariantMap>
+#include <3rdparty/mbientlab/src/metawear/sensor/gyro_bmi160.h>
 
 namespace Ui {
     class MbientConfigPanel;
 }
+
+#define GYRO "gyro"
+#define MAC "mac"
+#define NAME "name"
+#define ACC "acc"
+#define FUSION_QUATERNION "fusion_quaternion"
+#define FUSION_LINEAR_ACC "fusion_linear_acc"
+#define FUSION_EULAR_ANGLES "fusion_eular_angles"
+
+#define SAMPLE_RATE "sample_rate"
+#define SAMPLE_RANGE "sample_range"
 
 class MbientConfigPanel : public QWidget {
     Q_OBJECT
@@ -18,14 +30,23 @@ private:
     Ui::MbientConfigPanel *ui;
     void updateDisabled();
 public:
-    const float ACC_ODR_RANGE[4] = {12.5f, 50.f,100.0f,200.0f};
-    const float ACC_FSR_RANGE[4] = {2.0f,4.0f,8.0f,16.0f};
+    static const float ACC_ODR_RANGE[];
+    static const float ACC_FSR_RANGE[];
+    static const float FUSION_RANGE[];
 
-    const float FUSION_RANGE[4] = {8.0f,12.5f,50.0f,100.0f};
+    static MblMwGyroBmi160Range toGyroRangeFromIndex(int index);
+    static MblMwGyroBmi160Odr toGyroSampleFromIndex(int index);
+
+    float toAccRangeIndex(int index);
+    static float toAccSampleIndex(int index);
+
+    static float toFusionSampleRangeIndex(int index);
+
+
 
     MbientConfigPanel(QWidget *parent = nullptr);
-    QVariantMap getConfig();
-    void setConfig(QVariantMap map);
+    QVariantMap serialize();
+    void deserialize(QVariantMap map);
     bool isSensorFusionEnabled();
 
 };

@@ -29,7 +29,7 @@
 #include "JlCompress.h"
 #include <common/metawearwrapperbase.h>
 #include <forms/profiledialog.h>
-
+#include <forms/mbientconfigpanel.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
     ui->setupUi(this);
@@ -37,7 +37,31 @@ MainWindow::MainWindow(QWidget *parent)
 //    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
 
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
-		ProfileDialog profileDialog;
+		ProfileDialog profileDialog(this);
+		connect(&profileDialog,&ProfileDialog::onProfileSelected,this,[=](const QVariantList& payload){
+            for (int i = 0; i < payload.length(); ++i) {
+                QVariantMap map = payload.at(i).toMap();
+
+                if (map.contains(ACC)) {
+
+                }
+                if (map.contains(GYRO)) {
+
+                }
+                if (map.contains(FUSION_LINEAR_ACC)) {
+
+                }
+                if (map.contains(FUSION_EULAR_ANGLES)) {
+
+                }
+                if (map.contains(FUSION_QUATERNION)) {
+
+                }
+                map[NAME];
+                map[MAC];
+
+            }
+		});
 		profileDialog.exec();
 
 //        DeviceSelectDialog dialog;
