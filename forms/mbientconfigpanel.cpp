@@ -246,7 +246,7 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
 
     DiscoveryAgent discoveryAgent;
     connect(&discoveryAgent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
-        if (QString::compare(info.getMac(), ui->deviceMac->text(), Qt::CaseInsensitive)) {
+        if (QString::compare(info.getMac(), ui->deviceMac->text(), Qt::CaseInsensitive) == 0) {
             m_wrapper = new MetawearWrapper(info);
 
             MetawearWrapper* lwrapper = m_wrapper;
