@@ -215,7 +215,7 @@ MetawearWrapper::MetawearWrapper(const BluetoothAddress &target):
 
     // controller connection/disconnect
     connect(this->m_controller, &QLowEnergyController::connected, this, [=]() {
-        qDebug() << "Controller conected. Search services..";
+        qDebug() << "Controller connected. Search services..";
         this->m_controller->discoverServices();
         emit connected();
     });

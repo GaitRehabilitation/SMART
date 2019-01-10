@@ -40,7 +40,6 @@ SensorPanel::SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent)
       m_reconnectTimer(),
       m_isReadyToCapture(false){
     ui->setupUi(this);
-    m_reconnectTimer.setSingleShot(true);
 
     connect(&m_reconnectTimer,&QTimer::timeout,this,[=](){
        // this->m_wrapper->resetControllerAndTryAgain();
@@ -111,18 +110,8 @@ SensorPanel::SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent)
     this->registerPlotHandlers();
     this->registerDataHandlers();
 
-    // TODO: move init to profiles
-//    connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized, this,[=](){
-//        this->m_wrapper->configureAccelerometer(4.f,25.f);
-//        this->m_wrapper->configureGyroscope(MBL_MW_GYRO_BMI160_RANGE_125dps,MBL_MW_GYRO_BMI160_ODR_25Hz);
-//    });
-
     connect(this->m_wrapper, &MetawearWrapperBase::postMetawearInitialized,this,[=](){
-
-        // TODO: move init to profiles
-        //this->m_wrapper->startGyroscopeCapture();
-        //this->m_wrapper->startAccelerationCapture();
-
+        
         m_settingUpdateTimer.start();
         this->m_wrapper->readBatteryStatus();
         m_isReadyToCapture = true;
@@ -164,6 +153,7 @@ SensorPanel::SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent)
 }
 
 void SensorPanel::connectDevice() {
+    m_reconnectTimer.setSingleShot(true);
     m_wrapper->connectToDevice();
 }
 

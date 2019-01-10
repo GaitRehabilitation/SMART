@@ -281,6 +281,7 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
 
         }
     });
+
     QTimer timer;
     timer.setSingleShot(true);
 
@@ -293,6 +294,8 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
     discoveryAgent.start();
 
     loop.exec();
+    discoveryAgent.stop();
+    timer.stop();
     if(m_wrapper == nullptr){
         QMessageBox messageBox;
         messageBox.setText("Could not find a device with the mac:" + ui->deviceMac->text() + "\n would you like to try searching for the device again?");
