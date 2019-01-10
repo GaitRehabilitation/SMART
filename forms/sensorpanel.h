@@ -27,7 +27,7 @@
 #include "common/BluetoothAddress.h"
 
 class MetawearWrapperBase;
-class MblMwMetaWearBoard;
+struct MblMwMetaWearBoard;
 class QTimer;
 class DataBundle;
 namespace Ui {
