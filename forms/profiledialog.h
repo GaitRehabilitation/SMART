@@ -20,6 +20,7 @@ public:
     ProfileDialog(QWidget *parent = nullptr);
     QVariantList serialize();
     void deserialize(QVariantList payload);
+    void reloadProfiles();
 signals:
     void onProfileSelected(const QList<MbientConfigPanel*> &payload);
 };

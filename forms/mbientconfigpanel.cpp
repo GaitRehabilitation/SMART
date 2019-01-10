@@ -15,12 +15,14 @@
 #include <forms/deviceselectdialog.h>
 #include <QtCore/QTimer>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMainWindow>
+#include "QToolBar"
 
 #include "common/metawearwrapper.h"
 #include "common/DiscoveryAgent.h"
 
-const float MbientConfigPanel::ACC_ODR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
-const float MbientConfigPanel::ACC_FSR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
+const float MbientConfigPanel::ACC_ODR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
+const float MbientConfigPanel::ACC_FSR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
 const float MbientConfigPanel::FUSION_RANGE[] = {8.0f,12.5f,50.0f,100.0f};
 
 
@@ -215,24 +217,29 @@ void MbientConfigPanel::deserialize(QVariantMap value)
     if(value.contains(FUSION_EULAR_ANGLES)){
         QVariantMap s = value[FUSION_EULAR_ANGLES].toMap();
         ui->slideEularSample->setValue(s[SAMPLE_RATE].toInt());
+        ui->toggleEularAngles->setEnabled(true);
     }
     if(value.contains(FUSION_LINEAR_ACC)){
         QVariantMap s = value[FUSION_LINEAR_ACC].toMap();
         ui->slideLinearAccSample->setValue(s[SAMPLE_RATE].toInt());
+        ui->toggleLinearAcc->setEnabled(true);
     }
     if(value.contains(FUSION_QUATERNION)){
         QVariantMap s = value[FUSION_QUATERNION].toMap();
         ui->slideQuaternionSample->setValue(s[SAMPLE_RATE].toInt());
+        ui->toggleQuaternion->setEnabled(true);
     }
     if(value.contains(GYRO)){
         QVariantMap s = value[GYRO].toMap();
         ui->slideGyroRange->setValue(s[SAMPLE_RANGE].toInt());
         ui->slideGyroSample->setValue(s[SAMPLE_RATE].toInt());
+        ui->toggleGyro->setEnabled(true);
     }
     if(value.contains(ACC)){
         QVariantMap s = value[ACC].toMap();
         ui->slideAccRange->setValue(s[SAMPLE_RANGE].toInt());
         ui->slideAccSample->setValue(s[SAMPLE_RATE].toInt());
+        ui->toggleAcc->setEnabled(true);
     }
     ui->deviceMac->setText(value[MAC].toString());
     ui->deviceName->setText(value[NAME].toString());
@@ -317,6 +324,14 @@ MblMwGyroBmi160Range MbientConfigPanel::toGyroRangeFromIndex(int index){
 }
 MblMwGyroBmi160Odr MbientConfigPanel::toGyroSampleFromIndex(int index){
     return (MblMwGyroBmi160Odr)(6 + index);
+}
+
+
+QString MbientConfigPanel::getMac(){
+    return  ui->deviceMac->text();
+}
+QString MbientConfigPanel::getName(){
+    return ui->deviceName->text();
 }
 
 float MbientConfigPanel::toAccRangeIndex(int index) {

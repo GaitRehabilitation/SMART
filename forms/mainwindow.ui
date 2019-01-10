@@ -13,14 +13,7 @@
   <property name="windowTitle">
    <string>Sensor-based Motion Analysis Research Tool </string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QStackedWidget" name="pages">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="Capture">
+  <widget class="QWidget" name="Capture">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QScrollArea" name="scrollArea">
@@ -32,8 +25,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>791</width>
-             <height>438</height>
+             <width>801</width>
+             <height>420</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -127,11 +120,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="Sessions"/>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="font">
     <font>
@@ -148,6 +136,9 @@
     <string/>
    </property>
    <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="movable">
     <bool>false</bool>
    </property>
    <property name="iconSize">

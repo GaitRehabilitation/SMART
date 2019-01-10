@@ -44,6 +44,9 @@ public:
     static float toAccSampleIndex(int index);
     static float toFusionSampleRangeIndex(int index);
 
+    QString getMac();
+    QString getName();
+
     MetawearWrapperBase* buildWrapper();
 
     MbientConfigPanel(QWidget *parent = nullptr);

@@ -31,8 +31,8 @@ set (SOURCES
   forms/sensorpanel.cpp
   forms/profiledialog.cpp
   forms/mbientconfigpanel.cpp
-  
-  common/main.cpp
+
+        common/main.cpp
   common/metawearwrapperbase.cpp
   common/util.cpp
   common/BluetoothAddress.cpp)
@@ -45,7 +45,7 @@ set(HEADERS
   forms/profiledialog.h
   forms/mbientconfigpanel.h
 
-  common/metawearwrapperbase.h
+        common/metawearwrapperbase.h
   common/util.h
   common/BaseDiscoveryAgent.h
   common/BluetoothAddress.h)
@@ -57,7 +57,7 @@ set ( UIS
     forms/deviceselectdialog.ui
     forms/mbientconfigpanel.ui
     forms/profiledialog.ui
-)
+        )
 
 set ( RESOURCES
  qml.qrc

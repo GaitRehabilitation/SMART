@@ -42,7 +42,9 @@ MainWindow::MainWindow(QWidget *parent)
             for (int i = 0; i < payload.length(); ++i) {
                 MbientConfigPanel* panel = payload.at(i);
                 MetawearWrapperBase* wrapper = panel->buildWrapper();
-                registerDevice(wrapper);
+
+                auto devicePanel = registerDevice(wrapper);
+                devicePanel->setName(panel->getName());
             }
 		});
 		profileDialog.exec();
