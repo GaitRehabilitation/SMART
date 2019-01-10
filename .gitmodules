@@ -7,6 +7,3 @@
 [submodule "3rdparty/qmsgpack"]
 	path = 3rdparty/qmsgpack
 	url = https://github.com/romixlab/qmsgpack.git
-[submodule "3rdparty/Warble"]
-	path = 3rdparty/Warble
-	url = git@github.com:mbientlab/Warble.git
