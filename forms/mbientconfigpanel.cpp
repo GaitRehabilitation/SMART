@@ -6,7 +6,6 @@
 #include "ui_mbientconfigpanel.h"
 
 #include "QCheckBox"
-#include "mbientconfigpanel.h"
 #include "common/metawearwrapperbase.h"
 
 #include <metawear/sensor/gyro_bmi160.h>
@@ -21,12 +20,13 @@
 #include "common/metawearwrapper.h"
 #include "common/DiscoveryAgent.h"
 
+
 const float MbientConfigPanel::ACC_ODR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
 const float MbientConfigPanel::ACC_FSR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
 const float MbientConfigPanel::FUSION_RANGE[] = {8.0f,12.5f,50.0f,100.0f};
 
 
-MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigPanel){
+MbientConfigPanel::MbientConfigPanel(QWidget *parent) : QWidget(parent), ui(new Ui::MbientConfigPanel){
     ui->setupUi(this);
 
     ui->accelerationContainer->setEnabled(false);
@@ -354,3 +354,4 @@ float MbientConfigPanel::toFusionSampleRangeIndex(int index) {
     }
     return FUSION_RANGE[index];
 }
+

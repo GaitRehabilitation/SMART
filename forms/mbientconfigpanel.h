@@ -9,9 +9,6 @@
 #include <QVariantMap>
 #include <3rdparty/mbientlab/src/metawear/sensor/gyro_bmi160.h>
 
-namespace Ui {
-    class MbientConfigPanel;
-}
 
 #define GYRO "gyro"
 #define MAC "mac"
@@ -26,6 +23,9 @@ namespace Ui {
 
 class MetawearWrapperBase;
 class MetawearWrapper;
+namespace Ui {
+    class MbientConfigPanel;
+}
 class MbientConfigPanel : public QWidget {
     Q_OBJECT
 private:
