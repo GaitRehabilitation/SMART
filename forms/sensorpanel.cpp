@@ -30,12 +30,11 @@
 #include <QtWidgets/QMainWindow>
 #include <common/metawearwrapper.h>
 
-SensorPanel::SensorPanel(const BluetoothAddress &target, QWidget *parent)
+SensorPanel::SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent)
     : QWidget(parent), ui(new Ui::SensorPanel),
-      m_currentDevice(target),
       m_temporaryDir(nullptr),
       m_plotUpdatetimer(),
-      m_wrapper(new MetawearWrapper(target)),
+      m_wrapper(wrapper),
       m_settingUpdateTimer(this),
       m_plotoffset(0),
       m_reconnectTimer(),
@@ -191,24 +190,45 @@ void SensorPanel::registerPlotHandlers()
 
 }
 
-void SensorPanel::registerDataHandlers()
-{
-    connect(this->m_wrapper, &MetawearWrapper::acceleration, this,
-            [=](int64_t epoch, float x, float y, float z) {
-        if(m_temporaryDir && m_temporaryDir->isValid()){
-            m_accFile << epoch << ','<< x << ','<< y << ','<< z << '\n';
+
+
+void SensorPanel::registerDataHandlers() {
+    connect(this->m_wrapper, &MetawearWrapper::acceleration, this, [=](int64_t epoch, float x, float y, float z) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_accFile.is_open()) {
+                m_accFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "acc")).toStdString(),
+                               std::ios::out | std::ios::app);
+                m_accFile << "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
+            } else {
+                m_accFile << epoch << ',' << x << ',' << y << ',' << z << '\n';
+            }
         }
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::magnetometer,this,[=](int64_t epoch, float x, float y, float z){
-        if(m_temporaryDir && m_temporaryDir->isValid()){
-            m_magFile << epoch << ','<< x << ','<< y << ','<< z << '\n';
+    connect(this->m_wrapper, &MetawearWrapper::magnetometer, this, [=](int64_t epoch, float x, float y, float z) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_magFile.is_open()) {
+                m_magFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "mag")).toStdString(),
+                               std::ios::out | std::ios::app);
+                m_magFile << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
+            } else {
+                m_magFile << epoch << ',' << x << ',' << y << ',' << z << '\n';
+            }
         }
     });
 
-    connect(this->m_wrapper,&MetawearWrapper::gyroscope,this,[=](int64_t epoch, float x, float y, float z){
-        if(m_temporaryDir && m_temporaryDir->isValid()){
-            m_gyroFile << epoch << ','<< x << ','<< y << ','<< z << '\n';
+    connect(this->m_wrapper, &MetawearWrapper::gyroscope, this, [=](int64_t epoch, float x, float y, float z) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_gyroFile.is_open()) {
+                m_gyroFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "gyro")).toStdString(),
+                                std::ios::out | std::ios::app);
+                m_gyroFile << "epoch(ms),gyro_x(fdps),gyro_y(fdps),gyro_z(fdps)" << '\n';
+            } else {
+                m_gyroFile << epoch << ',' << x << ',' << y << ',' << z << '\n';
+            }
         }
     });
 
@@ -232,16 +252,6 @@ void SensorPanel::startCapture(QTemporaryDir* dir)
     if(m_isReadyToCapture){
         ui->sensorName->setEnabled(false);
         m_temporaryDir = dir;
-
-        //m_magFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"mag")).toStdString(), std::ios::out | std::ios::app );
-        //m_magFile << "epoch(ms),mag_x(uT),mag_y(uT),mag_z(uT)" << '\n';
-
-        m_accFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"acc")).toStdString(), std::ios::out | std::ios::app );
-        m_accFile<< "epoch(ms),acc_x(g),acc_y(g),acc_z(g)" << '\n';
-
-        m_gyroFile.open(m_temporaryDir->path().append(QString("/%1_%2.csv").arg(ui->sensorName->text(),"gyro")).toStdString(), std::ios::out | std::ios::app );
-        m_gyroFile << "epoch(ms),gyro_x(fdps),gyro_y(fdps),gyro_z(fdps)" << '\n';
-
     }
 }
 

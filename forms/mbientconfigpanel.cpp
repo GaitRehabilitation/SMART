@@ -7,12 +7,17 @@
 
 #include "QCheckBox"
 #include "mbientconfigpanel.h"
-
+#include "common/metawearwrapperbase.h"
 
 #include <metawear/sensor/gyro_bmi160.h>
 #include <metawear/sensor/accelerometer.h>
 
 #include <forms/deviceselectdialog.h>
+#include <QtCore/QTimer>
+#include <QtWidgets/QMessageBox>
+
+#include "common/metawearwrapper.h"
+#include "common/DiscoveryAgent.h"
 
 const float MbientConfigPanel::ACC_ODR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
 const float MbientConfigPanel::ACC_FSR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
@@ -33,6 +38,7 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
         connect(&dialog,&DeviceSelectDialog::onBluetoothDeviceAccepted,this,[=](const BluetoothAddress &info){
             ui->deviceMac->setText(info.getMac());
         });
+        dialog.exec();
     });
 
     connect(ui->removeDevice,&QPushButton::clicked,this,[=](){
@@ -65,12 +71,12 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
     });
 
     connect(ui->slideAccSample,&QSlider::valueChanged,this,[=](int value){
-        ui->labelAccSample->setText(QString("%1 Hz").arg(QString::number(ACC_ODR_RANGE[value],10,2)));
+        ui->labelAccSample->setText(QString("%1 Hz").arg(QString::number(toAccSampleIndex(value),10,2)));
     });
     ui->slideAccSample->valueChanged(0);
 
     connect(ui->slideAccRange,&QSlider::valueChanged,this,[=](int value){
-        ui->labelAccRange->setText(QString("%1 g's").arg(QString::number(ACC_FSR_RANGE[value],10,2)));
+        ui->labelAccRange->setText(QString("%1 g's").arg(QString::number(toAccRangeIndex(value),10,2)));
     });
     ui->slideAccRange->valueChanged(0);
 
@@ -130,17 +136,17 @@ MbientConfigPanel::MbientConfigPanel(QWidget *parent) : ui(new Ui::MbientConfigP
     ui->slideGyroSample->valueChanged(0);
 
     connect(ui->slideQuaternionSample,&QSlider::valueChanged,this,[=](int value){
-        ui->labelQuaternionSample->setText(QString("%1 Hz").arg(FUSION_RANGE[value]));
+        ui->labelQuaternionSample->setText(QString("%1 Hz").arg(toFusionSampleRangeIndex(value)));
     });
     ui->slideQuaternionSample->valueChanged(0);
 
     connect(ui->slideEularSample,&QSlider::valueChanged,this,[=](int value){
-        ui->labelEularSample->setText(QString("%1 Hz").arg(FUSION_RANGE[value]));
+        ui->labelEularSample->setText(QString("%1 Hz").arg(toFusionSampleRangeIndex(value)));
     });
     ui->slideEularSample->valueChanged(0);
 
     connect(ui->slideLinearAccSample,&QSlider::valueChanged,this,[=](int value){
-        ui->labelLinearAccSample->setText(QString("%1 Hz").arg(FUSION_RANGE[value]));
+        ui->labelLinearAccSample->setText(QString("%1 Hz").arg(toFusionSampleRangeIndex(value)));
     });
     ui->slideLinearAccSample->valueChanged(0);
 }
@@ -180,7 +186,6 @@ QVariantMap MbientConfigPanel::serialize(){
 
         }
         if(ui->toggleQuaternion->isChecked()){
-
             QVariantMap entries;
             entries.insert(SAMPLE_RATE,ui->slideQuaternionSample->value());
             map.insert(FUSION_QUATERNION,entries);
@@ -233,6 +238,76 @@ void MbientConfigPanel::deserialize(QVariantMap value)
     ui->deviceName->setText(value[NAME].toString());
 }
 
+
+MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
+
+    // clear wrapper
+    m_wrapper = nullptr;
+
+    DiscoveryAgent discoveryAgent;
+    connect(&discoveryAgent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
+        if (QString::compare(info.getMac(), ui->deviceMac->text(), Qt::CaseInsensitive)) {
+            m_wrapper = new MetawearWrapper(info);
+
+            MetawearWrapper* lwrapper = m_wrapper;
+
+            bool enableGyro = ui->toggleGyro->isChecked();
+            bool enableAcc = ui->toggleAcc->isChecked();
+            bool hasSensorFusion = isSensorFusionEnabled();
+
+            MblMwGyroBmi160Range gyrorange = toGyroRangeFromIndex(ui->slideGyroRange->value());
+            MblMwGyroBmi160Odr gyroSample = toGyroSampleFromIndex(ui->slideGyroSample->value());
+
+            float accRange = toAccRangeIndex(ui->slideAccRange->value());
+            float accSample = toAccSampleIndex(ui->slideAccSample->value());
+
+            connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized,[=](){
+                if(!hasSensorFusion) {
+                    if (enableGyro)
+                        lwrapper->configureGyroscope(gyrorange, gyroSample);
+                    if(enableAcc)
+                        lwrapper->configureAccelerometer(accRange,accSample);
+                }
+            });
+
+            connect(this->m_wrapper, &MetawearWrapperBase::postMetawearInitialized,[=](){
+                if(!hasSensorFusion) {
+                    if (enableGyro)
+                        lwrapper->startGyroscopeCapture();
+                    if (enableAcc)
+                        lwrapper->startAccelerationCapture();
+                }
+            });
+
+        }
+    });
+    QTimer timer;
+    timer.setSingleShot(true);
+
+    QEventLoop loop;
+    connect(&discoveryAgent,&DiscoveryAgent::finished,&loop,&QEventLoop::quit);
+    connect(&timer,&QTimer::timeout,&loop,&QEventLoop::quit);
+
+    // run timer for 10 seconds and if no deivce does not show up then kill it
+    timer.start(10000);
+    discoveryAgent.start();
+
+    loop.exec();
+    if(m_wrapper == nullptr){
+        QMessageBox messageBox;
+        messageBox.setText("Could not find a device with the mac:" + ui->deviceMac->text() + "\n would you like to try searching for the device again?");
+        messageBox.setFixedSize(500,200);
+        QAbstractButton* lbuttonYes = messageBox.addButton(tr("Yes"),QMessageBox::YesRole);
+        messageBox.addButton(tr("No"),QMessageBox::NoRole);
+        messageBox.exec();
+        if(messageBox.clickedButton() == lbuttonYes){
+            // run wrapper again and try to init wrapper
+            return buildWrapper();
+        }
+    }
+
+    return m_wrapper;
+}
 
 MblMwGyroBmi160Range MbientConfigPanel::toGyroRangeFromIndex(int index){
     return (MblMwGyroBmi160Range)(5 - index);

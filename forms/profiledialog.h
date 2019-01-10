@@ -10,21 +10,18 @@
 namespace Ui {
     class ProfileDialog;
 }
-
+class MbientConfigPanel;
 class ProfileDialog : public QDialog {
     Q_OBJECT
 private:
     Ui::ProfileDialog *ui;
     QString profilePath(const QString& profile);
-
-    void accept() override;
-    void reject() override;
 public:
     ProfileDialog(QWidget *parent = nullptr);
     QVariantList serialize();
     void deserialize(QVariantList payload);
 signals:
-    void onProfileSelected(const QVariantList &payload);
+    void onProfileSelected(const QList<MbientConfigPanel*> &payload);
 };
 
 

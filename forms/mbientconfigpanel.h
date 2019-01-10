@@ -24,11 +24,14 @@ namespace Ui {
 #define SAMPLE_RATE "sample_rate"
 #define SAMPLE_RANGE "sample_range"
 
+class MetawearWrapperBase;
+class MetawearWrapper;
 class MbientConfigPanel : public QWidget {
     Q_OBJECT
 private:
     Ui::MbientConfigPanel *ui;
     void updateDisabled();
+    MetawearWrapper* m_wrapper;
 public:
     static const float ACC_ODR_RANGE[];
     static const float ACC_FSR_RANGE[];
@@ -37,12 +40,11 @@ public:
     static MblMwGyroBmi160Range toGyroRangeFromIndex(int index);
     static MblMwGyroBmi160Odr toGyroSampleFromIndex(int index);
 
-    float toAccRangeIndex(int index);
+    static float toAccRangeIndex(int index);
     static float toAccSampleIndex(int index);
-
     static float toFusionSampleRangeIndex(int index);
 
-
+    MetawearWrapperBase* buildWrapper();
 
     MbientConfigPanel(QWidget *parent = nullptr);
     QVariantMap serialize();

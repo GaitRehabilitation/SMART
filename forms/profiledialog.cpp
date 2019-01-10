@@ -89,6 +89,22 @@ ProfileDialog::ProfileDialog(QWidget *parent): ui(new Ui::ProfileDialog) {
         file.write(data);
         file.close();
     });
+
+    connect(ui->buttonBox->button(QDialogButtonBox::Apply),&QPushButton::clicked,[=](){
+        QList<MbientConfigPanel*> result;
+        for(int x = 0; x < this->ui->deviceListContainer->count();x++){
+            MbientConfigPanel* p = static_cast<MbientConfigPanel*>(ui->deviceListContainer->itemAt(x)->widget());
+            result.append(p);
+        }
+        emit onProfileSelected(result);
+        this->close();
+    });
+
+
+    connect(ui->buttonBox->button(QDialogButtonBox::Discard),&QPushButton::clicked,[=](){
+        this->close();
+    });
+
 }
 
 
@@ -119,11 +135,3 @@ QVariantList ProfileDialog::serialize() {
     return result;
 }
 
-void ProfileDialog::accept() {
-    emit onProfileSelected(serialize());
-    this->close();
-}
-
-void ProfileDialog::reject() {
-    this->close();
-}

@@ -29,7 +29,7 @@ namespace Ui {
 class SensorPanel;
 class DeviceSelectDialog;
 class QFileDialog;
-
+class MetawearWrapperBase;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 private:
@@ -44,7 +44,7 @@ public:
   virtual ~MainWindow();
 
   void connectedDevices(QList<BluetoothAddress>&);
-  SensorPanel *registerDevice(const BluetoothAddress &info);
+  SensorPanel *registerDevice(MetawearWrapperBase* wrapper);
   void startCapture();
   void stopCapture();
 

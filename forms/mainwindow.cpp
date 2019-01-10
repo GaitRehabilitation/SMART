@@ -38,36 +38,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
 		ProfileDialog profileDialog(this);
-		connect(&profileDialog,&ProfileDialog::onProfileSelected,this,[=](const QVariantList& payload){
+		connect(&profileDialog,&ProfileDialog::onProfileSelected,this,[=](const QList<MbientConfigPanel*>& payload){
             for (int i = 0; i < payload.length(); ++i) {
-                QVariantMap map = payload.at(i).toMap();
-
-                if (map.contains(ACC)) {
-
-                }
-                if (map.contains(GYRO)) {
-
-                }
-                if (map.contains(FUSION_LINEAR_ACC)) {
-
-                }
-                if (map.contains(FUSION_EULAR_ANGLES)) {
-
-                }
-                if (map.contains(FUSION_QUATERNION)) {
-
-                }
-                map[NAME];
-                map[MAC];
-
+                MbientConfigPanel* panel = payload.at(i);
+                MetawearWrapperBase* wrapper = panel->buildWrapper();
+                registerDevice(wrapper);
             }
 		});
 		profileDialog.exec();
-
-//        DeviceSelectDialog dialog;
-//		connect(&dialog, &DeviceSelectDialog::onBluetoothDeviceAccepted, this, &MainWindow::registerDevice);
-//
-//		dialog.exec();
     });
     connect(ui->captureButton,&QPushButton::clicked,this,&MainWindow::startCapture);
     connect(ui->stopButton,&QPushButton::clicked,this,&MainWindow::stopCapture);
@@ -90,17 +68,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-SensorPanel* MainWindow::registerDevice(const BluetoothAddress &info) {
+SensorPanel* MainWindow::registerDevice(MetawearWrapperBase* wrapper) {
     m_deviceIndex++;
 
-// ignored for the moment
-//    QBluetoothHostInfo host;
-//    if(QBluetoothLocalDevice::allDevices().length() > 0 ){
-//        QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
-//        host = hosts[(m_deviceIndex % hosts.length())];
-//    }
-
-    SensorPanel* panel = new SensorPanel(info,this);
+    SensorPanel* panel = new SensorPanel(wrapper,this);
     connect(panel->getMetwareWrapper(),&MetawearWrapperBase::latestEpoch,this,[=](qint64 epoch){
         if(panel->getOffset() == 0){
             for(int x = 0; x < this->ui->sensorContainer->count();x++){
@@ -111,6 +82,7 @@ SensorPanel* MainWindow::registerDevice(const BluetoothAddress &info) {
         }
     });
     ui->sensorContainer->addWidget(panel);
+    panel->connectDevice();
     return panel;
 }
 

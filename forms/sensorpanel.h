@@ -60,8 +60,9 @@ private:
   void registerPlotHandlers();
   void registerDataHandlers();
 public:
-  explicit SensorPanel(const BluetoothAddress &target, QWidget *parent = nullptr);
+  explicit SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent = nullptr);
   virtual ~SensorPanel();
+
 
   bool isReadyToCapture();
   MetawearWrapperBase* getMetwareWrapper();
