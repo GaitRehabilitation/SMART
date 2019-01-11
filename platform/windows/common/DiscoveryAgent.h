@@ -4,7 +4,6 @@
 #ifndef SMART_DISCOVERYAGENT_H
 #define SMART_DISCOVERYAGENT_H
 
-
 #include "common/BaseDiscoveryAgent.h"
 #include <pplawait.h>
 #include <Windows.Foundation.h>
