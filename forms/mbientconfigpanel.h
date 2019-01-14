@@ -5,6 +5,7 @@
 #ifndef SMART_MBIENTCONFIGPANEL_H
 #define SMART_MBIENTCONFIGPANEL_H
 
+
 #include <QWidget>
 #include <QVariantMap>
 #include <3rdparty/mbientlab/src/metawear/sensor/gyro_bmi160.h>

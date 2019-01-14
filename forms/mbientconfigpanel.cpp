@@ -2,6 +2,11 @@
 // Created by michaelpollind on 21/12/18.
 //
 
+//I have no idea windows
+#ifdef _WIN32
+    #include <windows.h>
+#endif
+
 #include "forms/mbientconfigpanel.h"
 #include "ui_mbientconfigpanel.h"
 
@@ -24,7 +29,6 @@
 const float MbientConfigPanel::ACC_ODR_RANGE[] = {2.0f, 4.0f, 8.0f, 16.0f};
 const float MbientConfigPanel::ACC_FSR_RANGE[] = {12.5f, 50.f,100.0f,200.0f};
 const float MbientConfigPanel::FUSION_RANGE[] = {8.0f,12.5f,50.0f,100.0f};
-
 
 MbientConfigPanel::MbientConfigPanel(QWidget *parent) : QWidget(parent), ui(new Ui::MbientConfigPanel){
     ui->setupUi(this);
@@ -372,6 +376,6 @@ float MbientConfigPanel::toFusionSampleRangeIndex(int index) {
     if(index < 0 || index > 3){
         return 0;
     }
-    return FUSION_RANGE[index];
+    return MbientConfigPanel::FUSION_RANGE[index];
 }
 
