@@ -221,6 +221,47 @@ void SensorPanel::registerDataHandlers() {
             }
         }
     });
+//    ----------------- Sensor Fusion --------------------------------------------------------
+
+    connect(this->m_wrapper, &MetawearWrapper::quaternion, this, [=](int64_t epoch, float x, float y, float z,float w) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_quaternionFile.is_open()) {
+                m_quaternionFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "fusion_quaternion")).toStdString(),
+                               std::ios::out | std::ios::app);
+                m_quaternionFile << "epoch(ms),fusion_quat_x,fusion_quat_y,fusion_quat_z,fusion_quat_w" << '\n';
+            } else {
+                m_quaternionFile << epoch << ',' << x << ',' << y << ',' << z << ',' << w <<'\n';
+            }
+        }
+    });
+
+    connect(this->m_wrapper, &MetawearWrapper::linearAcceleration, this, [=](int64_t epoch, float x, float y, float z) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_linearAccelerationFile.is_open()) {
+                m_linearAccelerationFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "fusion_linear_acc")).toStdString(),
+                                std::ios::out | std::ios::app);
+                m_linearAccelerationFile << "epoch(ms),fusion_linear_x(fdps),fusion_linear_y(fdps),fusion_linear_z(fdps)" << '\n';
+            } else {
+                m_linearAccelerationFile << epoch << ',' << x << ',' << y << ',' << z << '\n';
+            }
+        }
+    });
+
+    connect(this->m_wrapper, &MetawearWrapper::eularAngles, this, [=](qint64 epoch,float heading,float pitch,float roll, float yaw) {
+        if (m_temporaryDir && m_temporaryDir->isValid()) {
+            if (!m_eularFile.is_open()) {
+                m_eularFile.open(m_temporaryDir->path().append(
+                        QString("/%1_%2.csv").arg(ui->sensorName->text(), "fusion_eular_angles")).toStdString(),
+                                std::ios::out | std::ios::app);
+                m_eularFile << "epoch(ms),fusion_heading(degrees),fusion_pitch(degrees),fusion_roll(degrees),fusion_yaw(degrees)" << '\n';
+            } else {
+                m_eularFile << epoch << ',' << heading << ',' << pitch << ',' << roll << ',' << yaw << '\n';
+            }
+        }
+    });
+
 
 }
 

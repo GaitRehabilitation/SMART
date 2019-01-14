@@ -27,7 +27,7 @@
 #include "metawear/sensor/magnetometer_bmm150.h"
 #include "metawear/core/datasignal.h"
 #include "common/BluetoothAddress.h"
-
+#include "metawear/sensor/sensor_fusion.h"
 
 class MetawearWrapperBase : public QObject {
 Q_OBJECT
@@ -36,6 +36,7 @@ private:
     QString m_firmwareVersion;
     QString m_model;
     qint64 m_latestEpoch;
+
 
 protected:
     MblMwMetaWearBoard *m_metaWearBoard;
@@ -57,7 +58,15 @@ public:
 
     void configureMagnetometer(MblMwMagBmm150Preset);
 
+    void configureFusion(MblMwSensorFusionMode,MblMwSensorFusionAccRange,MblMwSensorFusionGyroRange);
+
     void readBatteryStatus();
+
+    void startQuaternionCapture(float sample_rate);
+
+    void linearEulerAngleCapture(float sample_rate);
+
+    void linearAccelerationCapture(float sample_rate);
 
     void startAccelerationCapture();
 
@@ -101,6 +110,12 @@ signals:
     void gyroscope(qint64, float, float, float);
 
     void acceleration(qint64, float, float, float);
+
+    void quaternion(qint64, float, float, float, float);
+
+    void linearAcceleration(qint64, float, float, float);
+
+    void eularAngles(qint64,float,float,float, float);
 
     void metawareInitialized();
 

@@ -29,8 +29,10 @@
 #include "metawear/sensor/cpp/utils.h"
 #include "metawear/sensor/gyro_bmi160.h"
 #include "metawear/sensor/magnetometer_bmm150.h"
+#include "metawear/sensor/sensor_fusion.h"
 
 #include <QDebug>
+#include <3rdparty/mbientlab/src/metawear/processor/time.h>
 
 
 MetawearWrapperBase::MetawearWrapperBase(const BluetoothAddress& address):
@@ -60,6 +62,13 @@ void MetawearWrapperBase::configureAccelerometer(float range,float sample){
     mbl_mw_acc_write_acceleration_config(m_metaWearBoard);
 }
 
+void MetawearWrapperBase::configureFusion(MblMwSensorFusionMode mode,MblMwSensorFusionAccRange acc,MblMwSensorFusionGyroRange gyro){
+    mbl_mw_sensor_fusion_set_mode(m_metaWearBoard,mode);
+    mbl_mw_sensor_fusion_set_acc_range(m_metaWearBoard,acc);
+    mbl_mw_sensor_fusion_set_gyro_range(m_metaWearBoard,gyro);
+    mbl_mw_sensor_fusion_write_config(m_metaWearBoard);
+}
+
 void MetawearWrapperBase::configureGyroscope(MblMwGyroBmi160Range range, MblMwGyroBmi160Odr sample){
    mbl_mw_gyro_bmi160_set_odr(m_metaWearBoard, sample);
    mbl_mw_gyro_bmi160_set_range(m_metaWearBoard, range);
@@ -75,6 +84,18 @@ void MetawearWrapperBase::configureAmbientLight(MblMwAlsLtr329Gain gain, MblMwAl
 }
 
 void MetawearWrapperBase::startAccelerationCapture(){
+
+    // subscribe to acceleration handler
+    auto acc_signal = mbl_mw_acc_get_packed_acceleration_data_signal(m_metaWearBoard);
+
+    mbl_mw_datasignal_unsubscribe(acc_signal);
+    mbl_mw_datasignal_subscribe(acc_signal, this, [](void *context, const MblMwData *data) -> void {
+        MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
+        auto acceleration = static_cast<MblMwCartesianFloat *>(data->value);
+        emit wrapper->acceleration(data->epoch, acceleration->x, acceleration->y, acceleration->z);
+        wrapper->updateEpoch(data->epoch);
+    });
+
     mbl_mw_acc_enable_acceleration_sampling(m_metaWearBoard);
     mbl_mw_acc_start(m_metaWearBoard);
 }
@@ -84,6 +105,16 @@ void MetawearWrapperBase::startAmbientLightCapture(){
 }
 
 void MetawearWrapperBase::startGyroscopeCapture(){
+    // subscribe to gyro handler
+    auto gyroSignal = mbl_mw_gyro_bmi160_get_packed_rotation_data_signal(m_metaWearBoard);
+    mbl_mw_datasignal_unsubscribe(gyroSignal);
+    mbl_mw_datasignal_subscribe(gyroSignal, this, [](void *context, const MblMwData *data) -> void {
+        MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
+        auto rotRate = (MblMwCartesianFloat *) data->value;
+        emit wrapper->gyroscope(data->epoch, rotRate->x, rotRate->y, rotRate->z);
+        wrapper->updateEpoch(data->epoch);
+    });
+
     mbl_mw_gyro_bmi160_enable_rotation_sampling(m_metaWearBoard);
     mbl_mw_gyro_bmi160_start(m_metaWearBoard);
 }
@@ -142,7 +173,6 @@ void MetawearWrapperBase::configureHandlers() {
 
     connect(this, &MetawearWrapperBase::metawareInitialized, [=]() {
         mbl_mw_settings_set_connection_parameters(m_metaWearBoard, 7.5f, 7.5f, 0, 6000);
-
         auto battery_signal = mbl_mw_settings_get_battery_state_data_signal(m_metaWearBoard);
         mbl_mw_datasignal_subscribe(battery_signal, this, [](void *context, const MblMwData *data) -> void {
             MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
@@ -151,25 +181,54 @@ void MetawearWrapperBase::configureHandlers() {
             emit wrapper->batteryPercentage(state->charge);
             emit wrapper->voltage(state->voltage);
         });
-
-        // subscribe to acceleration handler
-        auto acc_signal = mbl_mw_acc_get_packed_acceleration_data_signal(m_metaWearBoard);
-        mbl_mw_datasignal_subscribe(acc_signal, this, [](void *context, const MblMwData *data) -> void {
-            MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
-            auto acceleration = static_cast<MblMwCartesianFloat *>(data->value);
-            emit wrapper->acceleration(data->epoch, acceleration->x, acceleration->y, acceleration->z);
-            wrapper->updateEpoch(data->epoch);
-        });
-        // subscribe to gyro handler
-        auto gyroSignal = mbl_mw_gyro_bmi160_get_packed_rotation_data_signal(m_metaWearBoard);
-        mbl_mw_datasignal_subscribe(gyroSignal, this, [](void *context, const MblMwData *data) -> void {
-            MetawearWrapperBase *wrapper = static_cast<MetawearWrapperBase *>(context);
-            auto rotRate = (MblMwCartesianFloat *) data->value;
-            emit wrapper->gyroscope(data->epoch, rotRate->x, rotRate->y, rotRate->z);
-            wrapper->updateEpoch(data->epoch);
-        });
     });
 }
+
+void MetawearWrapperBase::startQuaternionCapture(float sample_rate){
+    auto quaternion_signal = mbl_mw_sensor_fusion_get_data_signal(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_QUATERNION);
+    mbl_mw_datasignal_unsubscribe(quaternion_signal);
+    //mbl_mw_dataprocessor_time_create(quaternion_signal, MBL_MW_TIME_ABSOLUTE,static_cast<uint32_t>((1.0f / sample_rate) * 1000), this, [](void *context, MblMwDataProcessor* processor) -> void{
+        mbl_mw_datasignal_subscribe(quaternion_signal,this,[](void *context, const MblMwData *data) -> void {
+            auto wrapper = static_cast<MetawearWrapperBase *>(context);
+            auto quaternion = static_cast<MblMwQuaternion*>(data->value);
+            emit wrapper->quaternion(data->epoch,quaternion->x,quaternion->y,quaternion->z,quaternion->w);
+            wrapper->updateEpoch(data->epoch);
+        });
+    //});
+    mbl_mw_sensor_fusion_enable_data(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_QUATERNION);
+    mbl_mw_sensor_fusion_start(m_metaWearBoard);
+}
+
+void MetawearWrapperBase::linearEulerAngleCapture(float sample_rate){
+    auto linearEualr_signal = mbl_mw_sensor_fusion_get_data_signal(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_EULER_ANGLE);
+    mbl_mw_datasignal_unsubscribe(linearEualr_signal);
+    //mbl_mw_dataprocessor_time_create(quaternion_signal, MBL_MW_TIME_ABSOLUTE,static_cast<uint32_t>((1.0f / sample_rate) * 1000), this, [](void *context, MblMwDataProcessor* processor) -> void{
+        mbl_mw_datasignal_subscribe(linearEualr_signal ,this,[](void *context, const MblMwData *data) -> void {
+            auto wrapper = static_cast<MetawearWrapperBase *>(context);
+            auto result = static_cast<MblMwEulerAngles*>(data->value);
+            emit wrapper->eularAngles(data->epoch,result->heading,result->pitch,result->roll,result->yaw);
+            wrapper->updateEpoch(data->epoch);
+        });
+    //});
+    mbl_mw_sensor_fusion_enable_data(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_EULER_ANGLE);
+    mbl_mw_sensor_fusion_start(m_metaWearBoard);
+}
+
+void MetawearWrapperBase::linearAccelerationCapture(float sample_rate){
+    auto quaternion_signal = mbl_mw_sensor_fusion_get_data_signal(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_LINEAR_ACC);
+    mbl_mw_datasignal_unsubscribe(quaternion_signal);
+    //mbl_mw_dataprocessor_time_create(quaternion_signal, MBL_MW_TIME_ABSOLUTE,static_cast<uint32_t>((1.0f / sample_rate) * 1000), this, [](void *context, MblMwDataProcessor* processor) -> void{
+        mbl_mw_datasignal_subscribe(quaternion_signal,this,[](void *context, const MblMwData *data) -> void {
+            auto wrapper = static_cast<MetawearWrapperBase *>(context);
+            auto result = static_cast<MblMwCartesianFloat*>(data->value);
+            emit wrapper->linearAcceleration(data->epoch,result->x,result->y,result->z);
+            wrapper->updateEpoch(data->epoch);
+        });
+    //});
+    mbl_mw_sensor_fusion_enable_data(m_metaWearBoard, MBL_MW_SENSOR_FUSION_DATA_LINEAR_ACC);
+    mbl_mw_sensor_fusion_start(m_metaWearBoard);
+}
+
 
 void MetawearWrapperBase::updateEpoch(qint64 epoch)
 {

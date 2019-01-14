@@ -54,6 +54,9 @@ private:
   std::ofstream m_magFile;
   std::ofstream m_accFile;
   std::ofstream m_gyroFile;
+  std::ofstream m_quaternionFile;
+  std::ofstream m_linearAccelerationFile;
+  std::ofstream m_eularFile;
 
   bool m_isReadyToCapture;
 

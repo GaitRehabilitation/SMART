@@ -260,6 +260,15 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
 
             bool enableGyro = ui->toggleGyro->isChecked();
             bool enableAcc = ui->toggleAcc->isChecked();
+
+            bool enableQuaternion = ui->toggleQuaternion->isChecked();
+            bool enableLinear= ui->toggleLinearAcc->isChecked();
+            bool enableEularAngles = ui->toggleEularAngles->isChecked();
+
+            float quaternionSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+            float eularSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+            float linearAccelerationSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+
             bool hasSensorFusion = isSensorFusionEnabled();
 
             MblMwGyroBmi160Range gyrorange = toGyroRangeFromIndex(ui->slideGyroRange->value());
@@ -274,6 +283,8 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
                         lwrapper->configureGyroscope(gyrorange, gyroSample);
                     if(enableAcc)
                         lwrapper->configureAccelerometer(accRange,accSample);
+                }else{
+                    lwrapper->configureFusion(MblMwSensorFusionMode::MBL_MW_SENSOR_FUSION_MODE_NDOF,MblMwSensorFusionAccRange::MBL_MW_SENSOR_FUSION_ACC_RANGE_8G,MblMwSensorFusionGyroRange::MBL_MW_SENSOR_FUSION_GYRO_RANGE_1000DPS);
                 }
             });
 
@@ -283,6 +294,15 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
                         lwrapper->startGyroscopeCapture();
                     if (enableAcc)
                         lwrapper->startAccelerationCapture();
+                }
+                else{
+                    if(enableQuaternion)
+                        lwrapper->startQuaternionCapture(quaternionSampleRate);
+                    if(enableLinear)
+                        lwrapper->startQuaternionCapture(linearAccelerationSampleRate);
+                    if(enableEularAngles)
+                        lwrapper->startQuaternionCapture(eularSampleRate);
+
                 }
             });
 
