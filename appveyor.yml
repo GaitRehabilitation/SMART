@@ -24,6 +24,7 @@ environment:
 install:
   - set QTDIR=C:\Qt\%qt%\%qt_target%
   - set PATH=%PATH%;%QTDIR%\bin
+  - $env:APPVEYOR_BUILD_FOLDER=%APPVEYOR_BUILD_FOLDER%
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
@@ -33,9 +34,8 @@ before_build:
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd ..
-  - ps: Get-ChildItem -Path %APPVEYOR_BUILD_FOLDER%\build\*.dll -Recurse -File | Move-Item -Destination  %APPVEYOR_BUILD_FOLDER%\build\
+  - ps: Get-ChildItem -Path $APPVEYOR_BUILD_FOLDER\build\*.dll -Recurse -File | Move-Item -Destination  $APPVEYOR_BUILD_FOLDER\build\
   - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
-
 after_build:
     - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zi
       \%APPVEYOR_BUILD_FOLDER%\build\*
