@@ -37,18 +37,19 @@ build_script:
   - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
 
 after_build:
-    - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zi %APPVEYOR_BUILD_FOLDER%\build\*
-    -xr!*.cpp
-    -xr!*.obj
-    -xr!*.h
-    -xr!*.Cache
-    -xr!*.intermediate
-    -xr!*/CMakeFiles
-    -xr!*/3rdparty
-    -xr!*/CMakeCache
-    -xr!*/Makefile
-    -xr!*/SMART_autogen
-    -xr!*.cmake
+    - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zi
+      \%APPVEYOR_BUILD_FOLDER%\build\*
+      -xr!*.cpp
+      -xr!*.obj
+      -xr!*.h
+      -xr!*.Cache
+      -xr!*.intermediate
+      -xr!*/CMakeFiles
+      -xr!*/3rdparty
+      -xr!*/CMakeCache
+      -xr!*/Makefile
+      -xr!*/SMART_autogen
+      -xr!*.cmake
 
 artifacts:
   - path: '*.zip'
