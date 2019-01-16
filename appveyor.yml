@@ -33,17 +33,23 @@ before_build:
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd ..
+  - Get-ChildItem -Path %APPVEYOR_BUILD_FOLDER%\build\*.dll -Recurse -File | Move-Item -Destination  %APPVEYOR_BUILD_FOLDER%\build\
   - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
 
 after_build:
-  - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip 
-    %APPVEYOR_BUILD_FOLDER%\build\
+    - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip
+    %APPVEYOR_BUILD_FOLDER%\build\*
     -xr!*.cpp
     -xr!*.obj
     -xr!*.h
     -xr!*.Cache
-    -xr!*.intermediate    
-
+    -xr!*.intermediate
+    -xr!*/CMakeFiles
+    -xr!*/3rdparty
+    -xr!*/CMakeCache
+    -xr!*/Makefile
+    -xr!*/SMART_autogen
+    -xr!*.cmake
 
 artifacts:
   - path: '*.zip'

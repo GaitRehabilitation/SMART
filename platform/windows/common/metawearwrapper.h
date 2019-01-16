@@ -5,7 +5,6 @@
 #ifndef SMART_QTMETAWEARWRAPPER_H
 #define SMART_QTMETAWEARWRAPPER_H
 
-
 #include <QtCore/QPointer>
 #include "common/metawearwrapperbase.h"
 

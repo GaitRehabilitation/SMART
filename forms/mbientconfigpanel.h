@@ -10,7 +10,6 @@
 #include <QVariantMap>
 #include <3rdparty/mbientlab/src/metawear/sensor/gyro_bmi160.h>
 
-
 #define GYRO "gyro"
 #define MAC "mac"
 #define NAME "name"
