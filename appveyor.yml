@@ -33,7 +33,7 @@ before_build:
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd ..
-  - Get-ChildItem -Path %APPVEYOR_BUILD_FOLDER%\build\*.dll -Recurse -File | Move-Item -Destination  %APPVEYOR_BUILD_FOLDER%\build\
+  - ps: Get-ChildItem -Path %APPVEYOR_BUILD_FOLDER%\build\*.dll -Recurse -File | Move-Item -Destination  %APPVEYOR_BUILD_FOLDER%\build\
   - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
 
 after_build:
