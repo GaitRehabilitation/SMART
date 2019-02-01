@@ -164,7 +164,7 @@ void SensorPanel::registerPlotHandlers()
     xgraphAcc->setName("X Acc");
     QCPGraph *ygraphAcc = ui->plot->addGraph();
     ygraphAcc->setPen(QPen(QColor(0,255,0)));
-    ygraphAcc->setName("X Acc");
+    ygraphAcc->setName("Y Acc");
     QCPGraph *zgraphAcc = ui->plot->addGraph();
     zgraphAcc->setName("Z Acc");
     zgraphAcc->setPen(QPen(QColor(0,0,255)));

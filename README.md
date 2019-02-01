@@ -1,6 +1,6 @@
 # S.M.A.R.T
 
-![preview](https://raw.githubusercontent.com/GaitRehabilitation/SMART/master/preview.png)
+![preview](./preview.png)
 
 ## Introduction
 

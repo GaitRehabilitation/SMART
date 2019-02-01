@@ -221,29 +221,29 @@ void MbientConfigPanel::deserialize(QVariantMap value)
     if(value.contains(FUSION_EULAR_ANGLES)){
         QVariantMap s = value[FUSION_EULAR_ANGLES].toMap();
         ui->slideEularSample->setValue(s[SAMPLE_RATE].toInt());
-        ui->toggleEularAngles->setEnabled(true);
+        ui->toggleEularAngles->setChecked(true);
     }
     if(value.contains(FUSION_LINEAR_ACC)){
         QVariantMap s = value[FUSION_LINEAR_ACC].toMap();
         ui->slideLinearAccSample->setValue(s[SAMPLE_RATE].toInt());
-        ui->toggleLinearAcc->setEnabled(true);
+        ui->toggleLinearAcc->setChecked(true);
     }
     if(value.contains(FUSION_QUATERNION)){
         QVariantMap s = value[FUSION_QUATERNION].toMap();
         ui->slideQuaternionSample->setValue(s[SAMPLE_RATE].toInt());
-        ui->toggleQuaternion->setEnabled(true);
+        ui->toggleQuaternion->setChecked(true);
     }
     if(value.contains(GYRO)){
         QVariantMap s = value[GYRO].toMap();
         ui->slideGyroRange->setValue(s[SAMPLE_RANGE].toInt());
         ui->slideGyroSample->setValue(s[SAMPLE_RATE].toInt());
-        ui->toggleGyro->setEnabled(true);
+        ui->toggleGyro->setChecked(true);
     }
     if(value.contains(ACC)){
         QVariantMap s = value[ACC].toMap();
         ui->slideAccRange->setValue(s[SAMPLE_RANGE].toInt());
         ui->slideAccSample->setValue(s[SAMPLE_RATE].toInt());
-        ui->toggleAcc->setEnabled(true);
+        ui->toggleAcc->setChecked(true);
     }
     ui->deviceMac->setText(value[MAC].toString());
     ui->deviceName->setText(value[NAME].toString());
