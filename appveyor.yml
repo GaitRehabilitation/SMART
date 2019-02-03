@@ -1,9 +1,6 @@
 version: '{branch}-0.0.{build}'
 skip_tags: true
 image: Visual Studio 2017
-branches:
-  only:
-    - master
 
 environment:
   matrix:
