@@ -9,6 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 
+
 # There may be a way to tell up front if Qt5 is going to be found, but I haven't found
 # a foolproof way to do it yet, so settle for the default error message for now.
 #if(NOT CMAKE_PREFIX_PATH AND NOT Qt5Widgets_DIR)
@@ -94,15 +95,12 @@ if (MSVC)
 
 	set(PLATFORM_HEADERS
 		platform/windows/common/metawearwrapper.h
-			platform/windows/common/DiscoveryAgent.h
+		platform/windows/common/DiscoveryAgent.h
 	)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZW")
 	add_compile_options("/std:c++14")
 	include_directories(zlib)
 endif (MSVC)
-
-
-#include_directories(./3rdparty/quazip/quazip)
 
 # Generate code from ui files
 qt5_wrap_ui(UI_HEADERS ${UIS})
@@ -114,8 +112,6 @@ qt5_add_resources(QRCS ${RESOURCES})
 add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} )
 
 add_subdirectory(./3rdparty)
-target_link_libraries(SMART ${QUAZIP_LIB})
-target_link_libraries(SMART ${QMSGPACK_LIB})
 # Add the Qt5 Widgets for linking
 target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport)
 
@@ -124,7 +120,9 @@ if (UNIX)
 endif (UNIX)
 
 target_link_libraries(SMART extern_metawear)
-#target_link_libraries(SMART qmsgpack)
+target_link_libraries(SMART qmsgpack_extern ) 
+target_link_libraries(SMART quazip_extern ) 
+
 
 
 if (MSVC)
@@ -162,14 +160,22 @@ install(TARGETS SMART
 
 set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "SMART Application")
 
-set(CPACK_GENERATOR NSIS)
+if(NOT DEFINED ${CPACK_PACKAGE_VERSION_MAJOR})
+	SET(CPACK_PACKAGE_VERSION_MAJOR 0)
+endif()
+
+if(NOT DEFINED ${CPACK_PACKAGE_VERSION_MINOR})
+	SET(CPACK_PACKAGE_VERSION_MINOR 0)
+endif()
+
+if(NOT DEFINED ${CPACK_PACKAGE_VERSION_PATCH})
+	SET(CPACK_PACKAGE_VERSION_PATCH 0)
+endif()
+
+set(CPACK_GENERATOR WIX)
 set(CPACK_PACKAGE_NAME "SMART")
 set(CPACK_PACKAGE_VENDOR "GrailLab")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A Utility for collecting data from Mbient sensors")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "SMART")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 INCLUDE(CPack)

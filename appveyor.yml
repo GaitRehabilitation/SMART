@@ -29,33 +29,19 @@ before_build:
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version% -DV -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
-  - cd ..
-  - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
-after_build:
-    - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip
-      %APPVEYOR_BUILD_FOLDER%\build\*
-      -xr!*.cpp
-      -xr!*.obj
-      -xr!*.h
-      -xr!*.Cache
-      -xr!*.intermediate
-      -xr!*/CMakeFiles
-      -xr!*/3rdparty
-      -xr!*/CMakeCache
-      -xr!*/Makefile
-      -xr!*/SMART_autogen
-      -xr!*.cmake
+  - cpack -G WIX ZIP
 
 artifacts:
   - path: '*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
+  - path: '*.msi'
+    name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
 deploy:
 - provider: GitHub
   auth_token:
     secure: cfQYapw1kaToQWhkDuAZI7Q6VUBCDmRqm/+eziQ8yJoekJXgT3l8JBAflzCtpLVe
   repository: GaitRehabilitation/SMART
-  artifact: /.*\.zip/
