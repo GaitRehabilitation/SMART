@@ -26,7 +26,7 @@ before_build:
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version% -DV -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version%  -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cpack -G WIX ZIP
