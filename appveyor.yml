@@ -38,6 +38,8 @@ artifacts:
   - path: '*.exe'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
+on_failure:
+- appveyor PushArtifact %APPVEYOR_BUILD_FOLDER%\\build\\_CPack_Packages\\win64\\NSIS\\PreinstallOutput.log
 
 deploy:
 - provider: GitHub
