@@ -36,9 +36,9 @@ build_script:
   - cpack -G NSIS --verbose
 
 artifacts:
-  - path: '**\*\_CPack_Packages\**\*.zip'
+  - path: '**\*\_CPack_Packages\**\*\ZIP\*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
-  - path: '**\*\_CPack_Packages\**\*.exe'
+  - path: '**\*\_CPack_Packages\**\*\NSIS\*.exe'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
 on_failure:
