@@ -30,6 +30,7 @@ before_build:
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cpack -G WIX ZIP
+  - cat C:/projects/smart/build/_CPack_Packages/win64/WIX/PreinstallOutput.log
 
 artifacts:
   - path: '*.zip'
