@@ -32,17 +32,13 @@ before_build:
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd %APPVEYOR_BUILD_FOLDER%\\build
-  - cpack -G ZIP --verbose
-  - cpack -G NSIS --verbose
+  - cpack -D CPACK_GENERATOR="ZIP;NSIS" --verbose
 
 artifacts:
   - path: '**\*\_CPack_Packages\**\*\ZIP\*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
   - path: '**\*\_CPack_Packages\**\*\NSIS\*.exe'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
-
-on_failure:
-- appveyor PushArtifact %APPVEYOR_BUILD_FOLDER%\\build\\_CPack_Packages\\win64\\NSIS\\PreinstallOutput.log
 
 deploy:
 - provider: GitHub
