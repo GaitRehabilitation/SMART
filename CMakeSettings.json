@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.3\\msvc2017_64\\lib\\cmake -DCPACK_PACKAGE_VERSION=1.5.0",
+      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\5.11.3\\msvc2017_64\\lib\\cmake -DCPACK_PACKAGE_VERSION=1.5.0 -DCPACK_WIX_ROOT=C:\\Program Files (x86)\\WiX Toolset v3.11",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     }
