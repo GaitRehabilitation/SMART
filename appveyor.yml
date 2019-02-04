@@ -1,9 +1,6 @@
 version: '{branch}-0.0.{build}'
 skip_tags: true
 image: Visual Studio 2017
-branches:
-  only:
-    - master
 
 environment:
   matrix:
@@ -25,38 +22,26 @@ install:
   - set QTDIR=C:\Qt\%qt%\%qt_target%
   - set PATH=%PATH%;%QTDIR%\bin
 before_build:
+  - git config --global user.email "polli104@mail.chapman.edu"
+  - git config --global user.name "Michael Pollind"
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%build%.bat"
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
+  - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version%  -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
-  - cd ..
-  - ps: Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER\build\*.dll -Recurse -File | Move-Item -Destination  $env:APPVEYOR_BUILD_FOLDER\build\
-  - windeployqt %APPVEYOR_BUILD_FOLDER%/build/SMART.exe
-after_build:
-    - 7z a smart-%qt%-%qt_target%-%appveyor_build_version%.zip
-      %APPVEYOR_BUILD_FOLDER%\build\*
-      -xr!*.cpp
-      -xr!*.obj
-      -xr!*.h
-      -xr!*.Cache
-      -xr!*.intermediate
-      -xr!*/CMakeFiles
-      -xr!*/3rdparty
-      -xr!*/CMakeCache
-      -xr!*/Makefile
-      -xr!*/SMART_autogen
-      -xr!*.cmake
+  - cd %APPVEYOR_BUILD_FOLDER%\\build
+  - cpack -D CPACK_GENERATOR="ZIP;NSIS" --verbose
 
 artifacts:
-  - path: '*.zip'
+  - path: '**\*\_CPack_Packages\**\*\ZIP\*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
+  - path: '**\*\_CPack_Packages\**\*\NSIS\*.exe'
+    name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
 deploy:
 - provider: GitHub
   auth_token:
     secure: cfQYapw1kaToQWhkDuAZI7Q6VUBCDmRqm/+eziQ8yJoekJXgT3l8JBAflzCtpLVe
   repository: GaitRehabilitation/SMART
-  artifact: /.*\.zip/
