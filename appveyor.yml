@@ -29,6 +29,7 @@ before_build:
   - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version%  -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
+  - cd %APPVEYOR_BUILD_FOLDER%\\build
   - cpack -G WIX ZIP --verbose
 
 artifacts:
