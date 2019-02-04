@@ -33,12 +33,12 @@ build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
   - cd %APPVEYOR_BUILD_FOLDER%\\build
   - cpack -G ZIP --verbose
-  - cpack -G WIX --verbose
+  - cpack -G NSIS --verbose
 
 artifacts:
   - path: '**\*\_CPack_Packages\**\*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
-  - path: '**\*\_CPack_Packages\**\*.msi'
+  - path: '**\*\_CPack_Packages\**\*.exe'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
 on_failure:
