@@ -29,15 +29,17 @@ before_build:
   - cmake DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\\Qt\\%qt%\\%qt_target%\\lib\\cmake -DCPACK_PACKAGE_VERSION=%appveyor_build_version%  -G "CodeBlocks - NMake Makefiles" %APPVEYOR_BUILD_FOLDER%
 build_script:
   - cmake --build %APPVEYOR_BUILD_FOLDER%\\build --target SMART
-  - cpack -G WIX ZIP --verbose
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cpack -G NSIS ZIP --verbose
 
 artifacts:
   - path: '*.zip'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% binary
-  - path: '*.msi'
+  - path: '*.exe'
     name: smart %APPVEYOR_REPO_BRANCH% %qt% %qt_target% %appveyor_build_version% installer
 
-
+on_failure:
+- appveyor PushArtifact *.txt
 
 deploy:
 - provider: GitHub
