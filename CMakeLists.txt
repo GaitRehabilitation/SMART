@@ -8,16 +8,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Turn on automatic invocation of the MOC
 set(CMAKE_AUTOMOC ON)
 
-
-
-# There may be a way to tell up front if Qt5 is going to be found, but I haven't found
-# a foolproof way to do it yet, so settle for the default error message for now.
-#if(NOT CMAKE_PREFIX_PATH AND NOT Qt5Widgets_DIR)
-#    message(WARNING "CMAKE_PREFIX_PATH is not defined, so find_package may not work. Set the CMAKE_PREFIX_PATH "
-#            "environment variable to the install prefix of Qt 5, either on the command line as "
-#            "-DCMAKE_PREFIX_PATH=\"path/to/Qt5/lib/cmake\" or with set(CMAKE_PREFIX_PATH path/to/Qt5/lib/cmake)")
-#endif(NOT CMAKE_PREFIX_PATH AND NOT Qt5Widgets_DIR)
-
 # Make this a GUI application on Windows
 if(WIN32)
   set(CMAKE_WIN32_EXECUTABLE ON)
@@ -126,17 +116,6 @@ target_link_libraries(SMART quazip_extern )
 
 
 if (MSVC)
-#	add_custom_command(
-#		TARGET SMART POST_BUILD
-#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#			$<TARGET_FILE:Qt5::Widgets>
-#			$<TARGET_FILE:Qt5::Core>
-#			$<TARGET_FILE:Qt5::Gui>
-#			$<TARGET_FILE:Qt5::Quick>
-#			$<TARGET_FILE:Qt5::PrintSupport>
-#			$<TARGET_FILE_DIR:SMART>
-#	)
-
 		get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
 		get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 		find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
@@ -192,4 +171,12 @@ set(CPACK_PACKAGE_VENDOR "GrailLab")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A Utility for collecting data from Mbient sensors")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "SMART")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+
+
+set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+set(CPACK_PACKAGE_EXECUTABLES "SMART" "SMART")
+set(CPACK_CREATE_DESKTOP_LINKS "SMART")
+set(CPACK_NSIS_MODIFY_PATH "ON")
+
+
 INCLUDE(CPack)
