@@ -1,5 +1,5 @@
 /**
-* Copyright 2018 GaitRehabilitation
+* Copyright 2019 GaitRehabilitation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ SensorPanel::SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent)
             updated = this->ui->deviceAddress->text();
         }
 
-        //remove illegal symbols
+        //remove illegal symbols from the filename
         updated.replace(":","_");
         updated.replace(" ","_");
 

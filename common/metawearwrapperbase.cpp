@@ -1,5 +1,5 @@
 /**
-* Copyright %yyyy% GaitRehabilitation
+* Copyright 2019 GaitRehabilitation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -56,12 +56,23 @@ void MetawearWrapperBase::readBatteryStatus()
     mbl_mw_datasignal_read(battery_signal);
 }
 
+/**
+ * Configure acceleration
+ * @param range
+ * @param sample
+ */
 void MetawearWrapperBase::configureAccelerometer(float range,float sample){
     mbl_mw_acc_set_odr(m_metaWearBoard, sample);
     mbl_mw_acc_set_range(m_metaWearBoard,range);
     mbl_mw_acc_write_acceleration_config(m_metaWearBoard);
 }
 
+/**
+ * Configure sensor fusion
+ * @param mode
+ * @param acc
+ * @param gyro
+ */
 void MetawearWrapperBase::configureFusion(MblMwSensorFusionMode mode,MblMwSensorFusionAccRange acc,MblMwSensorFusionGyroRange gyro){
     mbl_mw_sensor_fusion_set_mode(m_metaWearBoard,mode);
     mbl_mw_sensor_fusion_set_acc_range(m_metaWearBoard,acc);
@@ -69,6 +80,11 @@ void MetawearWrapperBase::configureFusion(MblMwSensorFusionMode mode,MblMwSensor
     mbl_mw_sensor_fusion_write_config(m_metaWearBoard);
 }
 
+/**
+ * configure Metawear gyroscope with range and sample
+ * @param range
+ * @param sample
+ */
 void MetawearWrapperBase::configureGyroscope(MblMwGyroBmi160Range range, MblMwGyroBmi160Odr sample){
    mbl_mw_gyro_bmi160_set_odr(m_metaWearBoard, sample);
    mbl_mw_gyro_bmi160_set_range(m_metaWearBoard, range);
@@ -248,6 +264,10 @@ const QString& MetawearWrapperBase::getModel() const{
     return m_model;
 }
 
+/**
+ * the current epoch in milliseconds from the start of capture
+ * @return
+ */
 qint64 MetawearWrapperBase::getLatestEpoch()
 {
     return m_latestEpoch;

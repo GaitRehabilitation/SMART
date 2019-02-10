@@ -1,5 +1,5 @@
 /**
-* Copyright 2018 GaitRehabilitation
+* Copyright 2019 GaitRehabilitation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -35,55 +35,80 @@ namespace Ui {
 }
 
 class SensorPanel : public QWidget {
-    Q_OBJECT
+Q_OBJECT
 private:
     Ui::SensorPanel *ui;
 
-  MetawearWrapperBase *m_wrapper;
-  BluetoothAddress m_currentDevice;
+    MetawearWrapperBase *m_wrapper;
+    BluetoothAddress m_currentDevice;
 
-  qint64 m_plotoffset;
+    qint64 m_plotoffset;
 
-  QTimer m_reconnectTimer;
-  QTimer m_plotUpdatetimer;
-  QTimer m_settingUpdateTimer;
+    QTimer m_reconnectTimer;
+    QTimer m_plotUpdatetimer;
+    QTimer m_settingUpdateTimer;
 
-  QTemporaryDir* m_temporaryDir;
-  QMutex m_plotLock;
+    QTemporaryDir *m_temporaryDir;
+    QMutex m_plotLock;
 
-  std::ofstream m_magFile;
-  std::ofstream m_accFile;
-  std::ofstream m_gyroFile;
-  std::ofstream m_quaternionFile;
-  std::ofstream m_linearAccelerationFile;
-  std::ofstream m_eularFile;
+    std::ofstream m_magFile;
+    std::ofstream m_accFile;
+    std::ofstream m_gyroFile;
+    std::ofstream m_quaternionFile;
+    std::ofstream m_linearAccelerationFile;
+    std::ofstream m_eularFile;
 
-  bool m_isReadyToCapture;
+    bool m_isReadyToCapture;
 
-  void registerPlotHandlers();
-  void registerDataHandlers();
+    void registerPlotHandlers();
+
+    void registerDataHandlers();
+
 public:
-  explicit SensorPanel(MetawearWrapperBase* wrapper, QWidget *parent = nullptr);
-  virtual ~SensorPanel();
+    explicit SensorPanel(MetawearWrapperBase *wrapper, QWidget *parent = nullptr);
 
+    virtual ~SensorPanel();
 
-  bool isReadyToCapture();
-  MetawearWrapperBase* getMetwareWrapper();
-  const BluetoothAddress& getDeviceInfo() const;
-  void setName(QString);
-  void setOffset(qint64 offset);
-  qint64 getOffset() const;
-  void startCapture(QTemporaryDir* dir);
-  void stopCapture();
-  void clearPlots();
-  void connectDevice();
+    bool isReadyToCapture();
+
+    MetawearWrapperBase *getMetwareWrapper();
+
+    const BluetoothAddress &getDeviceInfo() const;
+
+    /**
+     * set the name of the listed device
+     * @param name of the device
+     */
+    void setName(QString name);
+
+    /**
+     * set the time offset to zero out the streaming
+     * @param offset
+     */
+    void setOffset(qint64 offset);
+
+    /**
+     * get the current time offset in milliseconds from the current device epoch
+     * @return the epoch in seconds
+     */
+    qint64 getOffset() const;
+
+    void startCapture(QTemporaryDir *dir);
+
+    void stopCapture();
+
+    void clearPlots();
+
+    void connectDevice();
 
 signals:
-  void connected();
-  void disconnect();
-  //void bluetoothError(QLowEnergyController::Error e);
 
-  void metawearInitilized();
+    void connected();
+
+    void disconnect();
+    //void bluetoothError(QLowEnergyController::Error e);
+
+    void metawearInitilized();
 };
 
 #endif // SENSORPANEL_H

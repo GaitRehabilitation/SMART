@@ -5,5 +5,6 @@
     <mapping directory="$PROJECT_DIR$/3rdparty/Warble" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rdparty/mbientlab" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rdparty/qmsgpack" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rdparty/quazip" vcs="Git" />
   </component>
 </project>
