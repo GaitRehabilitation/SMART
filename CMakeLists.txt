@@ -127,10 +127,6 @@ if (MSVC)
 		)
 
 		install(
-            FILES "128x128-gait.ico"
-            DESTINATION .
-		)
-		install(
             DIRECTORY ${CMAKE_BINARY_DIR}/windeployqt_stuff/
             DESTINATION .
 		)
@@ -182,7 +178,7 @@ set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 set(CPACK_PACKAGE_EXECUTABLES "SMART" "SMART")
 set(CPACK_CREATE_DESKTOP_LINKS "SMART")
 set(CPACK_NSIS_MODIFY_PATH "ON")
-set(CPACK_NSIS_MUI_ICON "128x128-gait.ico")
+set(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/icon.ico")
 
 
 INCLUDE(CPack)
