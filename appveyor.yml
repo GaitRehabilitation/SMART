@@ -4,18 +4,18 @@ image: Visual Studio 2017
 
 environment:
   matrix:
-  - qt: 5.11.2  
+  - qt: 5.12.1 
     build: 64
     qt_target: msvc2017_64
 #  - qt: 5.11.1
 #    build: 64
 #    qt_target: winrt_armv7_msvc2017
-  - qt: 5.11.2
-    build: 32
-    qt_target: winrt_x86_msvc2017
-  - qt: 5.11.2
-    build: 64
-    qt_target: winrt_x64_msvc2017
+#  - qt: 5.12.1
+#    build: 32
+#    qt_target: winrt_x86_msvc2017
+#  - qt: 5.12.1
+#    build: 64
+#    qt_target: winrt_x64_msvc2017
            
 
 install:
