@@ -19,61 +19,66 @@
 #include <QListView>
 #include "common/DiscoveryAgent.h"
 
-DeviceSelectDialog::DeviceSelectDialog(QWidget *parent)
-    : QDialog(parent), ui(new Ui::DeviceSelectDialog),
-      m_deviceInfo(),
-      m_deviceBlackList(),
-      m_discoveryAgent(new DiscoveryAgent()){
-    ui->setupUi(this);
+DeviceSelectDialog::DeviceSelectDialog(QWidget * parent):
+	m_discoveryAgent(new DiscoveryAgent()),
+	QDialog(parent), 
+	ui(new Ui::DeviceSelectDialog),
+	m_deviceInfo(),
+	m_deviceBlackList()
+{
+	ui->setupUi(this);
 
-    connect(ui->scan, &QPushButton::clicked, this,[=](){
-        ui->scan->setEnabled(false);
-        m_discoveryAgent->start();
-    });
-    connect(ui->clear, &QPushButton::clicked,this,[=](){
-        ui->deviceList->clear();
-        m_discoveryAgent->stop();
-    });
-   // connect(m_discoveryAgent,&QBluetoothDeviceDiscoveryAgent::finished, this, [=](){ui->scan->setEnabled(true); });
+	connect(ui->scan, &QPushButton::clicked, this, [=]() {
+		ui->scan->setEnabled(false);
+		m_discoveryAgent->start();
+	});
+	connect(ui->clear, &QPushButton::clicked, this, [=]() {
+		ui->deviceList->clear();
+		m_discoveryAgent->stop();
+	});
+	// connect(m_discoveryAgent,&QBluetoothDeviceDiscoveryAgent::finished, this, [=](){ui->scan->setEnabled(true); });
 
-    // An entry is added for every device connected
-    qRegisterMetaType<BluetoothAddress>("BluetoothAddress");
-    connect(m_discoveryAgent, &DiscoveryAgent::deviceDiscovered, this,[=](BluetoothAddress info){
-        //if(info.name() != "MetaWear")
-         //   return;
-        if(m_deviceBlackList.contains(info.getMac()))
-            return;
+	 // An entry is added for every device connected
+	qRegisterMetaType<BluetoothAddress>("BluetoothAddress");
+	connect(m_discoveryAgent, &DiscoveryAgent::deviceDiscovered, this, [=](BluetoothAddress info) {
+		//if(info.name() != "MetaWear")
+		 //   return;
+		if (m_deviceBlackList.contains(info.getMac()))
+			return;
 
 
-        QString label = QString("%1 %2").arg(info.getMac()).arg(info.getTitle());
-        m_deviceInfo.insert(label, info);
+		QString label = QString("%1 %2").arg(info.getMac()).arg(info.getTitle());
+		m_deviceInfo.insert(label, info);
 
-        QList<QListWidgetItem *> items = ui->deviceList->findItems(label, Qt::MatchExactly);
-        if (items.empty()) {
-            QListWidgetItem *item = new QListWidgetItem(label);
-            //QBluetoothLocalDevice::Pairing lpairingStatus = localDevice->pairingStatus(info.address());
-            //if (lpairingStatus == QBluetoothLocalDevice::Paired || lpairingStatus == QBluetoothLocalDevice::AuthorizedPaired) {
-             //   item->setTextColor(QColor(Qt::green));
-            //} else {
-                item->setTextColor(QColor(Qt::black));
-            //}
-            ui->deviceList->addItem(item);
-        }
-    });
+		QList<QListWidgetItem *> items = ui->deviceList->findItems(label, Qt::MatchExactly);
+		if (items.empty()) {
+			QListWidgetItem *item = new QListWidgetItem(label);
+			//QBluetoothLocalDevice::Pairing lpairingStatus = localDevice->pairingStatus(info.address());
+			//if (lpairingStatus == QBluetoothLocalDevice::Paired || lpairingStatus == QBluetoothLocalDevice::AuthorizedPaired) {
+			 //   item->setTextColor(QColor(Qt::green));
+			//} else {
+			item->setTextColor(QColor(Qt::black));
+			//}
+			ui->deviceList->addItem(item);
+		}
+	});
 
-    connect(ui->deviceList, &QListWidget::itemSelectionChanged, this,[=](){
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(!(ui->deviceList->selectedItems().count() > 0));
-    });
+	connect(ui->deviceList, &QListWidget::itemSelectionChanged, this, [=]() {
+		ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(!(ui->deviceList->selectedItems().count() > 0));
+	});
 
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+	m_discoveryAgent->query();
 }
 
-DeviceSelectDialog::~DeviceSelectDialog() { delete ui; }
+DeviceSelectDialog::~DeviceSelectDialog() {
+	delete ui;
+	delete m_discoveryAgent;
+}
 
 void DeviceSelectDialog::accept() {
     if (ui->deviceList->count() == 0)
         return;
-
 
     m_discoveryAgent->stop();
     ui->scan->setEnabled(true);

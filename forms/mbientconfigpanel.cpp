@@ -262,13 +262,12 @@ void MbientConfigPanel::deserialize(QVariantMap value)
 }
 
 
-MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
+MetawearWrapperBase* MbientConfigPanel::buildWrapper(DiscoveryAgent& agent){
 
     // clear wrapper
     m_wrapper = nullptr;
 
-    DiscoveryAgent discoveryAgent;
-    connect(&discoveryAgent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
+    connect(&agent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
         if (QString::compare(info.getMac(), ui->deviceMac->text(), Qt::CaseInsensitive) == 0) {
             m_wrapper = new MetawearWrapper(info);
 
@@ -329,15 +328,16 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
     timer.setSingleShot(true);
 
     QEventLoop loop;
-    connect(&discoveryAgent,&DiscoveryAgent::finished,&loop,&QEventLoop::quit);
+    connect(&agent,&DiscoveryAgent::finished,&loop,&QEventLoop::quit);
     connect(&timer,&QTimer::timeout,&loop,&QEventLoop::quit);
 
     // run timer for 10 seconds and if no deivce does not show up then kill it
     timer.start(10000);
-    discoveryAgent.start();
+	agent.query();
+	agent.start();
 
     loop.exec();
-    discoveryAgent.stop();
+    agent.stop();
     timer.stop();
     if(m_wrapper == nullptr){
         QMessageBox messageBox;
@@ -348,7 +348,7 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
         messageBox.exec();
         if(messageBox.clickedButton() == lbuttonYes){
             // run wrapper again and try to init wrapper
-            return buildWrapper();
+            return buildWrapper(agent);
         }
     }
 

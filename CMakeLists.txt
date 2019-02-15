@@ -23,11 +23,13 @@ set (SOURCES
   forms/sensorpanel.cpp
   forms/profiledialog.cpp
   forms/mbientconfigpanel.cpp
+  forms/deviceloadingdialog.cpp
 
   common/main.cpp
   common/metawearwrapperbase.cpp
   common/util.cpp
-  common/BluetoothAddress.cpp)
+  common/BluetoothAddress.cpp
+  common/BaseDiscoveryAgent.cpp)
 
 set(HEADERS
   qcustomplot.h
@@ -36,6 +38,7 @@ set(HEADERS
   forms/mainwindow.h
   forms/profiledialog.h
   forms/mbientconfigpanel.h
+  forms/deviceloadingdialog.h
 
   common/metawearwrapperbase.h
   common/util.h
@@ -48,8 +51,7 @@ set ( UIS
     forms/sensorpanel.ui
     forms/deviceselectdialog.ui
     forms/mbientconfigpanel.ui
-    forms/profiledialog.ui
-        )
+    forms/profiledialog.ui )
 
 set ( RESOURCES
  qml.qrc
@@ -75,7 +77,6 @@ if (UNIX)
 endif (UNIX)
 
 if (MSVC)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 	include_directories(platform/windows)
 
 	set (PLATFORM_SOURCE
@@ -126,6 +127,11 @@ if (MSVC)
                     COMMAND ${WINDEPLOYQT_EXECUTABLE} --compiler-runtime --dir ${CMAKE_BINARY_DIR}/windeployqt_stuff $<TARGET_FILE:SMART>
 		)
 
+		add_custom_command(
+                    TARGET SMART POST_BUILD
+                    COMMAND ${WINDEPLOYQT_EXECUTABLE} --compiler-runtime $<TARGET_FILE:SMART>
+		)
+
 		install(
             DIRECTORY ${CMAKE_BINARY_DIR}/windeployqt_stuff/
             DESTINATION .
@@ -134,19 +140,10 @@ if (MSVC)
 	target_link_libraries(SMART wsock32 ws2_32)
 	
 	set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+	set(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
 	set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ./)
 	include(InstallRequiredSystemLibraries)
 endif(MSVC)
-
-
-install(FILES
-	$<TARGET_FILE:Qt5::Widgets>
-	$<TARGET_FILE:Qt5::Core>
-	$<TARGET_FILE:Qt5::Gui>
-	$<TARGET_FILE:Qt5::Quick>
-	$<TARGET_FILE:Qt5::PrintSupport>
-	DESTINATION "."
-)
 
 install(TARGETS SMART 
 	DESTINATION "."
@@ -178,7 +175,9 @@ set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 set(CPACK_PACKAGE_EXECUTABLES "SMART" "SMART")
 set(CPACK_CREATE_DESKTOP_LINKS "SMART")
 set(CPACK_NSIS_MODIFY_PATH "ON")
-set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icon.ico")
 
+set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons\\\\gait-icon.bmp")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
 
 INCLUDE(CPack)

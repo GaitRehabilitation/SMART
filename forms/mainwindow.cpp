@@ -20,6 +20,8 @@
 #include "forms/mainwindow.h"
 #include "forms/profiledialog.h"
 
+#include <common/DiscoveryAgent.h>
+
 #include "forms/sensorpanel.h"
 #include <QFileDialog>
 #include <QtDebug>
@@ -30,21 +32,24 @@
 #include <common/metawearwrapperbase.h>
 #include <forms/profiledialog.h>
 #include <forms/mbientconfigpanel.h>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),m_temporaryData(new QTemporaryDir()),m_triggerSingleShot(),m_triggerTime(0),m_updateTriggerTimer(),m_deviceIndex(0){
     ui->setupUi(this);
 
 //    connect(this,&MainWindow::onConnectedDevices,m_deviceSelectDialog,&DeviceSelectDialog::updateDeviceBlackList);
-
+	
     connect(ui->actionAddDevice, &QAction::triggered, this,[=](){
 		ProfileDialog profileDialog(this);
 		connect(&profileDialog,&ProfileDialog::onProfileSelected,this,[=](const QList<MbientConfigPanel*>& payload){
-            for (int i = 0; i < payload.length(); ++i) {
+			DiscoveryAgent agent;
+			for (int i = 0; i < payload.length(); ++i) {
                 MbientConfigPanel* panel = payload.at(i);
-                MetawearWrapperBase* wrapper = panel->buildWrapper();
-
-                auto devicePanel = registerDevice(wrapper);
-                devicePanel->setName(panel->getName());
+                MetawearWrapperBase* wrapper = panel->buildWrapper(agent);
+				if (wrapper) {
+					auto devicePanel = registerDevice(wrapper);
+					devicePanel->setName(panel->getName());
+				}
             }
 		});
 		profileDialog.exec();

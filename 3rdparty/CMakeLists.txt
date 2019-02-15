@@ -27,6 +27,13 @@ install(FILES
 	DESTINATION "."
 )
 
+ add_custom_command(
+	   TARGET qmsgpack
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${install_dir}/bin/qmsgpackd.dll ${CMAKE_BINARY_DIR}
+   )
+
+
 SET(QUAZIP_LIB_VERSION_SUFFIX 5)
 ExternalProject_Add(quazip 
 		GIT_REPOSITORY https://github.com/stachenov/quazip.git 
@@ -47,6 +54,12 @@ install(FILES
 	 ${install_dir}/lib/quazip${QUAZIP_LIB_VERSION_SUFFIX}d.dll
 	DESTINATION "."
 )
+
+ add_custom_command(
+       TARGET quazip
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	  ${install_dir}/lib/quazip${QUAZIP_LIB_VERSION_SUFFIX}d.dll ${CMAKE_BINARY_DIR}
+   )
 
 add_dependencies(quazip_extern quazip)
 add_dependencies(qmsgpack_extern qmsgpack)

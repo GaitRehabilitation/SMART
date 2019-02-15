@@ -37,6 +37,7 @@ private:
   QList<QString> m_deviceBlackList;
 
 public:
+
   explicit DeviceSelectDialog(QWidget *parent = nullptr);
   ~DeviceSelectDialog() override;
 

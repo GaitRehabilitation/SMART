@@ -21,6 +21,7 @@
 #include <QWidget>
 #include <QVariantMap>
 #include <3rdparty/mbientlab/src/metawear/sensor/gyro_bmi160.h>
+#include <common/DiscoveryAgent.h>
 
 #define GYRO "gyro"
 #define MAC "mac"
@@ -59,7 +60,7 @@ public:
     QString getMac();
     QString getName();
 
-    MetawearWrapperBase* buildWrapper();
+    MetawearWrapperBase* buildWrapper(DiscoveryAgent& agent);
 
     MbientConfigPanel(QWidget *parent = nullptr);
     QVariantMap serialize();

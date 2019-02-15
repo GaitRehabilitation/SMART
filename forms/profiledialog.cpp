@@ -18,6 +18,7 @@
 #include "forms/profiledialog.h"
 #include "forms/mbientconfigpanel.h"
 #include "ui_profiledialog.h"
+#include <common/DiscoveryAgent.h>
 
 #include <QtWidgets/QPushButton>
 #include <QStandardPaths>
@@ -34,7 +35,7 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QListWidget>
 
-ProfileDialog::ProfileDialog(QWidget *parent):QDialog(parent), ui(new Ui::ProfileDialog) {
+ProfileDialog::ProfileDialog(QWidget *parent):QDialog(parent), ui(new Ui::ProfileDialog){
     ui->setupUi(this);
     qDebug() << QString("%1/profiles").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!QDir().mkpath(QString("%1/profiles").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)))){

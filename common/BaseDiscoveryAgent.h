@@ -19,19 +19,24 @@
 
 #include <QtCore/QObject>
 #include "BluetoothAddress.h"
+#include <QMap>
 
 class BaseDiscoveryAgent : public QObject{
     Q_OBJECT
 private:
+	QMap<QString, BluetoothAddress> _agentCache;
 public:
-    BaseDiscoveryAgent(){
-
+    BaseDiscoveryAgent(QObject *parent = nullptr) : QObject(parent), BaseDiscoveryAgent::_agentCache(QMap<QString, BluetoothAddress>()) {
+		connect(this, &BaseDiscoveryAgent::deviceDiscovered, [=](BluetoothAddress addr) {
+			_agentCache.insert(addr.getMac(), addr);
+		});
     }
     ~BaseDiscoveryAgent(){
 
     }
 
     virtual void start() = 0;
+	void query();
     virtual void stop()  = 0;
 signals:
     void deviceDiscovered(BluetoothAddress address);
