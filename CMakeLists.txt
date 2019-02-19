@@ -14,7 +14,7 @@ if(WIN32)
 endif()
 
 include_directories(./)
-find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth Concurrent REQUIRED)
 
 set (SOURCES
   qcustomplot.cpp
@@ -23,7 +23,7 @@ set (SOURCES
   forms/sensorpanel.cpp
   forms/profiledialog.cpp
   forms/mbientconfigpanel.cpp
-  forms/deviceloadingdialog.cpp
+  forms/MbientDeviceDiscoveryDialog.cpp
 
   common/main.cpp
   common/metawearwrapperbase.cpp
@@ -38,7 +38,7 @@ set(HEADERS
   forms/mainwindow.h
   forms/profiledialog.h
   forms/mbientconfigpanel.h
-  forms/deviceloadingdialog.h
+  forms/MbientDeviceDiscoveryDialog.h
 
   common/metawearwrapperbase.h
   common/util.h
@@ -104,7 +104,7 @@ add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOUR
 
 add_subdirectory(./3rdparty)
 # Add the Qt5 Widgets for linking
-target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport)
+target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport Qt5::Concurrent)
 
 if (UNIX)
     target_link_libraries(SMART Qt5::Bluetooth)

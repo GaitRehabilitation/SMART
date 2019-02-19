@@ -20,20 +20,25 @@
 #include <QDialog>
 #include <QList>
 #include <QMap>
+#include <QRunnable>
+#include <QLabel>
 
 class MetawearWrapperBase;
 class MbientConfigPanel;
-class DeviceLoadingDialog : public QDialog {
+class MbientDeviceDiscoveryDialog : public QDialog {
 	Q_OBJECT
 private:
 	QList<MbientConfigPanel*> m_payloads;
-	QMap<QString, MbientConfigPanel*> m_mappings;
-
+	QMap<QString, QLabel*> m_mappings;
+	void run();
 public:
-	explicit DeviceLoadingDialog(const QList<MbientConfigPanel*>& payload,QWidget *parent = nullptr);
-	~DeviceLoadingDialog();
+	explicit MbientDeviceDiscoveryDialog(const QList<MbientConfigPanel*>& payload,QWidget *parent = nullptr);
+	~MbientDeviceDiscoveryDialog();
+	
+	 int exec() override;
+
 signals:
-	void OnConfigured(MetawearWrapperBase* result);
+	void OnConfigured(MbientConfigPanel* panel,MetawearWrapperBase* result);
 
 };
 #endif
