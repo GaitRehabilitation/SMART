@@ -100,7 +100,7 @@ qt5_wrap_ui(UI_HEADERS ${UIS})
 qt5_add_resources(QRCS ${RESOURCES})
 
 # Tell CMake to create the helloworld executable
-add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} )
+add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} "app.rc")
 
 add_subdirectory(./3rdparty)
 # Add the Qt5 Widgets for linking
@@ -149,6 +149,11 @@ install(TARGETS SMART
 	DESTINATION "."
 )
 
+install(
+    DIRECTORY ${CMAKE_SOURCE_DIR}/icons/
+    DESTINATION icons
+)
+
 set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "SMART Application")
 
 if(NOT DEFINED ${CPACK_PACKAGE_VERSION_MAJOR})
@@ -180,4 +185,5 @@ set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons\\\\gait-icon.bmp")
 set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
 set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
 
+set (CPACK_NSIS_MODIFY_PATH "ON")
 INCLUDE(CPack)

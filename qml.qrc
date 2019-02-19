@@ -3,5 +3,6 @@
         <file>icons/history-solid.svg</file>
         <file>icons/plus-solid.svg</file>
         <file>icons/download-solid.svg</file>
+        <file>icons/gait-icon.ico</file>
     </qresource>
 </RCC>
