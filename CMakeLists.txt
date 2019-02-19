@@ -14,7 +14,7 @@ if(WIN32)
 endif()
 
 include_directories(./)
-find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Quick PrintSupport Bluetooth Concurrent REQUIRED)
 
 set (SOURCES
   qcustomplot.cpp
@@ -23,7 +23,7 @@ set (SOURCES
   forms/sensorpanel.cpp
   forms/profiledialog.cpp
   forms/mbientconfigpanel.cpp
-  forms/deviceloadingdialog.cpp
+  forms/MbientDeviceDiscoveryDialog.cpp
 
   common/main.cpp
   common/metawearwrapperbase.cpp
@@ -38,7 +38,7 @@ set(HEADERS
   forms/mainwindow.h
   forms/profiledialog.h
   forms/mbientconfigpanel.h
-  forms/deviceloadingdialog.h
+  forms/MbientDeviceDiscoveryDialog.h
 
   common/metawearwrapperbase.h
   common/util.h
@@ -100,11 +100,11 @@ qt5_wrap_ui(UI_HEADERS ${UIS})
 qt5_add_resources(QRCS ${RESOURCES})
 
 # Tell CMake to create the helloworld executable
-add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} )
+add_executable(SMART ${UI_HEADERS} ${QRCS} ${SOURCES} ${HEADERS} ${PLATFORM_SOURCE} ${PLATFORM_HEADERS} "app.rc")
 
 add_subdirectory(./3rdparty)
 # Add the Qt5 Widgets for linking
-target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport)
+target_link_libraries(SMART Qt5::Gui Qt5::Widgets Qt5::Core Qt5::Quick Qt5::PrintSupport Qt5::Concurrent)
 
 if (UNIX)
     target_link_libraries(SMART Qt5::Bluetooth)
@@ -149,6 +149,11 @@ install(TARGETS SMART
 	DESTINATION "."
 )
 
+install(
+    DIRECTORY ${CMAKE_SOURCE_DIR}/icons/
+    DESTINATION icons
+)
+
 set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "SMART Application")
 
 if(NOT DEFINED ${CPACK_PACKAGE_VERSION_MAJOR})
@@ -180,4 +185,5 @@ set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons\\\\gait-icon.bmp")
 set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
 set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/icons/gait-icon.ico")
 
+set (CPACK_NSIS_MODIFY_PATH "ON")
 INCLUDE(CPack)
