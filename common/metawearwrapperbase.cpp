@@ -273,6 +273,15 @@ qint64 MetawearWrapperBase::getLatestEpoch()
     return m_latestEpoch;
 }
 
+void MetawearWrapperBase::setName(const QString& name) {
+	m_name = QString(name);
+}
+
+const QString& MetawearWrapperBase::getName() const {
+	return m_name;
+}
+
+
 
 const BluetoothAddress& MetawearWrapperBase::getTarget() const {
     return m_target;

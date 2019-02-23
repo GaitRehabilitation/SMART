@@ -25,9 +25,10 @@ private:
     QString m_title;
 public:
     BluetoothAddress();
+	BluetoothAddress(const QString& mac);
     BluetoothAddress(const QString& mac, const QString& title);
     BluetoothAddress(const BluetoothAddress& address);
-    BluetoothAddress(unsigned long long address, const QString& title);
+	//BluetoothAddress(unsigned long long address, const QString& title);
 
     ~BluetoothAddress();
 

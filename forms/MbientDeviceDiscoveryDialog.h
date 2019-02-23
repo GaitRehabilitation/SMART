@@ -22,15 +22,18 @@
 #include <QMap>
 #include <QRunnable>
 #include <QLabel>
+#include <QTimer>
 
 class MetawearWrapperBase;
 class MbientConfigPanel;
+class DiscoveryAgent;
 class MbientDeviceDiscoveryDialog : public QDialog {
 	Q_OBJECT
 private:
-	QList<MbientConfigPanel*> m_payloads;
+	QList<MetawearWrapperBase*> m_payloads;
+	DiscoveryAgent* m_agent;
+	QTimer m_timer;
 	QMap<QString, QLabel*> m_mappings;
-	void run();
 public:
 	explicit MbientDeviceDiscoveryDialog(const QList<MbientConfigPanel*>& payload,QWidget *parent = nullptr);
 	~MbientDeviceDiscoveryDialog();
@@ -38,7 +41,7 @@ public:
 	 int exec() override;
 
 signals:
-	void OnConfigured(MbientConfigPanel* panel,MetawearWrapperBase* result);
+	void OnConfigured(MetawearWrapperBase* result);
 
 };
 #endif

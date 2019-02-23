@@ -35,6 +35,7 @@ private:
     bool m_isMetawearReady;
     QString m_firmwareVersion;
     QString m_model;
+	QString m_name;
     qint64 m_latestEpoch;
 
 
@@ -92,8 +93,12 @@ public:
 
     const QString& getFirmwareVersion() const;
 
-
     const BluetoothAddress& getTarget() const;
+
+	void setName(const QString& name);
+
+	const QString& getName() const;
+
 
 signals:
 

@@ -262,64 +262,66 @@ void MbientConfigPanel::deserialize(QVariantMap value)
 }
 
 
-MetawearWrapperBase* MbientConfigPanel::buildWrapper(DiscoveryAgent& agent){
+MetawearWrapperBase* MbientConfigPanel::buildWrapper(){
 
     // clear wrapper
-    m_wrapper = nullptr;
+	MetawearWrapper* m_wrapper = new MetawearWrapper(BluetoothAddress(ui->deviceMac->text()));
+	m_wrapper->setName(getName());
 
-    connect(&agent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
-        if (QString::compare(info.getMac(), ui->deviceMac->text(), Qt::CaseInsensitive) == 0) {
+	bool enableGyro = ui->toggleGyro->isChecked();
+	bool enableAcc = ui->toggleAcc->isChecked();
+
+	bool enableQuaternion = ui->toggleQuaternion->isChecked();
+	bool enableLinear = ui->toggleLinearAcc->isChecked();
+	bool enableEularAngles = ui->toggleEularAngles->isChecked();
+
+	float quaternionSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+	float eularSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+	float linearAccelerationSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
+
+	bool hasSensorFusion = isSensorFusionEnabled();
+
+	MblMwGyroBmi160Range gyrorange = toGyroRangeFromIndex(ui->slideGyroRange->value());
+	MblMwGyroBmi160Odr gyroSample = toGyroSampleFromIndex(ui->slideGyroSample->value());
+
+	float accRange = toAccRangeIndex(ui->slideAccRange->value());
+	float accSample = toAccSampleIndex(ui->slideAccSample->value());
+
+	connect(m_wrapper, &MetawearWrapperBase::metawareInitialized, [=]() {
+		if (!hasSensorFusion) {
+			if (enableGyro)
+				m_wrapper->configureGyroscope(gyrorange, gyroSample);
+			if (enableAcc)
+				m_wrapper->configureAccelerometer(accRange, accSample);
+		}
+		else {
+			m_wrapper->configureFusion(MblMwSensorFusionMode::MBL_MW_SENSOR_FUSION_MODE_NDOF, MblMwSensorFusionAccRange::MBL_MW_SENSOR_FUSION_ACC_RANGE_8G, MblMwSensorFusionGyroRange::MBL_MW_SENSOR_FUSION_GYRO_RANGE_1000DPS);
+		}
+	});
+
+	connect(m_wrapper, &MetawearWrapperBase::postMetawearInitialized, [=]() {
+		if (!hasSensorFusion) {
+			if (enableGyro)
+				m_wrapper->startGyroscopeCapture();
+			if (enableAcc)
+				m_wrapper->startAccelerationCapture();
+		}
+		else {
+			if (enableQuaternion)
+				m_wrapper->startQuaternionCapture(quaternionSampleRate);
+			if (enableLinear)
+				m_wrapper->startQuaternionCapture(linearAccelerationSampleRate);
+			if (enableEularAngles)
+				m_wrapper->startQuaternionCapture(eularSampleRate);
+
+		}
+	});
+
+   /* connect(&agent, &DiscoveryAgent::deviceDiscovered, this,[this](BluetoothAddress info) {
+        if (QString::compare(info.getMac(), , Qt::CaseInsensitive) == 0) {
             m_wrapper = new MetawearWrapper(info);
 
-            MetawearWrapper* lwrapper = m_wrapper;
-
-            bool enableGyro = ui->toggleGyro->isChecked();
-            bool enableAcc = ui->toggleAcc->isChecked();
-
-            bool enableQuaternion = ui->toggleQuaternion->isChecked();
-            bool enableLinear= ui->toggleLinearAcc->isChecked();
-            bool enableEularAngles = ui->toggleEularAngles->isChecked();
-
-            float quaternionSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
-            float eularSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
-            float linearAccelerationSampleRate = toFusionSampleRangeIndex(ui->slideQuaternionSample->value());
-
-            bool hasSensorFusion = isSensorFusionEnabled();
-
-            MblMwGyroBmi160Range gyrorange = toGyroRangeFromIndex(ui->slideGyroRange->value());
-            MblMwGyroBmi160Odr gyroSample = toGyroSampleFromIndex(ui->slideGyroSample->value());
-
-            float accRange = toAccRangeIndex(ui->slideAccRange->value());
-            float accSample = toAccSampleIndex(ui->slideAccSample->value());
-
-            connect(this->m_wrapper,&MetawearWrapperBase::metawareInitialized,[=](){
-                if(!hasSensorFusion) {
-                    if (enableGyro)
-                        lwrapper->configureGyroscope(gyrorange, gyroSample);
-                    if(enableAcc)
-                        lwrapper->configureAccelerometer(accRange,accSample);
-                }else{
-                    lwrapper->configureFusion(MblMwSensorFusionMode::MBL_MW_SENSOR_FUSION_MODE_NDOF,MblMwSensorFusionAccRange::MBL_MW_SENSOR_FUSION_ACC_RANGE_8G,MblMwSensorFusionGyroRange::MBL_MW_SENSOR_FUSION_GYRO_RANGE_1000DPS);
-                }
-            });
-
-            connect(this->m_wrapper, &MetawearWrapperBase::postMetawearInitialized,[=](){
-                if(!hasSensorFusion) {
-                    if (enableGyro)
-                        lwrapper->startGyroscopeCapture();
-                    if (enableAcc)
-                        lwrapper->startAccelerationCapture();
-                }
-                else{
-                    if(enableQuaternion)
-                        lwrapper->startQuaternionCapture(quaternionSampleRate);
-                    if(enableLinear)
-                        lwrapper->startQuaternionCapture(linearAccelerationSampleRate);
-                    if(enableEularAngles)
-                        lwrapper->startQuaternionCapture(eularSampleRate);
-
-                }
-            });
+          
 
         }
     });
@@ -350,7 +352,7 @@ MetawearWrapperBase* MbientConfigPanel::buildWrapper(DiscoveryAgent& agent){
             // run wrapper again and try to init wrapper
             return buildWrapper(agent);
         }
-    }
+    }*/
 
     return m_wrapper;
 }

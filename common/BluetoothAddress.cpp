@@ -22,6 +22,9 @@ BluetoothAddress::BluetoothAddress(){
 BluetoothAddress::BluetoothAddress(const QString& mac, const QString& title) :
     m_mac(mac),m_title(title) {}
 
+BluetoothAddress::BluetoothAddress(const QString& mac) : m_mac(mac) {
+
+}
 BluetoothAddress::BluetoothAddress(const BluetoothAddress& address):
     m_title(address.m_title),m_mac(address.m_mac){
 }
