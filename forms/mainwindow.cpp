@@ -43,9 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(&profileDialog, &ProfileDialog::onProfileSelected, this, [=](const QList<MbientConfigPanel*>& payload) {
 
 			MbientDeviceDiscoveryDialog discover(payload,this);
-			connect(&discover, &MbientDeviceDiscoveryDialog::OnConfigured, this, [=](MbientConfigPanel* panel,MetawearWrapperBase* result) {
+			connect(&discover, &MbientDeviceDiscoveryDialog::OnConfigured, this, [=](MetawearWrapperBase* result) {
 				auto devicePanel = registerDevice(result);
-				devicePanel->setName(panel->getName());
+				devicePanel->setName(result->getName());
 			});
 			discover.exec();
 

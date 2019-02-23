@@ -44,7 +44,6 @@ class MbientConfigPanel : public QWidget {
 private:
     Ui::MbientConfigPanel *ui;
     void updateDisabled();
-    MetawearWrapper* m_wrapper;
 public:
     static const float ACC_ODR_RANGE[];
     static const float ACC_FSR_RANGE[];
@@ -60,7 +59,7 @@ public:
     QString getMac();
     QString getName();
 
-    MetawearWrapperBase* buildWrapper(DiscoveryAgent& agent);
+    MetawearWrapperBase* buildWrapper();
 
     MbientConfigPanel(QWidget *parent = nullptr);
     QVariantMap serialize();
