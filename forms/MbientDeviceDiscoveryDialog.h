@@ -24,16 +24,23 @@
 #include <QLabel>
 #include <QTimer>
 
+namespace Ui {
+	class MbientDeviceDiscoveryDialog;
+}
+
 class MetawearWrapperBase;
 class MbientConfigPanel;
 class DiscoveryAgent;
+class MbientDeviceDiscoveryWidget;
+
 class MbientDeviceDiscoveryDialog : public QDialog {
 	Q_OBJECT
 private:
+	Ui::MbientDeviceDiscoveryDialog* ui;
 	QList<MetawearWrapperBase*> m_payloads;
 	DiscoveryAgent* m_agent;
 	QTimer m_timer;
-	QMap<QString, QLabel*> m_mappings;
+	QMap<QString, MbientDeviceDiscoveryWidget*> m_mappings;
 public:
 	explicit MbientDeviceDiscoveryDialog(const QList<MbientConfigPanel*>& payload,QWidget *parent = nullptr);
 	~MbientDeviceDiscoveryDialog();

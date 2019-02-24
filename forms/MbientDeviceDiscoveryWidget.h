@@ -14,19 +14,32 @@
 * limitations under the License.
 */
 
-#include <common/BaseDiscoveryAgent.h>
-#include <common/DiscoveryAgent.h>
+#ifndef MBIENT_DEVICE_DISCOVERY_WIDGET_H
+#define MBIENT_DEVICE_DISCOVERY_WIDGET_H
 
-BaseDiscoveryAgent::BaseDiscoveryAgent(QObject *parent) : QObject(parent), BaseDiscoveryAgent::_agentCache(QMap<QString, BluetoothAddress>()) {
-	qRegisterMetaType<BluetoothAddress>("BluetoothAddress");
-	connect(this, &BaseDiscoveryAgent::deviceDiscovered, [=](BluetoothAddress addr) {
-		_agentCache.insert(addr.getMac(), addr);
-	});
-}
+#include <QWidget>
 
-void BaseDiscoveryAgent::query() {
-	QMap<QString, BluetoothAddress>::iterator i;
-	for (i = _agentCache.begin(); i != _agentCache.end(); ++i) {
-		emit deviceDiscovered(i.value());
-	}
+namespace Ui {
+	class MbientDeviceDiscoveryWidget;
 }
+class MetawearWrapperBase;
+class QMovie;
+class MbientDeviceDiscoveryWidget : public QWidget {
+	Q_OBJECT
+private:
+	Ui::MbientDeviceDiscoveryWidget* ui;
+	QMovie* m_search_icon;
+	QPixmap* m_found_icon;
+public:
+	enum Status {
+		Searching,
+		Found
+	};
+
+	MbientDeviceDiscoveryWidget(MetawearWrapperBase* wrapper,QWidget *parent = nullptr);
+	~MbientDeviceDiscoveryWidget();
+
+	void setStatus(Status status);
+};
+
+#endif

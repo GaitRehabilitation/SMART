@@ -24,6 +24,7 @@ set (SOURCES
   forms/profiledialog.cpp
   forms/mbientconfigpanel.cpp
   forms/MbientDeviceDiscoveryDialog.cpp
+  forms/MbientDeviceDiscoveryWidget.cpp
 
   common/main.cpp
   common/metawearwrapperbase.cpp
@@ -39,6 +40,7 @@ set(HEADERS
   forms/profiledialog.h
   forms/mbientconfigpanel.h
   forms/MbientDeviceDiscoveryDialog.h
+  forms/MbientDeviceDiscoveryWidget.h
 
   common/metawearwrapperbase.h
   common/util.h
@@ -51,7 +53,9 @@ set ( UIS
     forms/sensorpanel.ui
     forms/deviceselectdialog.ui
     forms/mbientconfigpanel.ui
-    forms/profiledialog.ui )
+    forms/profiledialog.ui 
+	forms/MbientDeviceDiscoveryWidget.ui
+	forms/MbientDeviceDiscoveryDialog.ui)
 
 set ( RESOURCES
  qml.qrc

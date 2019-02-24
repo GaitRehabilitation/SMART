@@ -4,5 +4,7 @@
         <file>icons/plus-solid.svg</file>
         <file>icons/download-solid.svg</file>
         <file>icons/gait-icon.ico</file>
+        <file>icons/loading.gif</file>
+        <file>icons/check-solid.svg</file>
     </qresource>
 </RCC>

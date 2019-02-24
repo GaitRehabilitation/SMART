@@ -26,11 +26,7 @@ class BaseDiscoveryAgent : public QObject{
 private:
 	QMap<QString, BluetoothAddress> _agentCache;
 public:
-    BaseDiscoveryAgent(QObject *parent = nullptr) : QObject(parent), BaseDiscoveryAgent::_agentCache(QMap<QString, BluetoothAddress>()) {
-		connect(this, &BaseDiscoveryAgent::deviceDiscovered, [=](BluetoothAddress addr) {
-			_agentCache.insert(addr.getMac(), addr);
-		});
-    }
+	BaseDiscoveryAgent(QObject *parent = nullptr);
     ~BaseDiscoveryAgent(){
 
     }

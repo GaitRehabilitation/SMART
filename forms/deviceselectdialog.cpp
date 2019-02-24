@@ -39,7 +39,7 @@ DeviceSelectDialog::DeviceSelectDialog(QWidget * parent):
 	// connect(m_discoveryAgent,&QBluetoothDeviceDiscoveryAgent::finished, this, [=](){ui->scan->setEnabled(true); });
 
 	 // An entry is added for every device connected
-	qRegisterMetaType<BluetoothAddress>("BluetoothAddress");
+
 	connect(m_discoveryAgent, &DiscoveryAgent::deviceDiscovered, this, [=](BluetoothAddress info) {
 		//if(info.name() != "MetaWear")
 		 //   return;

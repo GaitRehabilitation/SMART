@@ -99,7 +99,6 @@ public:
 
 	const QString& getName() const;
 
-
 signals:
 
     void connected();

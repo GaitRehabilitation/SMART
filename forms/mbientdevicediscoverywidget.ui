@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>MbientDeviceDiscoveryWidget</class>
+ <widget class="QWidget" name="MbientDeviceDiscoveryWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,6 +25,12 @@
      </item>
      <item>
       <widget class="QLabel" name="name">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
          <pointsize>16</pointsize>
